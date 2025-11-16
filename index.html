@@ -1,117 +1,349 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <!-- 
-      This viewport works for phones with notches.
-      It's optimized for gestures by disabling global zoom.
-     -->
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1.00001, viewport-fit=cover"
-    />
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sport Tracker</title>
     <style>
-      /**
-       * Extend the react-native-web reset:
-       * https://github.com/necolas/react-native-web/blob/master/packages/react-native-web/src/exports/StyleSheet/initialRules.js
-       */
-      html,
-      body,
-      #root {
-        width: 100%;
-        /* To smooth any scrolling behavior */
-        -webkit-overflow-scrolling: touch;
-        margin: 0px;
-        padding: 0px;
-        /* Allows content to fill the viewport and go beyond the bottom */
-        min-height: 100%;
-      }
-      #root {
-        flex-shrink: 0;
-        flex-basis: auto;
-        flex-grow: 1;
-        display: flex;
-        flex: 1;
-      }
-
-      html {
-        scroll-behavior: smooth;
-        /* Prevent text size change on orientation change https://gist.github.com/tfausak/2222823#file-ios-8-web-app-html-L138 */
-        -webkit-text-size-adjust: 100%;
-        height: calc(100% + env(safe-area-inset-top));
-      }
-
-      body {
-        display: flex;
-        /* Allows you to scroll below the viewport; default value is visible */
-        overflow-y: auto;
-        overscroll-behavior-y: none;
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        -ms-overflow-style: scrollbar;
-      }
-      /* Enable for apps that support dark-theme */
-      /*@media (prefers-color-scheme: dark) {
-        body {
-          background-color: black;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      }*/
-    </style>
-  </head>
-
-  <body>
-    <!-- 
-      A generic no script element with a reload button and a message.
-      Feel free to customize this however you'd like.
-    -->
-    <noscript>
-      <form
-        action=""
-        style="
-          background-color: #fff;
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 9999;
-        "
-      >
-        <div
-          style="
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .section-title {
             font-size: 18px;
-            font-family: Helvetica, sans-serif;
-            line-height: 24px;
-            margin: 10%;
-            width: 80%;
-          "
-        >
-          <p>Oh no! It looks like JavaScript is not enabled in your browser.</p>
-          <p style="margin: 20px 0;">
-            <button
-              type="submit"
-              style="
-                background-color: #4630eb;
-                border-radius: 100px;
-                border: none;
-                box-shadow: none;
-                color: #fff;
-                cursor: pointer;
-                font-weight: bold;
-                line-height: 20px;
-                padding: 6px 16px;
-              "
-            >
-              Reload
-            </button>
-          </p>
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .groups-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .group-button {
+            background: #e0e0e0;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            flex: 1 1 calc(50% - 10px);
+            min-width: 140px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .group-button:hover {
+            background: #d0d0d0;
+        }
+        
+        .group-button.selected {
+            background: #007AFF;
+            color: white;
+        }
+        
+        .group-button-text {
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .exercises-container {
+            margin-bottom: 20px;
+        }
+        
+        .exercise-button {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .exercise-button:hover {
+            background: #e8e8e8;
+        }
+        
+        .exercise-button.selected {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+        
+        .set-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+        }
+        
+        .set-number {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #007AFF;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .checkbox.completed {
+            background: #007AFF;
+        }
+        
+        .checkbox-text {
+            color: white;
+            font-weight: bold;
+        }
+        
+        .add-button, .save-button {
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: opacity 0.3s;
+        }
+        
+        .add-button {
+            background: #34C759;
+            color: white;
+        }
+        
+        .save-button {
+            background: #007AFF;
+            color: white;
+        }
+        
+        .add-button:hover, .save-button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Новая тренировка</div>
+        
+        <!-- Шаг 1: Выбор группы мышц -->
+        <div class="section-title">1. Выберите группу мышц:</div>
+        <div class="groups-container" id="groupsContainer">
+            <!-- Группы будут добавлены через JavaScript -->
         </div>
-      </form>
-    </noscript>
-    <!-- The root element for your Expo app. -->
-    <div id="root"></div>
-  <script src="/bundles/web-1e927fcf0d6e03d55ca5f843987af344.js" defer></script></body>
+        
+        <!-- Шаг 2: Выбор упражнения -->
+        <div id="exercisesSection" style="display: none;">
+            <div class="section-title" id="exercisesTitle">2. Выберите упражнение:</div>
+            <div class="exercises-container" id="exercisesContainer">
+                <!-- Упражнения будут добавлены через JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Шаг 3: Подходы -->
+        <div id="setsSection" style="display: none;">
+            <div class="section-title" id="setsTitle">3. Подходы для: <span id="selectedExerciseName"></span></div>
+            <div id="setsContainer">
+                <!-- Подходы будут добавлены через JavaScript -->
+            </div>
+            
+            <button class="add-button" id="addSetButton">+ Добавить подход</button>
+            <button class="save-button" id="saveButton">Сохранить тренировку</button>
+        </div>
+    </div>
+
+    <script>
+        // База данных упражнений
+        const exercisesDatabase = {
+            "Грудь": [
+                "Жим штанги на прямой скамье", "Жим штанги под углом", "Жим штанги под наклоном вниз",
+                "Жим штанги в смите на прямой скамье", "Жим штанги в смите под углом",
+                "Жим гантелей на прямой скамье", "Жим гантелей под углом", "Жим гантелей под наклоном вниз", 
+                "Разводка гантелей на прямой скамье", "Разводка гантелей под углом",
+                "Сведение в тренажере", "Сведение в кросовере"
+            ],
+            "Спина": [
+                "Подтягивания", "Тяга штанги в наклоне", "Тяга гантели в наклоне",
+                "Тяга вертикального блока", "Тяга горизонтального блока", "Гиперэкстензия"
+            ],
+            "Руки": [
+                "Подъем штанги на бицепс", "Подъем гантелей на бицепс", "Молотки",
+                "Французский жим", "Разгибание рук на блоке"
+            ],
+            "Плечи": [
+                "Жим штанги с груди", "Жим гантелей сидя", "Махи гантелей в стороны",
+                "Махи гантелей в наклоне", "Тяга штанги к подбородку"
+            ],
+            "Ноги": [
+                "Приседания со штангой", "Жим ногами", "Жим ногами вверх 45 градусов",
+                "Жим ногами горизонтальный тренажер", "Сгибание ног лежа", 
+                "Сгибание ног по одной стоя", "Разгибание ног сидя", "Выпады"
+            ],
+            "Кардио": [
+                "Беговая дорожка", "Велотренажер", "Эллипс", "Скакалка"
+            ],
+            "Пресс": [
+                "Скручивания", "Подъем ног в висе", "Планка", "Русский твист"
+            ]
+        };
+
+        let selectedGroup = null;
+        let selectedExercise = null;
+        let sets = [{ completed: false }];
+
+        // Инициализация
+        function init() {
+            renderGroups();
+            setupEventListeners();
+        }
+
+        // Рендер групп мышц
+        function renderGroups() {
+            const groupsContainer = document.getElementById('groupsContainer');
+            groupsContainer.innerHTML = '';
+            
+            Object.keys(exercisesDatabase).forEach(group => {
+                const button = document.createElement('button');
+                button.className = 'group-button';
+                button.innerHTML = `<div class="group-button-text">${group}</div>`;
+                button.onclick = () => selectGroup(group);
+                groupsContainer.appendChild(button);
+            });
+        }
+
+        // Выбор группы
+        function selectGroup(group) {
+            selectedGroup = group;
+            selectedExercise = null;
+            sets = [{ completed: false }];
+            
+            // Обновляем UI
+            document.querySelectorAll('.group-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            renderExercises();
+            document.getElementById('exercisesSection').style.display = 'block';
+            document.getElementById('setsSection').style.display = 'none';
+        }
+
+        // Рендер упражнений
+        function renderExercises() {
+            const exercisesContainer = document.getElementById('exercisesContainer');
+            const exercisesTitle = document.getElementById('exercisesTitle');
+            
+            exercisesTitle.textContent = `2. Выберите упражнение для ${selectedGroup}:`;
+            exercisesContainer.innerHTML = '';
+            
+            exercisesDatabase[selectedGroup].forEach(exercise => {
+                const button = document.createElement('button');
+                button.className = 'exercise-button';
+                button.textContent = exercise;
+                button.onclick = () => selectExercise(exercise);
+                exercisesContainer.appendChild(button);
+            });
+        }
+
+        // Выбор упражнения
+        function selectExercise(exercise) {
+            selectedExercise = exercise;
+            
+            // Обновляем UI
+            document.querySelectorAll('.exercise-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            renderSets();
+            document.getElementById('setsSection').style.display = 'block';
+        }
+
+        // Рендер подходов
+        function renderSets() {
+            const setsContainer = document.getElementById('setsContainer');
+            const selectedExerciseName = document.getElementById('selectedExerciseName');
+            
+            selectedExerciseName.textContent = selectedExercise;
+            setsContainer.innerHTML = '';
+            
+            sets.forEach((set, index) => {
+                const setElement = document.createElement('div');
+                setElement.className = 'set-container';
+                setElement.innerHTML = `
+                    <div class="set-number">Подход ${index + 1}</div>
+                    <div class="checkbox ${set.completed ? 'completed' : ''}" onclick="toggleSet(${index})">
+                        <div class="checkbox-text">${set.completed ? '✓' : ''}</div>
+                    </div>
+                `;
+                setsContainer.appendChild(setElement);
+            });
+        }
+
+        // Переключение подхода
+        function toggleSet(index) {
+            sets[index].completed = !sets[index].completed;
+            renderSets();
+        }
+
+        // Добавление подхода
+        function addSet() {
+            sets.push({ completed: false });
+            renderSets();
+        }
+
+        // Сохранение тренировки
+        function saveWorkout() {
+            alert(`Тренировка "${selectedExercise}" сохранена! Подходов: ${sets.length}`);
+            // Здесь можно добавить логику сохранения в localStorage или отправку на сервер
+        }
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            document.getElementById('addSetButton').onclick = addSet;
+            document.getElementById('saveButton').onclick = saveWorkout;
+        }
+
+        // Запускаем приложение
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
 </html>
