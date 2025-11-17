@@ -2,7 +2,7 @@
   "name": "Sport Tracker",
   "short_name": "SportTracker", 
   "description": "Трекер тренировок и прогресса",
-  "start_url": "./"
+  "start_url": "/"
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007AFF",
