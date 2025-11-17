@@ -714,9 +714,11 @@
 
             <div class="chart-container">
                 <canvas id="progressChart"></canvas>
-            </div>
+            </div>  
         </div>
     </div>
+        <!-- Подключаем базу данных -->
+    <script src="database.js"></script>
 
     <script>
         // Обновленная база данных упражнений
@@ -753,6 +755,74 @@
                 "Скручивания", "Подъем ног в висе", "Планка", "Русский твист", "Свечка"
             ]
         };
+            // 🔄 Инициализация базы данных при загрузке
+    async function initDatabase() {
+        try {
+            await sportDatabase.init();
+            console.log('✅ База данных готова к работе');
+        } catch (error) {
+            console.error('❌ Ошибка инициализации базы данных:', error);
+        }
+    }
+
+    // 🔄 ОБНОВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ ТРЕНИРОВКИ
+    async function saveWorkout() {
+        const completedSets = sets.filter(set => set.completed);
+        if (completedSets.length === 0) {
+            alert('Добавьте хотя бы один выполненный подход!');
+            return;
+        }
+
+        const workout = {
+            exercise: selectedExercise,
+            muscleGroup: selectedGroup,
+            sets: sets,
+            grip: selectedGrip
+        };
+
+        try {
+            // Сохраняем в новую базу данных
+            await sportDatabase.saveCompleteWorkout(workout);
+            alert(`✅ Тренировка "${selectedExercise}" сохранена!\nПодходов: ${sets.length}\nВыполнено: ${completedSets.length}`);
+            
+            // Сброс формы
+            resetWorkoutForm();
+            
+            // Обновляем интерфейс
+            renderCalendar();
+            updateAnalytics();
+            showTab('home');
+            
+        } catch (error) {
+            console.error('❌ Ошибка сохранения:', error);
+            // Fallback: сохраняем в localStorage
+            saveWorkoutToHistory(workout);
+            alert(`Тренировка "${selectedExercise}" сохранена (резервное сохранение)!`);
+        }
+    }
+
+    // 🔄 Функция сброса формы
+    function resetWorkoutForm() {
+        selectedGroup = null;
+        selectedExercise = null;
+        sets = [{ weight: '', reps: '', completed: false }];
+        selectedGrip = null;
+        editingWorkout = null;
+        
+        document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        document.getElementById('exercisesSection').style.display = 'none';
+        document.getElementById('setsSection').style.display = 'none';
+        document.getElementById('gripSection').style.display = 'none';
+        document.getElementById('saveButton').textContent = 'Сохранить тренировку';
+    }
+
+    // 🔄 ОБНОВЛЯЕМ ИНИЦИАЛИЗАЦИЮ ПРИЛОЖЕНИЯ
+    document.addEventListener('DOMContentLoaded', function() {
+        initDatabase(); // Инициализируем базу
+        init(); // Ваша существующая функция инициализации
+    });
 
         // Упражнения с постановкой
         const exercisesWithGrip = [
