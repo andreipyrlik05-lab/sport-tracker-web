@@ -1322,7 +1322,7 @@ function addSet() {
 }
         
 
- // 🔄 УЛУЧШЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ ТРЕНИРОВКИ
+// 🔄 УЛУЧШЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ ТРЕНИРОВКИ
 function saveWorkout() {
     const completedSets = sets.filter(set => set.completed);
     if (completedSets.length === 0) {
@@ -1337,6 +1337,63 @@ function saveWorkout() {
         date: new Date().toISOString(),
         timestamp: new Date().getTime()
     };
+
+    // Добавляем постановку если выбрана
+    if (selectedGrip) {
+        workout.grip = selectedGrip;
+    }
+
+    console.log('💾 Сохранение тренировки:', workout);
+
+    // Сохраняем в облако
+    saveWorkoutToServer(workout);
+    
+    // Сброс формы
+    resetWorkoutForm();
+    
+    // Обновляем календарь и аналитику
+    renderCalendar();
+    updateAnalytics();
+    showTab('home');
+}
+
+// 🆕 НОВАЯ ФУНКЦИЯ ДЛЯ СОХРАНЕНИЯ НА СЕРВЕР
+const API_BASE = 'http://194.48.141.245:3001/api';
+
+async function saveWorkoutToServer(workout) {
+    const userId = getUserId();
+    
+    try {
+        const response = await fetch(`${API_BASE}/workouts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...workout, userId })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('✅ Тренировка сохранена на сервере!');
+            showMessage(`✅ Тренировка "${workout.exercise}" сохранена в облаке!`, 'success');
+            // Дублируем в localStorage для оффлайн-работы
+            saveWorkoutToHistory(workout);
+        }
+    } catch (error) {
+        console.log('⚠️ Сохраняем только в localStorage', error);
+        saveWorkoutToHistory(workout);
+        showMessage('⚠️ Сохранено локально (нет связи с сервером)', 'warning');
+    }
+}
+
+// 🆕 ФУНКЦИЯ ПОЛУЧЕНИЯ ID ПОЛЬЗОВАТЕЛЯ
+function getUserId() {
+    let userId = localStorage.getItem('userId');
+    if (!userId) {
+        userId = 'user_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('userId', userId);
+    }
+    return userId;
+}
 
     // Добавляем постановку если выбрана
     if (selectedGrip) {
