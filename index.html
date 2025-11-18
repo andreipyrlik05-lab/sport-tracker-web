@@ -990,11 +990,7 @@
 
             const firstDay = new Date(currentYear, currentMonth, 1);
             const lastDay = new Date(currentYear, currentMonth + 1, 0);
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> 12ac3cce (new)
             // Начинаем с понедельника (1) вместо воскресенья (0)
             const startDate = new Date(firstDay);
             const firstDayOfWeek = firstDay.getDay() || 7; // Преобразуем воскресенье (0) в 7
@@ -1122,12 +1118,7 @@
                 });
                 workoutHistoryElement.innerHTML = historyHTML;
             } else {
-<<<<<<< HEAD
                 workoutHistoryElement.innerHTML = '<div class="section-title">У вас пока нет тренировок</div>';
-=======
-                document.getElementById('workoutHistory').innerHTML =
-                    '<div class="section-title">У вас пока нет тренировок</div>';
->>>>>>> 12ac3cce (new)
             }
         }
 
@@ -1495,10 +1486,6 @@
 
         function updateProgressChart(workouts) {
             const ctx = document.getElementById('progressChart').getContext('2d');
-<<<<<<< HEAD
-=======
-
->>>>>>> 12ac3cce (new)
             if (progressChart) {
                 progressChart.destroy();
             }
@@ -1587,19 +1574,11 @@
         function setupWorkoutForm() {
             const workoutForm = document.getElementById('workoutForm');
             if (workoutForm) {
-<<<<<<< HEAD
                 workoutForm.addEventListener('submit', function (e) {
                     e.preventDefault();
                     saveNewWorkout();
                 });
 
-=======
-                workoutForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    saveNewWorkout();
-                });
-                
->>>>>>> 12ac3cce (new)
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('workoutDate').value = today;
             }
@@ -1609,20 +1588,12 @@
             const workoutDate = document.getElementById('workoutDate').value;
             const workoutName = document.getElementById('workoutName').value;
             const workoutDetails = document.getElementById('workoutDetails').value;
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> 12ac3cce (new)
             if (!workoutDate || !workoutName) {
                 alert('Пожалуйста, заполните название тренировки и дату');
                 return;
             }
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> 12ac3cce (new)
             const workout = {
                 date: workoutDate,
                 name: workoutName,
@@ -1630,7 +1601,6 @@
                 createdAt: new Date().toISOString(),
                 type: 'manual'
             };
-<<<<<<< HEAD
 
             saveWorkoutToNewSystem(workout);
 
@@ -1641,37 +1611,17 @@
             renderCalendar();
             updateAnalytics();
 
-=======
-            
-            saveWorkoutToNewSystem(workout);
-            
-            document.getElementById('workoutName').value = '';
-            document.getElementById('workoutDetails').value = '';
-            
-            loadRecentWorkouts();
-            renderCalendar();
-            updateAnalytics();
-            
->>>>>>> 12ac3cce (new)
             alert('Тренировка сохранена!');
         }
 
         function saveWorkoutToNewSystem(workout) {
             const history = getWorkoutHistory();
             const dateString = workout.date;
-<<<<<<< HEAD
 
             if (!history[dateString]) {
                 history[dateString] = [];
             }
 
-=======
-            
-            if (!history[dateString]) {
-                history[dateString] = [];
-            }
-            
->>>>>>> 12ac3cce (new)
             const legacyWorkout = {
                 exercise: workout.name,
                 muscleGroup: 'Ручная запись',
@@ -1684,11 +1634,7 @@
                 details: workout.details,
                 type: 'manual'
             };
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> 12ac3cce (new)
             history[dateString].push(legacyWorkout);
             localStorage.setItem('workoutHistory', JSON.stringify(history));
         }
@@ -1696,39 +1642,22 @@
         function loadRecentWorkouts() {
             const workoutsList = document.getElementById('workoutsList');
             if (!workoutsList) return;
-<<<<<<< HEAD
 
             const allWorkouts = getAllWorkouts();
             const recentWorkouts = allWorkouts
                 .sort((a, b) => new Date(b.date) - new Date(a.date))    
                 .slice(0, 5);
 
-=======
-            
-            const allWorkouts = getAllWorkouts();
-            const recentWorkouts = allWorkouts
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 5);
-            
->>>>>>> 12ac3cce (new)
             if (recentWorkouts.length === 0) {
                 workoutsList.innerHTML = '<p>Пока нет тренировок</p>';
                 return;
             }
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> 12ac3cce (new)
             workoutsList.innerHTML = recentWorkouts.map(workout => {
                 const date = new Date(workout.date).toLocaleDateString('ru-RU');
                 const details = workout.details ? `<p>${workout.details}</p>` : '';
                 const setsInfo = workout.sets ? `Подходов: ${workout.sets.length}` : '';
-<<<<<<< HEAD
 
-=======
-                
->>>>>>> 12ac3cce (new)
                 return `
                     <div class="workout-item">
                         <strong>${workout.exercise || workout.name}</strong>
@@ -1745,7 +1674,6 @@
             if (confirm('Удалить эту тренировку?')) {
                 const history = getWorkoutHistory();
                 const workoutsOnDate = history[dateString];
-<<<<<<< HEAD
 
                 if (workoutsOnDate && workoutsOnDate[workoutIndex]) {
                     workoutsOnDate.splice(workoutIndex, 1);
@@ -1754,16 +1682,6 @@
                         delete history[dateString];
                     }
 
-=======
-                
-                if (workoutsOnDate && workoutsOnDate[workoutIndex]) {
-                    workoutsOnDate.splice(workoutIndex, 1);
-                    
-                    if (workoutsOnDate.length === 0) {
-                        delete history[dateString];
-                    }
-                    
->>>>>>> 12ac3cce (new)
                     localStorage.setItem('workoutHistory', JSON.stringify(history));
                     loadRecentWorkouts();
                     renderCalendar();
