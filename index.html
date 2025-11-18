@@ -407,6 +407,13 @@
             color: #ccc;
         }
 
+        .calendar-date.selected {
+            border: 2px solid #007AFF !important;
+            background: #007AFF !important;
+            color: white !important;
+            font-weight: bold;
+        }
+
         .workout-history {
             background: white;
             border-radius: 10px;
@@ -784,10 +791,10 @@
             </div>
 
             <div class="recent-workouts">
-                <h3>Последние тренировки</h3>
+                <h3>Следующие тренировки</h3>
                 <div id="workoutsList"></div>
             </div>
-            
+
             <div class="workout-history">
                 <div id="workoutHistory">
                     <!-- История тренировок будет здесь -->
@@ -1060,34 +1067,52 @@
         }
 
         function showWorkoutHistory(dateString) {
-            const workoutHistory = getWorkoutHistory();
-            const workouts = workoutHistory[dateString];
+            console.log('=== ОТЛАДКА showWorkoutHistory ===');
+            console.log('Ищем тренировки для даты:', dateString);
 
-            if (workouts) {
-                let historyHTML = `<div class="section-title">Тренировки за ${dateString}:</div>`;
+            // Убрать выделение со всех дат
+            document.querySelectorAll('.calendar-date').forEach(date => {
+                date.classList.remove('selected');
+            });
+
+            // Выделить выбранную дату
+            event.target.classList.add('selected');
+
+            const workoutHistory = getWorkoutHistory();
+            console.log('Все тренировки в хранилище:', workoutHistory);
+            console.log('Тренировки для этой даты:', workoutHistory[dateString]);
+
+            const workouts = workoutHistory[dateString];
+            const workoutHistoryElement = document.getElementById('workoutHistory');
+
+            if (workouts && workouts.length > 0) {
+                console.log('Найдены тренировки:', workouts);
+                let historyHTML = `<div class="section-title">Тренировки за ${dateString.replace(/-/g, '.')}:</div>`;
                 workouts.forEach((workout, index) => {
                     historyHTML += `
-                        <div class="history-item">
-                            <div class="history-exercise" onclick="viewWorkoutDetails('${dateString}', ${index})">
-                                ${workout.exercise}
-                                ${workout.grip ? ` (${getGripText(workout.grip)})` : ''}
-                            </div>
-                            <div class="history-details">
-                                Подходов: ${workout.sets.length} | 
-                                Выполнено: ${workout.sets.filter(s => s.completed).length}
-                            </div>
-                            <div class="action-buttons">
-                                <button class="edit-button" onclick="editWorkout('${dateString}', ${index})">✏️ Редактировать</button>
-                                <button class="delete-button" onclick="deleteWorkout('${dateString}', ${index})">🗑️ Удалить</button>
-                            </div>
-                        </div>
-                    `;
+                <div class="history-item">
+                    <div class="history-exercise" onclick="viewWorkoutDetails('${dateString}', ${index})">
+                        ${workout.exercise}
+                        ${workout.grip ? ` (${getGripText(workout.grip)})` : ''}
+                    </div>
+                    <div class="history-details">
+                        Подходов: ${workout.sets.length} | 
+                        Выполнено: ${workout.sets.filter(s => s.completed).length}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="edit-button" onclick="editWorkout('${dateString}', ${index})">✏️ Редактировать</button>
+                        <button class="delete-button" onclick="deleteWorkout('${dateString}', ${index})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `;
                 });
-                document.getElementById('workoutHistory').innerHTML = historyHTML;
+                workoutHistoryElement.innerHTML = historyHTML;
             } else {
-                document.getElementById('workoutHistory').innerHTML =
+                console.log('Тренировок не найдено');
+                workoutHistoryElement.innerHTML =
                     '<div class="section-title">На эту дату тренировок нет</div>';
             }
+            console.log('=== КОНЕЦ ОТЛАДКИ ===');
         }
 
         function updateWorkoutHistory() {
@@ -1103,7 +1128,7 @@
                 .slice(0, 5);
 
             if (recentWorkouts.length > 0) {
-                let historyHTML = '<div class="section-title">Последние тренировки:</div>';
+                let historyHTML = '<div class="section-title">Следующие тренировки:</div>';
                 recentWorkouts.forEach(([date, workouts]) => {
                     workouts.forEach((workout, index) => {
                         historyHTML += `
@@ -1396,7 +1421,7 @@
                 exercise: selectedExercise,
                 muscleGroup: selectedGroup,
                 sets: sets,
-                date: new Date().toISOString()
+                date: formatDate(new Date()) // Используем нашу функцию форматирования
             };
 
             if (selectedGrip) {
@@ -1534,9 +1559,27 @@
 
         // ==================== ХРАНЕНИЕ ДАННЫХ ====================
         function getWorkoutHistory() {
-            return JSON.parse(localStorage.getItem('workoutHistory') || '{}');
-        }
+            const history = JSON.parse(localStorage.getItem('workoutHistory') || '{}');
+            const convertedHistory = {};
 
+            // Конвертируем все даты в формат DD.MM.YYYY
+            Object.keys(history).forEach(oldDateString => {
+                let newDateString;
+
+                if (oldDateString.includes('-')) { // Формат YYYY-MM-DD
+                    const [year, month, day] = oldDateString.split('-');
+                    newDateString = `${day.padStart(2, '0')}.${month.padStart(2, '0')}.${year}`;
+                } else if (oldDateString.includes('.')) { // Уже новый формат
+                    newDateString = oldDateString;
+                } else { // Неизвестный формат
+                    newDateString = oldDateString;
+                }
+
+                convertedHistory[newDateString] = history[oldDateString];
+            });
+
+            return convertedHistory;
+        }
         function getAllWorkouts() {
             const history = getWorkoutHistory();
             const allWorkouts = [];
@@ -1567,7 +1610,10 @@
         }
 
         function formatDate(date) {
-            return date.toISOString().split('T')[0];
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
         }
 
         // ==================== НОВАЯ СИСТЕМА ТРЕНИРОВОК ====================
