@@ -990,11 +990,7 @@
 
             const firstDay = new Date(currentYear, currentMonth, 1);
             const lastDay = new Date(currentYear, currentMonth + 1, 0);
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             // Начинаем с понедельника (1) вместо воскресенья (0)
             const startDate = new Date(firstDay);
             const firstDayOfWeek = firstDay.getDay() || 7; // Преобразуем воскресенье (0) в 7
@@ -1122,12 +1118,7 @@
                 });
                 workoutHistoryElement.innerHTML = historyHTML;
             } else {
-<<<<<<< HEAD
                 workoutHistoryElement.innerHTML = '<div class="section-title">У вас пока нет тренировок</div>';
-=======
-                document.getElementById('workoutHistory').innerHTML =
-                    '<div class="section-title">У вас пока нет тренировок</div>';
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             }
         }
 
@@ -1493,7 +1484,6 @@
             });
         }
 
-<<<<<<< HEAD
         function updateProgressChart(workouts) {
             const ctx = document.getElementById('progressChart').getContext('2d');
             if (progressChart) {
@@ -1506,50 +1496,36 @@
                 const completedSets = workout.sets.filter(set => set.completed);
                 return completedSets.reduce((sum, set) => sum + (parseInt(set.weight) || 0), 0);
             });
-=======
-function updateProgressChart(workouts) {
-    const ctx = document.getElementById('progressChart').getContext('2d');
-    if (progressChart) {
-        progressChart.destroy();
-    }
 
-    const lastWorkouts = workouts.slice(-10).reverse();
-    const labels = lastWorkouts.map((_, i) => `Тренировка ${i + 1}`);
-    const data = lastWorkouts.map(workout => {
-        const completedSets = workout.sets.filter(set => set.completed);
-        return completedSets.reduce((sum, set) => sum + (parseInt(set.weight) || 0), 0);
-    });
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
-
-    progressChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Суммарный вес (кг)',
-                data: data,
-                borderColor: '#007AFF',
-                backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                borderWidth: 2,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Прогресс по тренировкам'
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Суммарный вес (кг)',
+                        data: data,
+                        borderColor: '#007AFF',
+                        backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Прогресс по тренировкам'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
+            });
         }
-    });
-}
 
         // ==================== ХРАНЕНИЕ ДАННЫХ ====================
         function getWorkoutHistory() {
@@ -1598,19 +1574,11 @@ function updateProgressChart(workouts) {
         function setupWorkoutForm() {
             const workoutForm = document.getElementById('workoutForm');
             if (workoutForm) {
-<<<<<<< HEAD
                 workoutForm.addEventListener('submit', function (e) {
                     e.preventDefault();
                     saveNewWorkout();
                 });
 
-=======
-                workoutForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    saveNewWorkout();
-                });
-                
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('workoutDate').value = today;
             }
@@ -1620,20 +1588,12 @@ function updateProgressChart(workouts) {
             const workoutDate = document.getElementById('workoutDate').value;
             const workoutName = document.getElementById('workoutName').value;
             const workoutDetails = document.getElementById('workoutDetails').value;
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             if (!workoutDate || !workoutName) {
                 alert('Пожалуйста, заполните название тренировки и дату');
                 return;
             }
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             const workout = {
                 date: workoutDate,
                 name: workoutName,
@@ -1641,7 +1601,6 @@ function updateProgressChart(workouts) {
                 createdAt: new Date().toISOString(),
                 type: 'manual'
             };
-<<<<<<< HEAD
 
             saveWorkoutToNewSystem(workout);
 
@@ -1652,37 +1611,17 @@ function updateProgressChart(workouts) {
             renderCalendar();
             updateAnalytics();
 
-=======
-            
-            saveWorkoutToNewSystem(workout);
-            
-            document.getElementById('workoutName').value = '';
-            document.getElementById('workoutDetails').value = '';
-            
-            loadRecentWorkouts();
-            renderCalendar();
-            updateAnalytics();
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             alert('Тренировка сохранена!');
         }
 
         function saveWorkoutToNewSystem(workout) {
             const history = getWorkoutHistory();
             const dateString = workout.date;
-<<<<<<< HEAD
 
             if (!history[dateString]) {
                 history[dateString] = [];
             }
 
-=======
-            
-            if (!history[dateString]) {
-                history[dateString] = [];
-            }
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             const legacyWorkout = {
                 exercise: workout.name,
                 muscleGroup: 'Ручная запись',
@@ -1695,11 +1634,7 @@ function updateProgressChart(workouts) {
                 details: workout.details,
                 type: 'manual'
             };
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             history[dateString].push(legacyWorkout);
             localStorage.setItem('workoutHistory', JSON.stringify(history));
         }
@@ -1707,38 +1642,22 @@ function updateProgressChart(workouts) {
         function loadRecentWorkouts() {
             const workoutsList = document.getElementById('workoutsList');
             if (!workoutsList) return;
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             const allWorkouts = getAllWorkouts();
             const recentWorkouts = allWorkouts
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .sort((a, b) => new Date(b.date) - new Date(a.date))    
                 .slice(0, 5);
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             if (recentWorkouts.length === 0) {
                 workoutsList.innerHTML = '<p>Пока нет тренировок</p>';
                 return;
             }
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
             workoutsList.innerHTML = recentWorkouts.map(workout => {
                 const date = new Date(workout.date).toLocaleDateString('ru-RU');
                 const details = workout.details ? `<p>${workout.details}</p>` : '';
                 const setsInfo = workout.sets ? `Подходов: ${workout.sets.length}` : '';
-<<<<<<< HEAD
 
-=======
-                
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
                 return `
                     <div class="workout-item">
                         <strong>${workout.exercise || workout.name}</strong>
@@ -1755,7 +1674,6 @@ function updateProgressChart(workouts) {
             if (confirm('Удалить эту тренировку?')) {
                 const history = getWorkoutHistory();
                 const workoutsOnDate = history[dateString];
-<<<<<<< HEAD
 
                 if (workoutsOnDate && workoutsOnDate[workoutIndex]) {
                     workoutsOnDate.splice(workoutIndex, 1);
@@ -1764,16 +1682,6 @@ function updateProgressChart(workouts) {
                         delete history[dateString];
                     }
 
-=======
-                
-                if (workoutsOnDate && workoutsOnDate[workoutIndex]) {
-                    workoutsOnDate.splice(workoutIndex, 1);
-                    
-                    if (workoutsOnDate.length === 0) {
-                        delete history[dateString];
-                    }
-                    
->>>>>>> e282497b2c2f89a6c9ffdef2cbff8d08521b477e
                     localStorage.setItem('workoutHistory', JSON.stringify(history));
                     loadRecentWorkouts();
                     renderCalendar();
