@@ -274,12 +274,17 @@
         .history-item {
             padding: 12px;
             border-bottom: 1px solid #eee;
-            cursor: pointer;
         }
 
         .history-exercise {
             font-weight: 500;
             margin-bottom: 5px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .history-exercise:hover {
+            color: #007AFF;
         }
 
         .history-details {
@@ -420,6 +425,22 @@
         .checkbox.completed { background: #007AFF; }
         .checkbox-text { color: white; font-weight: bold; }
 
+        .delete-set-button {
+            background: #FF3B30;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .delete-set-button:hover {
+            opacity: 0.8;
+        }
+
         .add-button, .save-button {
             padding: 15px;
             border-radius: 8px;
@@ -445,23 +466,23 @@
             <div class="modal-content">
                 <div class="modal-title" id="modalExerciseName"></div>
                 <div class="workout-details" id="workoutDetails"></div>
-                <button class="close-modal" onclick="closeWorkoutModal()">Закрыть</button>
+                <button class="close-modal" onclick="app.closeWorkoutModal()">Закрыть</button>
             </div>
         </div>
 
         <div class="nav">
-            <button class="nav-button active" onclick="showTab('home', event)">🏠 Главная</button>
-            <button class="nav-button" onclick="showTab('workout', event)">💪 Тренировка</button>
-            <button class="nav-button" onclick="showTab('analytics', event)">📊 Аналитика</button>
+            <button class="nav-button active" onclick="app.showTab('home')">🔥 Главная 🏋🏽</button>
+            <button class="nav-button" onclick="app.showTab('workout')">💪 Тренировка 💪🏼</button>
+            <button class="nav-button" onclick="app.showTab('analytics')">📈 Аналитика 📈</button>
         </div>
 
         <div id="home" class="content active">
             <div class="title">Мои тренировки</div>
             <div class="calendar">
                 <div class="calendar-header">
-                    <button class="calendar-nav" onclick="changeMonth(-1)">←</button>
+                    <button class="calendar-nav" onclick="app.changeMonth(-1)">←</button>
                     <div class="calendar-month" id="currentMonth"></div>
-                    <button class="calendar-nav" onclick="changeMonth(1)">→</button>
+                    <button class="calendar-nav" onclick="app.changeMonth(1)">→</button>
                 </div>
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
@@ -482,15 +503,11 @@
                 <div class="section-title" id="setsTitle">3. Подходы для: <span id="selectedExerciseName"></span></div>
                 <div id="gripSection" style="display: none;">
                     <div class="section-title">Постановка:</div>
-                    <div class="grip-options">
-                        <div class="grip-option" onclick="selectGrip('narrow', event)">Узкая</div>
-                        <div class="grip-option" onclick="selectGrip('medium', event)">Средняя</div>
-                        <div class="grip-option" onclick="selectGrip('wide', event)">Широкая</div>
-                    </div>
+                    <div class="grip-options" id="gripOptions"></div>
                 </div>
                 <div id="setsContainer"></div>
-                <button class="add-button" id="addSetButton">+ Добавить подход</button>
-                <button class="save-button" id="saveButton">Сохранить тренировку</button>
+                <button class="add-button" onclick="app.addSet()">+ Добавить подход</button>
+                <button class="save-button" onclick="app.saveWorkout()">Сохранить тренировку</button>
             </div>
         </div>
 
@@ -516,735 +533,723 @@
     </div>
 
     <script>
-        const exercisesDatabase = {
-            "Грудь": ["Жим штанги на прямой скамье", "Жим штанги под углом", "Жим гантелей на прямой скамье", "Разводка гантелей"],
-            "Спина": ["Подтягивания", "Тяга штанги в наклоне", "Тяга вертикального блока", "Гиперэкстензия"],
-            "Руки": ["Подъем штанги на бицепс", "Подъем гантелей на бицепс", "Французский жим"],
-            "Плечи": ["Жим штанги с груди", "Жим гантелей сидя", "Махи гантелей в стороны"],
-            "Ноги": ["Приседания со штангой", "Жим ногами", "Сгибание ног лежа", "Разгибание ног сидя"],
-            "Кардио": ["Беговая дорожка", "Велотренажер", "Эллипс"],
-            "Пресс": ["Скручивания", "Подъем ног в висе", "Планка"]
-        };
+        const app = {
+            exercisesDatabase: {
+                "Грудь": ["Жим штанги на прямой скамье", "Жим штанги под углом", "Жим гантелей на прямой скамье", "Разводка гантелей"],
+                "Спина": ["Подтягивания", "Тяга штанги в наклоне", "Тяга вертикального блока", "Гиперэкстензия"],
+                "Руки": ["Подъем штанги на бицепс", "Подъем гантелей на бицепс", "Французский жим"],
+                "Плечи": ["Жим штанги с груди", "Жим гантелей сидя", "Махи гантелей в стороны"],
+                "Ноги": ["Приседания со штангой", "Жим ногами", "Сгибание ног лежа", "Разгибание ног сидя"],
+                "Кардио": ["Беговая дорожка", "Велотренажер", "Эллипс"],
+                "Пресс": ["Скручивания", "Подъем ног в висе", "Планка"]
+            },
 
-        const exercisesWithGrip = ["Приседания со штангой", "Жим ногами"];
-        const groupAnimations = {
-            "Грудь": "animation-chest",
-            "Спина": "animation-back",
-            "Руки": "animation-arms",
-            "Плечи": "animation-shoulders",
-            "Ноги": "animation-legs",
-            "Кардио": "animation-cardio",
-            "Пресс": "animation-abs"
-        };
-
-        let selectedWorkoutDate = null;
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let selectedGroup = null;
-        let selectedExercise = null;
-        let sets = [{ weight: '', reps: '', completed: false }];
-        let muscleGroupChart = null;
-        let progressChart = null;
-        let selectedGrip = null;
-        let editingWorkout = null;
-
-        // ✅ ИСПРАВЛЕНО: Добавлен параметр event
-        function showTab(tabName, event) {
-            document.querySelectorAll('.content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            exercisesWithGrip: ["Приседания со штангой", "Жим ногами"],
             
-            document.getElementById(tabName).classList.add('active');
-            if (event && event.target) {
+            groupAnimations: {
+                "Грудь": "animation-chest",
+                "Спина": "animation-back",
+                "Руки": "animation-arms",
+                "Плечи": "animation-shoulders",
+                "Ноги": "animation-legs",
+                "Кардио": "animation-cardio",
+                "Пресс": "animation-abs"
+            },
+
+            selectedWorkoutDate: null,
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            selectedGroup: null,
+            selectedExercise: null,
+            sets: [{ weight: '', reps: '', completed: false }],
+            muscleGroupChart: null,
+            progressChart: null,
+            selectedGrip: null,
+            editingWorkout: null,
+
+            init() {
+                this.renderCalendar();
+                this.initWorkout();
+                this.updateAnalytics();
+            },
+
+            showTab(tabName) {
+                document.querySelectorAll('.content').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+                
+                document.getElementById(tabName).classList.add('active');
                 event.target.classList.add('active');
-            }
 
-            if (tabName === 'analytics') {
-                updateAnalytics();
-            } else if (tabName === 'home') {
-                renderCalendar();
-            }
-        }
+                if (tabName === 'analytics') {
+                    this.updateAnalytics();
+                } else if (tabName === 'home') {
+                    this.renderCalendar();
+                }
+            },
 
-        async function init() {
-            await renderCalendar();
-            initWorkout();
-            await updateAnalytics();
-            setupEventListeners();
-        }
+            renderCalendar() {
+                const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
-        async function renderCalendar() {
-            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+                document.getElementById('currentMonth').textContent = `${monthNames[this.currentMonth]} ${this.currentYear}`;
 
-            document.getElementById('currentMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const startDate = new Date(firstDay);
+                const firstDayOfWeek = firstDay.getDay() || 7;
+                startDate.setDate(startDate.getDate() - (firstDayOfWeek - 1));
 
-            const firstDay = new Date(currentYear, currentMonth, 1);
-            const startDate = new Date(firstDay);
-            const firstDayOfWeek = firstDay.getDay() || 7;
-            startDate.setDate(startDate.getDate() - (firstDayOfWeek - 1));
+                const calendarGrid = document.getElementById('calendarGrid');
+                calendarGrid.innerHTML = '';
 
-            const calendarGrid = document.getElementById('calendarGrid');
-            calendarGrid.innerHTML = '';
-
-            ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
-                const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day';
-                dayElement.textContent = day;
-                calendarGrid.appendChild(dayElement);
-            });
-
-            const today = new Date();
-            const workoutHistory = getWorkoutHistory();
-
-            for (let i = 0; i < 42; i++) {
-                const date = new Date(startDate);
-                date.setDate(startDate.getDate() + i);
-
-                const dateElement = document.createElement('div');
-                dateElement.className = 'calendar-date';
-
-                const dateString = formatDate(date);
-                const hasWorkout = workoutHistory[dateString]?.length > 0;
-                const isToday = date.toDateString() === today.toDateString();
-                const isCurrentMonth = date.getMonth() === currentMonth;
-
-                if (!isCurrentMonth) dateElement.classList.add('other-month');
-                if (hasWorkout) dateElement.classList.add('has-workout');
-                if (isToday) dateElement.classList.add('today');
-
-                dateElement.textContent = date.getDate();
-                dateElement.onclick = (e) => showWorkoutHistory(dateString, e);
-                calendarGrid.appendChild(dateElement);
-            }
-
-            await updateWorkoutHistory();
-        }
-
-        async function changeMonth(direction) {
-            currentMonth += direction;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            } else if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            await renderCalendar();
-        }
-
-        // ✅ ИСПРАВЛЕНО: Добавлен параметр event
-        async function showWorkoutHistory(dateString, event) {
-            selectedWorkoutDate = dateString;
-
-            document.querySelectorAll('.calendar-date').forEach(date => date.classList.remove('selected'));
-            if (event && event.target) {
-                event.target.classList.add('selected');
-            }
-
-            const workoutHistory = getWorkoutHistory();
-            const workouts = workoutHistory[dateString];
-            const workoutHistoryElement = document.getElementById('workoutHistory');
-
-            if (workouts?.length > 0) {
-                let historyHTML = `
-                    <div class="section-title">Тренировки за ${dateString.replace(/-/g, '.')}:</div>
-                    <button class="add-button" onclick="addWorkoutToDate('${dateString}')" style="margin-bottom: 15px;">
-                        + Добавить тренировку на эту дату
-                    </button>
-                `;
-                workouts.forEach((workout, index) => {
-                    historyHTML += `
-                        <div class="history-item">
-                            <div class="history-exercise" onclick="viewWorkoutDetails('${dateString}', ${index})">
-                                ${workout.exercise}${workout.grip ? ` (${getGripText(workout.grip)})` : ''}
-                            </div>
-                            <div class="history-details">
-                                Подходов: ${workout.sets.length} | Выполнено: ${workout.sets.filter(s => s.completed).length}
-                            </div>
-                            <div class="action-buttons">
-                                <button class="edit-button" onclick="editWorkout('${dateString}', ${index})">✏️ Редактировать</button>
-                                <button class="delete-button" onclick="deleteWorkout('${dateString}', ${index})">🗑️ Удалить</button>
-                            </div>
-                        </div>
-                    `;
+                ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+                    dayElement.textContent = day;
+                    calendarGrid.appendChild(dayElement);
                 });
-                workoutHistoryElement.innerHTML = historyHTML;
-            } else {
-                workoutHistoryElement.innerHTML = `
-                    <div class="section-title">На ${dateString.replace(/-/g, '.')} тренировок нет</div>
-                    <button class="add-button" onclick="addWorkoutToDate('${dateString}')">
-                        + Добавить тренировку на эту дату
-                    </button>
-                `;
-            }
-        }
 
-        // ✅ ИСПРАВЛЕНО: Сделана async
-        async function updateWorkoutHistory() {
-            const workoutHistoryElement = document.getElementById('workoutHistory');
-            if (!workoutHistoryElement) return;
+                const today = new Date();
+                const workoutHistory = this.getWorkoutHistory();
 
-            const workoutHistory = getWorkoutHistory();
-            const recentWorkouts = Object.entries(workoutHistory)
-                .sort((a, b) => new Date(b[0]) - new Date(a[0]))
-                .slice(0, 5);
+                for (let i = 0; i < 42; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + i);
 
-            if (recentWorkouts.length > 0) {
-                let historyHTML = '<div class="section-title">Предстоящие тренеровки:</div>';
-                recentWorkouts.forEach(([date, workouts]) => {
+                    const dateElement = document.createElement('div');
+                    dateElement.className = 'calendar-date';
+
+                    const dateString = this.formatDate(date);
+                    const hasWorkout = workoutHistory[dateString]?.length > 0;
+                    const isToday = date.toDateString() === today.toDateString();
+                    const isCurrentMonth = date.getMonth() === this.currentMonth;
+
+                    if (!isCurrentMonth) dateElement.classList.add('other-month');
+                    if (hasWorkout) dateElement.classList.add('has-workout');
+                    if (isToday) dateElement.classList.add('today');
+
+                    dateElement.textContent = date.getDate();
+                    dateElement.onclick = () => this.showWorkoutHistory(dateString);
+                    calendarGrid.appendChild(dateElement);
+                }
+
+                this.updateWorkoutHistory();
+            },
+
+            changeMonth(direction) {
+                this.currentMonth += direction;
+                if (this.currentMonth < 0) {
+                    this.currentMonth = 11;
+                    this.currentYear--;
+                } else if (this.currentMonth > 11) {
+                    this.currentMonth = 0;
+                    this.currentYear++;
+                }
+                this.renderCalendar();
+            },
+
+            showWorkoutHistory(dateString) {
+                this.selectedWorkoutDate = dateString;
+
+                document.querySelectorAll('.calendar-date').forEach(date => date.classList.remove('selected'));
+                event.target.classList.add('selected');
+
+                const workoutHistory = this.getWorkoutHistory();
+                const workouts = workoutHistory[dateString];
+                const workoutHistoryElement = document.getElementById('workoutHistory');
+
+                if (workouts?.length > 0) {
+                    let historyHTML = `
+                        <div class="section-title">Тренировки за ${dateString.replace(/-/g, '.')}:</div>
+                        <button class="add-button" onclick="app.addWorkoutToDate('${dateString}')" style="margin-bottom: 15px;">
+                            + Добавить тренировку на эту дату
+                        </button>
+                    `;
                     workouts.forEach((workout, index) => {
                         historyHTML += `
                             <div class="history-item">
-                                <div class="history-exercise" onclick="viewWorkoutDetails('${date}', ${index})">
-                                    ${workout.exercise}${workout.grip ? ` (${getGripText(workout.grip)})` : ''}
+                                <div class="history-exercise" onclick="app.viewWorkoutDetails('${dateString}', ${index})">
+                                    ${workout.exercise}${workout.grip ? ` (${this.getGripText(workout.grip)})` : ''}
                                 </div>
-                                <div class="history-details">${date} | Подходов: ${workout.sets.length}</div>
+                                <div class="history-details">
+                                    Подходов: ${workout.sets.length} | Выполнено: ${workout.sets.filter(s => s.completed).length}
+                                </div>
                                 <div class="action-buttons">
-                                    <button class="edit-button" onclick="editWorkout('${date}', ${index})">✏️ Редактировать</button>
-                                    <button class="delete-button" onclick="deleteWorkout('${date}', ${index})">🗑️ Удалить</button>
+                                    <button class="edit-button" onclick="app.editWorkout('${dateString}', ${index})">✏️ Редактировать</button>
+                                    <button class="delete-button" onclick="app.deleteWorkout('${dateString}', ${index})">🗑️ Удалить</button>
                                 </div>
                             </div>
                         `;
                     });
-                });
-                workoutHistoryElement.innerHTML = historyHTML;
-            } else {
-                workoutHistoryElement.innerHTML = '<div class="section-title">У вас пока нет тренировок</div>';
-            }
-        }
-
-        function addWorkoutToDate(dateString) {
-            selectedWorkoutDate = dateString;
-            showTab('workout', null);
-            selectedGroup = null;
-            selectedExercise = null;
-            sets = [{ weight: '', reps: '', completed: false }];
-            selectedGrip = null;
-            editingWorkout = null;
-
-            document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-
-            document.getElementById('exercisesSection').style.display = 'none';
-            document.getElementById('setsSection').style.display = 'none';
-            document.getElementById('gripSection').style.display = 'none';
-            document.getElementById('saveButton').textContent = 'Сохранить тренировку';
-
-            alert(`Добавляем тренировку на ${dateString}`);
-        }
-
-        // ✅ ИСПРАВЛЕНО: Синхронная функция
-        function viewWorkoutDetails(dateString, workoutIndex) {
-            const workoutHistory = getWorkoutHistory();
-            if (!workoutHistory[dateString]?.[workoutIndex]) {
-                alert('Тренировка не найдена');
-                return;
-            }
-            
-            const workout = workoutHistory[dateString][workoutIndex];
-
-            document.getElementById('modalExerciseName').textContent =
-                `${workout.exercise}${workout.grip ? ` (${getGripText(workout.grip)})` : ''}`;
-
-            let detailsHTML = '<div class="workout-details">';
-            workout.sets.forEach((set, index) => {
-                if (set.completed) {
-                    detailsHTML += `
-                        <div class="workout-set">
-                            <div>Подход ${index + 1}</div>
-                            <div>${set.weight} кг × ${set.reps} повторений</div>
-                        </div>
+                    workoutHistoryElement.innerHTML = historyHTML;
+                } else {
+                    workoutHistoryElement.innerHTML = `
+                        <div class="section-title">На ${dateString.replace(/-/g, '.')} тренировок нет</div>
+                        <button class="add-button" onclick="app.addWorkoutToDate('${dateString}')">
+                            + Добавить тренировку на эту дату
+                        </button>
                     `;
                 }
-            });
-            detailsHTML += '</div>';
+            },
 
-            document.getElementById('workoutDetails').innerHTML = detailsHTML;
-            document.getElementById('workoutModal').style.display = 'flex';
-        }
+            updateWorkoutHistory() {
+                const workoutHistoryElement = document.getElementById('workoutHistory');
+                if (!workoutHistoryElement) return;
 
-        function closeWorkoutModal() {
-            document.getElementById('workoutModal').style.display = 'none';
-        }
+                const workoutHistory = this.getWorkoutHistory();
+                const recentWorkouts = Object.entries(workoutHistory)
+                    .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+                    .slice(0, 5);
 
-        // ✅ ИСПРАВЛЕНО: Синхронная функция
-        function editWorkout(dateString, workoutIndex) {
-            const workoutHistory = getWorkoutHistory();
-            if (!workoutHistory[dateString]?.[workoutIndex]) {
-                alert('Тренировка не найдена');
-                return;
-            }
-            
-            const workout = workoutHistory[dateString][workoutIndex];
-
-            selectedGroup = workout.muscleGroup;
-            selectedExercise = workout.exercise;
-            sets = workout.sets;
-            selectedGrip = workout.grip || null;
-            editingWorkout = { date: dateString, index: workoutIndex, id: workout.id };
-
-            showTab('workout', null);
-
-            document.querySelectorAll('.group-button').forEach(btn => {
-                btn.classList.remove('selected');
-                if (btn.textContent.includes(selectedGroup)) {
-                    btn.classList.add('selected');
+                if (recentWorkouts.length > 0) {
+                    let historyHTML = '<div class="section-title">Последние тренировки:</div>';
+                    recentWorkouts.forEach(([date, workouts]) => {
+                        workouts.forEach((workout, index) => {
+                            historyHTML += `
+                                <div class="history-item">
+                                    <div class="history-exercise" onclick="app.viewWorkoutDetails('${date}', ${index})">
+                                        ${workout.exercise}${workout.grip ? ` (${this.getGripText(workout.grip)})` : ''}
+                                    </div>
+                                    <div class="history-details">${date} | Подходов: ${workout.sets.length}</div>
+                                    <div class="action-buttons">
+                                        <button class="edit-button" onclick="app.editWorkout('${date}', ${index})">✏️ Редактировать</button>
+                                        <button class="delete-button" onclick="app.deleteWorkout('${date}', ${index})">🗑️ Удалить</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    });
+                    workoutHistoryElement.innerHTML = historyHTML;
+                } else {
+                    workoutHistoryElement.innerHTML = '<div class="section-title">У вас пока нет тренировок</div>';
                 }
-            });
+            },
 
-            renderExercises();
-            document.getElementById('exercisesSection').style.display = 'block';
+            addWorkoutToDate(dateString) {
+                this.selectedWorkoutDate = dateString;
+                this.showTab('workout');
+                this.resetWorkoutState();
+                alert(`Добавляем тренировку на ${dateString}`);
+            },
 
-            setTimeout(() => {
-                document.querySelectorAll('.exercise-button').forEach(btn => {
-                    btn.classList.remove('selected');
-                    if (btn.textContent.includes(selectedExercise)) {
-                        btn.classList.add('selected');
+            viewWorkoutDetails(dateString, workoutIndex) {
+                const workoutHistory = this.getWorkoutHistory();
+                if (!workoutHistory[dateString]?.[workoutIndex]) {
+                    alert('Тренировка не найдена');
+                    return;
+                }
+                
+                const workout = workoutHistory[dateString][workoutIndex];
+
+                document.getElementById('modalExerciseName').textContent =
+                    `${workout.exercise}${workout.grip ? ` (${this.getGripText(workout.grip)})` : ''}`;
+
+                let detailsHTML = '<div class="workout-details">';
+                workout.sets.forEach((set, index) => {
+                    if (set.completed) {
+                        detailsHTML += `
+                            <div class="workout-set">
+                                <div>Подход ${index + 1}</div>
+                                <div>${set.weight} кг × ${set.reps} повторений</div>
+                            </div>
+                        `;
                     }
                 });
+                detailsHTML += '</div>';
 
-                if (exercisesWithGrip.includes(selectedExercise)) {
-                    document.getElementById('gripSection').style.display = 'block';
-                    document.querySelectorAll('.grip-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                        if (opt.textContent.includes(getGripText(selectedGrip))) {
-                            opt.classList.add('selected');
+                document.getElementById('workoutDetails').innerHTML = detailsHTML;
+                document.getElementById('workoutModal').style.display = 'flex';
+            },
+
+            closeWorkoutModal() {
+                document.getElementById('workoutModal').style.display = 'none';
+            },
+
+            editWorkout(dateString, workoutIndex) {
+                const workoutHistory = this.getWorkoutHistory();
+                if (!workoutHistory[dateString]?.[workoutIndex]) {
+                    alert('Тренировка не найдена');
+                    return;
+                }
+                
+                const workout = workoutHistory[dateString][workoutIndex];
+
+                this.selectedGroup = workout.muscleGroup;
+                this.selectedExercise = workout.exercise;
+                this.sets = workout.sets;
+                this.selectedGrip = workout.grip || null;
+                this.editingWorkout = { date: dateString, index: workoutIndex };
+
+                this.showTab('workout');
+
+                setTimeout(() => {
+                    document.querySelectorAll('.group-button').forEach(btn => {
+                        btn.classList.remove('selected');
+                        if (btn.textContent.includes(this.selectedGroup)) {
+                            btn.classList.add('selected');
                         }
                     });
-                }
 
-                renderSets();
-                document.getElementById('setsSection').style.display = 'block';
-                document.getElementById('saveButton').textContent = 'Обновить тренировку';
-            }, 100);
-        }
+                    this.renderExercises();
+                    document.getElementById('exercisesSection').style.display = 'block';
 
-        async function deleteWorkout(dateString, workoutIndex) {
-            if (!confirm('Удалить эту тренировку?')) return;
+                    setTimeout(() => {
+                        document.querySelectorAll('.exercise-button').forEach(btn => {
+                            btn.classList.remove('selected');
+                            if (btn.textContent.includes(this.selectedExercise)) {
+                                btn.classList.add('selected');
+                            }
+                        });
 
-            const workoutHistory = getWorkoutHistory();
-            
-            if (workoutHistory[dateString]?.[workoutIndex]) {
-                workoutHistory[dateString].splice(workoutIndex, 1);
+                        if (this.exercisesWithGrip.includes(this.selectedExercise)) {
+                            document.getElementById('gripSection').style.display = 'block';
+                            this.renderGripOptions();
+                        }
 
-                if (workoutHistory[dateString].length === 0) {
-                    delete workoutHistory[dateString];
-                }
+                        this.renderSets();
+                        document.getElementById('setsSection').style.display = 'block';
+                        document.querySelector('.save-button').textContent = 'Обновить тренировку';
+                    }, 100);
+                }, 100);
+            },
 
-                localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-                await updateWorkoutHistory();
-                await renderCalendar();
-                await updateAnalytics();
+            deleteWorkout(dateString, workoutIndex) {
+                if (!confirm('Удалить эту тренировку?')) return;
+
+                const workoutHistory = this.getWorkoutHistory();
                 
-                alert('Тренировка удалена!');
-            } else {
-                alert('Тренировка не найдена');
-            }
-        }
+                if (workoutHistory[dateString] && workoutHistory[dateString][workoutIndex]) {
+                    workoutHistory[dateString].splice(workoutIndex, 1);
 
-        function getGripText(grip) {
-            const gripTexts = {
-                'narrow': 'Узкая',
-                'medium': 'Средняя',
-                'wide': 'Широкая'
-            };
-            return gripTexts[grip] || '';
-        }
-
-        function initWorkout() {
-            renderGroups();
-        }
-
-        function renderGroups() {
-            const groupsContainer = document.getElementById('groupsContainer');
-            groupsContainer.innerHTML = '';
-
-            Object.keys(exercisesDatabase).forEach(group => {
-                const button = document.createElement('button');
-                button.className = 'group-button';
-                button.innerHTML = `<div class="group-button-text">${group}</div>`;
-                button.onclick = (e) => selectGroup(group, e);
-                groupsContainer.appendChild(button);
-            });
-        }
-
-        // ✅ ИСПРАВЛЕНО: Добавлен параметр event
-        function selectGroup(group, event) {
-            selectedGroup = group;
-            selectedExercise = null;
-            sets = [{ weight: '', reps: '', completed: false }];
-            selectedGrip = null;
-            editingWorkout = null;
-
-            document.querySelectorAll('.group-button').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            if (event && event.target) {
-                event.target.classList.add('selected');
-            }
-
-            renderExercises();
-            document.getElementById('exercisesSection').style.display = 'block';
-            document.getElementById('setsSection').style.display = 'none';
-            document.getElementById('gripSection').style.display = 'none';
-            document.getElementById('saveButton').textContent = 'Сохранить тренировку';
-        }
-
-        function renderExercises() {
-            const exercisesContainer = document.getElementById('exercisesContainer');
-            const exercisesTitle = document.getElementById('exercisesTitle');
-
-            exercisesTitle.textContent = `2. Выберите упражнение для ${selectedGroup}:`;
-            exercisesContainer.innerHTML = '';
-
-            const animationClass = groupAnimations[selectedGroup];
-
-            exercisesDatabase[selectedGroup].forEach(exercise => {
-                const button = document.createElement('button');
-                button.className = 'exercise-button';
-                button.innerHTML = `
-                    <div class="exercise-with-animation">
-                        <div class="exercise-name">${exercise}</div>
-                        <div class="exercise-animation ${animationClass}">
-                            ${getExerciseEmoji(selectedGroup)}
-                        </div>
-                    </div>
-                `;
-                button.onclick = (e) => selectExercise(exercise, e);
-                exercisesContainer.appendChild(button);
-            });
-        }
-
-        function getExerciseEmoji(group) {
-            const emojis = {
-                "Грудь": "🏋️",
-                "Спина": "💪",
-                "Руки": "💪",
-                "Плечи": "⬆️",
-                "Ноги": "🦵",
-                "Кардио": "🏃",
-                "Пресс": "🔁"
-            };
-            return emojis[group] || "💪";
-        }
-
-        // ✅ ИСПРАВЛЕНО: Добавлен параметр event
-        function selectExercise(exercise, event) {
-            selectedExercise = exercise;
-
-            document.querySelectorAll('.exercise-button').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            if (event && event.target) {
-                const button = event.target.closest('.exercise-button');
-                if (button) button.classList.add('selected');
-            }
-
-            if (exercisesWithGrip.includes(exercise)) {
-                document.getElementById('gripSection').style.display = 'block';
-            } else {
-                document.getElementById('gripSection').style.display = 'none';
-                selectedGrip = null;
-            }
-
-            renderSets();
-            document.getElementById('setsSection').style.display = 'block';
-        }
-
-        // ✅ ИСПРАВЛЕНО: Добавлен параметр event
-        function selectGrip(grip, event) {
-            selectedGrip = grip;
-            document.querySelectorAll('.grip-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            if (event && event.target) {
-                event.target.classList.add('selected');
-            }
-        }
-
-        function renderSets() {
-            const setsContainer = document.getElementById('setsContainer');
-            const selectedExerciseName = document.getElementById('selectedExerciseName');
-
-            selectedExerciseName.textContent = selectedExercise;
-            setsContainer.innerHTML = '';
-
-            sets.forEach((set, index) => {
-                const setElement = document.createElement('div');
-                setElement.className = `set-container ${set.completed ? 'completed-set' : ''}`;
-                setElement.innerHTML = `
-                    <div class="set-number">Подход ${index + 1}</div>
-                    <div class="set-inputs">
-                        <div class="input-group">
-                            <div class="input-label">Вес (кг)</div>
-                            <input 
-                                type="number" 
-                                class="weight-input" 
-                                placeholder="0" 
-                                value="${set.weight}"
-                                oninput="updateSet(${index}, 'weight', this.value)"
-                            >
-                        </div>
-                        <div class="input-group">
-                            <div class="input-label">Повторения</div>
-                            <input 
-                                type="number" 
-                                class="reps-input" 
-                                placeholder="0" 
-                                value="${set.reps}"
-                                oninput="updateSet(${index}, 'reps', this.value)"
-                            >
-                        </div>
-                    </div>
-                    <div class="checkbox ${set.completed ? 'completed' : ''}" onclick="toggleSet(${index})">
-                        <div class="checkbox-text">${set.completed ? '✓' : ''}</div>
-                    </div>
-                `;
-                setsContainer.appendChild(setElement);
-            });
-        }
-
-        function updateSet(index, field, value) {
-            sets[index][field] = value;
-        }
-
-        function toggleSet(index) {
-            sets[index].completed = !sets[index].completed;
-            renderSets();
-        }
-
-        function addSet() {
-            sets.push({ weight: '', reps: '', completed: false });
-            renderSets();
-        }
-
-        async function saveWorkout() {
-            const completedSets = sets.filter(set => set.completed);
-            if (completedSets.length === 0) {
-                alert('Добавьте хотя бы один выполненный подход!');
-                return;
-            }
-
-            if (!selectedExercise || !selectedGroup) {
-                alert('Выберите упражнение и группу мышц!');
-                return;
-            }
-
-            let selectedDate;
-            if (selectedWorkoutDate) {
-                const [day, month, year] = selectedWorkoutDate.split('.');
-                selectedDate = new Date(year, month - 1, day);
-            } else {
-                selectedDate = new Date();
-            }
-
-            const dateString = selectedWorkoutDate || formatDate(selectedDate);
-
-            const workout = {
-                exercise: selectedExercise,
-                muscleGroup: selectedGroup,
-                sets: sets,
-                date: dateString
-            };
-
-            if (selectedGrip) {
-                workout.grip = selectedGrip;
-            }
-
-            if (editingWorkout) {
-                updateWorkoutInHistory(editingWorkout.date, editingWorkout.index, workout);
-                alert(`Тренировка "${selectedExercise}" обновлена!`);
-            } else {
-                saveWorkoutToHistory(workout);
-                alert(`Тренировка "${selectedExercise}" сохранена на ${dateString}!\nПодходов: ${sets.length}\nВыполнено: ${completedSets.length}`);
-            }
-
-            selectedWorkoutDate = null;
-            selectedGroup = null;
-            selectedExercise = null;
-            sets = [{ weight: '', reps: '', completed: false }];
-            selectedGrip = null;
-            editingWorkout = null;
-
-            document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            document.getElementById('exercisesSection').style.display = 'none';
-            document.getElementById('setsSection').style.display = 'none';
-            document.getElementById('gripSection').style.display = 'none';
-            document.getElementById('saveButton').textContent = 'Сохранить тренировку';
-
-            await renderCalendar();
-            await updateAnalytics();
-            showTab('home', null);
-        }
-
-        async function updateAnalytics() {
-            const allWorkouts = getAllWorkouts();
-
-            document.getElementById('totalWorkouts').textContent = allWorkouts.length;
-
-            const thisMonth = new Date().getMonth();
-            const monthWorkouts = allWorkouts.filter(workout =>
-                new Date(workout.date).getMonth() === thisMonth
-            );
-            document.getElementById('monthWorkouts').textContent = monthWorkouts.length;
-
-            updateMuscleGroupChart(allWorkouts);
-            updateProgressChart(allWorkouts);
-        }
-
-        function updateMuscleGroupChart(workouts) {
-            const muscleGroups = {};
-
-            workouts.forEach(workout => {
-                const group = workout.muscleGroup;
-                muscleGroups[group] = (muscleGroups[group] || 0) + 1;
-            });
-
-            const ctx = document.getElementById('muscleGroupChart').getContext('2d');
-
-            if (muscleGroupChart) {
-                muscleGroupChart.destroy();
-            }
-
-            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384'];
-
-            muscleGroupChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(muscleGroups),
-                    datasets: [{
-                        data: Object.values(muscleGroups),
-                        backgroundColor: colors,
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        title: {
-                            display: true,
-                            text: 'Распределение по группам мышц'
-                        }
+                    if (workoutHistory[dateString].length === 0) {
+                        delete workoutHistory[dateString];
                     }
-                }
-            });
-        }
 
-        function updateProgressChart(workouts) {
-            const ctx = document.getElementById('progressChart').getContext('2d');
-            if (progressChart) {
-                progressChart.destroy();
-            }
-
-            const lastWorkouts = workouts.slice(-10).reverse();
-            const labels = lastWorkouts.map((_, i) => `Тренировка ${i + 1}`);
-            const data = lastWorkouts.map(workout => {
-                const completedSets = workout.sets.filter(set => set.completed);
-                return completedSets.reduce((sum, set) => sum + (parseInt(set.weight) || 0), 0);
-            });
-
-            progressChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Суммарный вес (кг)',
-                        data: data,
-                        borderColor: '#007AFF',
-                        backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                        borderWidth: 2,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Прогресс по тренировкам'
-                        }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        // ✅ ИСПРАВЛЕНО: Синхронная функция
-        function getWorkoutHistory() {
-            const history = localStorage.getItem('workoutHistory');
-            if (!history) return {};
-            
-            const parsedHistory = JSON.parse(history);
-            const convertedHistory = {};
-
-            Object.keys(parsedHistory).forEach(oldDateString => {
-                let newDateString;
-
-                if (oldDateString.includes('-')) {
-                    const [year, month, day] = oldDateString.split('-');
-                    newDateString = `${day.padStart(2, '0')}.${month.padStart(2, '0')}.${year}`;
+                    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+                    this.updateWorkoutHistory();
+                    this.renderCalendar();
+                    this.updateAnalytics();
+                    
+                    alert('Тренировка удалена!');
                 } else {
-                    newDateString = oldDateString;
+                    alert('Тренировка не найдена');
+                }
+            },
+
+            getGripText(grip) {
+                const gripTexts = {
+                    'narrow': 'Узкая',
+                    'medium': 'Средняя',
+                    'wide': 'Широкая'
+                };
+                return gripTexts[grip] || '';
+            },
+
+            initWorkout() {
+                this.renderGroups();
+            },
+
+            renderGroups() {
+                const groupsContainer = document.getElementById('groupsContainer');
+                groupsContainer.innerHTML = '';
+
+                Object.keys(this.exercisesDatabase).forEach(group => {
+                    const button = document.createElement('button');
+                    button.className = 'group-button';
+                    button.innerHTML = `<div class="group-button-text">${group}</div>`;
+                    button.onclick = () => this.selectGroup(group);
+                    groupsContainer.appendChild(button);
+                });
+            },
+
+            selectGroup(group) {
+                this.selectedGroup = group;
+                this.selectedExercise = null;
+                this.sets = [{ weight: '', reps: '', completed: false }];
+                this.selectedGrip = null;
+                this.editingWorkout = null;
+
+                document.querySelectorAll('.group-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
+
+                this.renderExercises();
+                document.getElementById('exercisesSection').style.display = 'block';
+                document.getElementById('setsSection').style.display = 'none';
+                document.getElementById('gripSection').style.display = 'none';
+                document.querySelector('.save-button').textContent = 'Сохранить тренировку';
+            },
+
+            renderExercises() {
+                const exercisesContainer = document.getElementById('exercisesContainer');
+                const exercisesTitle = document.getElementById('exercisesTitle');
+
+                exercisesTitle.textContent = `2. Выберите упражнение для ${this.selectedGroup}:`;
+                exercisesContainer.innerHTML = '';
+
+                const animationClass = this.groupAnimations[this.selectedGroup];
+
+                this.exercisesDatabase[this.selectedGroup].forEach(exercise => {
+                    const button = document.createElement('button');
+                    button.className = 'exercise-button';
+                    button.innerHTML = `
+                        <div class="exercise-with-animation">
+                            <div class="exercise-name">${exercise}</div>
+                            <div class="exercise-animation ${animationClass}">
+                                ${this.getExerciseEmoji(this.selectedGroup)}
+                            </div>
+                        </div>
+                    `;
+                    button.onclick = () => this.selectExercise(exercise);
+                    exercisesContainer.appendChild(button);
+                });
+            },
+
+            getExerciseEmoji(group) {
+                const emojis = {
+                    "Грудь": "🏋️",
+                    "Спина": "💪",
+                    "Руки": "💪",
+                    "Плечи": "⬆️",
+                    "Ноги": "🦵",
+                    "Кардио": "🏃",
+                    "Пресс": "🔁"
+                };
+                return emojis[group] || "💪";
+            },
+
+            selectExercise(exercise) {
+                this.selectedExercise = exercise;
+
+                document.querySelectorAll('.exercise-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
+
+                if (this.exercisesWithGrip.includes(exercise)) {
+                    document.getElementById('gripSection').style.display = 'block';
+                    this.renderGripOptions();
+                } else {
+                    document.getElementById('gripSection').style.display = 'none';
+                    this.selectedGrip = null;
                 }
 
-                convertedHistory[newDateString] = parsedHistory[oldDateString];
-            });
+                this.renderSets();
+                document.getElementById('setsSection').style.display = 'block';
+            },
 
-            return convertedHistory;
-        }
+            renderGripOptions() {
+                const gripOptions = document.getElementById('gripOptions');
+                gripOptions.innerHTML = `
+                    <div class="grip-option ${this.selectedGrip === 'narrow' ? 'selected' : ''}" onclick="app.selectGrip('narrow')">Узкая</div>
+                    <div class="grip-option ${this.selectedGrip === 'medium' ? 'selected' : ''}" onclick="app.selectGrip('medium')">Средняя</div>
+                    <div class="grip-option ${this.selectedGrip === 'wide' ? 'selected' : ''}" onclick="app.selectGrip('wide')">Широкая</div>
+                `;
+            },
 
-        function getAllWorkouts() {
-            const history = getWorkoutHistory();
-            const allWorkouts = [];
+            selectGrip(grip) {
+                this.selectedGrip = grip;
+                this.renderGripOptions();
+            },
 
-            Object.values(history).forEach(workouts => {
-                allWorkouts.push(...workouts);
-            });
+            renderSets() {
+                const setsContainer = document.getElementById('setsContainer');
+                const selectedExerciseName = document.getElementById('selectedExerciseName');
 
-            return allWorkouts.sort((a, b) => new Date(a.date) - new Date(b.date));
-        }
+                selectedExerciseName.textContent = this.selectedExercise;
+                setsContainer.innerHTML = '';
 
-        function saveWorkoutToHistory(workout) {
-            const history = getWorkoutHistory();
-            const dateString = workout.date;
+                this.sets.forEach((set, index) => {
+                    const setElement = document.createElement('div');
+                    setElement.className = `set-container ${set.completed ? 'completed-set' : ''}`;
+                    setElement.innerHTML = `
+                        <div class="set-number">Подход ${index + 1}</div>
+                        <div class="set-inputs">
+                            <div class="input-group">
+                                <div class="input-label">Вес (кг)</div>
+                                <input 
+                                    type="number" 
+                                    class="weight-input" 
+                                    placeholder="0" 
+                                    value="${set.weight}"
+                                    onchange="app.updateSet(${index}, 'weight', this.value)"
+                                >
+                            </div>
+                            <div class="input-group">
+                                <div class="input-label">Повторения</div>
+                                <input 
+                                    type="number" 
+                                    class="reps-input" 
+                                    placeholder="0" 
+                                    value="${set.reps}"
+                                    onchange="app.updateSet(${index}, 'reps', this.value)"
+                                >
+                            </div>
+                        </div>
+                        <div class="checkbox ${set.completed ? 'completed' : ''}" onclick="app.toggleSet(${index})">
+                            <div class="checkbox-text">${set.completed ? '✓' : ''}</div>
+                        </div>
+                        ${this.sets.length > 1 ? `
+                            <button class="delete-set-button" onclick="app.deleteSet(${index})" title="Удалить подход">
+                                🗑️
+                            </button>
+                        ` : ''}
+                    `;
+                    setsContainer.appendChild(setElement);
+                });
+            },
 
-            if (!history[dateString]) {
-                history[dateString] = [];
-            }
+            updateSet(index, field, value) {
+                this.sets[index][field] = value;
+            },
 
-            history[dateString].push(workout);
-            localStorage.setItem('workoutHistory', JSON.stringify(history));
-        }
+            toggleSet(index) {
+                this.sets[index].completed = !this.sets[index].completed;
+                this.renderSets();
+            },
 
-        function updateWorkoutInHistory(dateString, workoutIndex, updatedWorkout) {
-            const history = getWorkoutHistory();
-            
-            if (history[dateString]?.[workoutIndex]) {
-                history[dateString][workoutIndex] = updatedWorkout;
+            addSet() {
+                this.sets.push({ weight: '', reps: '', completed: false });
+                this.renderSets();
+            },
+
+            deleteSet(index) {
+                if (this.sets.length > 1) {
+                    this.sets.splice(index, 1);
+                    this.renderSets();
+                }
+            },
+
+            saveWorkout() {
+                const completedSets = this.sets.filter(set => set.completed);
+                if (completedSets.length === 0) {
+                    alert('Добавьте хотя бы один выполненный подход!');
+                    return;
+                }
+
+                if (!this.selectedExercise || !this.selectedGroup) {
+                    alert('Выберите упражнение и группу мышц!');
+                    return;
+                }
+
+                let selectedDate;
+                if (this.selectedWorkoutDate) {
+                    const [day, month, year] = this.selectedWorkoutDate.split('.');
+                    selectedDate = new Date(year, month - 1, day);
+                } else {
+                    selectedDate = new Date();
+                }
+
+                const dateString = this.selectedWorkoutDate || this.formatDate(selectedDate);
+
+                const workout = {
+                    exercise: this.selectedExercise,
+                    muscleGroup: this.selectedGroup,
+                    sets: this.sets,
+                    date: dateString
+                };
+
+                if (this.selectedGrip) {
+                    workout.grip = this.selectedGrip;
+                }
+
+                if (this.editingWorkout) {
+                    this.updateWorkoutInHistory(this.editingWorkout.date, this.editingWorkout.index, workout);
+                    alert(`Тренировка "${this.selectedExercise}" обновлена!`);
+                } else {
+                    this.saveWorkoutToHistory(workout);
+                    alert(`Тренировка "${this.selectedExercise}" сохранена на ${dateString}!\nПодходов: ${this.sets.length}\nВыполнено: ${completedSets.length}`);
+                }
+
+                this.resetWorkoutState();
+                this.renderCalendar();
+                this.updateAnalytics();
+                this.showTab('home');
+            },
+
+            resetWorkoutState() {
+                this.selectedWorkoutDate = null;
+                this.selectedGroup = null;
+                this.selectedExercise = null;
+                this.sets = [{ weight: '', reps: '', completed: false }];
+                this.selectedGrip = null;
+                this.editingWorkout = null;
+
+                document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                document.getElementById('exercisesSection').style.display = 'none';
+                document.getElementById('setsSection').style.display = 'none';
+                document.getElementById('gripSection').style.display = 'none';
+                document.querySelector('.save-button').textContent = 'Сохранить тренировку';
+            },
+
+            updateAnalytics() {
+                const allWorkouts = this.getAllWorkouts();
+
+                document.getElementById('totalWorkouts').textContent = allWorkouts.length;
+
+                const thisMonth = new Date().getMonth();
+                const monthWorkouts = allWorkouts.filter(workout => {
+                    const [day, month, year] = workout.date.split('.');
+                    const workoutDate = new Date(year, month - 1, day);
+                    return workoutDate.getMonth() === thisMonth;
+                });
+                document.getElementById('monthWorkouts').textContent = monthWorkouts.length;
+
+                this.updateMuscleGroupChart(allWorkouts);
+                this.updateProgressChart(allWorkouts);
+            },
+
+            updateMuscleGroupChart(workouts) {
+                const muscleGroups = {};
+
+                workouts.forEach(workout => {
+                    const group = workout.muscleGroup;
+                    muscleGroups[group] = (muscleGroups[group] || 0) + 1;
+                });
+
+                const ctx = document.getElementById('muscleGroupChart').getContext('2d');
+
+                if (this.muscleGroupChart) {
+                    this.muscleGroupChart.destroy();
+                }
+
+                const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384'];
+
+                this.muscleGroupChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(muscleGroups),
+                        datasets: [{
+                            data: Object.values(muscleGroups),
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            title: {
+                                display: true,
+                                text: 'Распределение по группам мышц'
+                            }
+                        }
+                    }
+                });
+            },
+
+            updateProgressChart(workouts) {
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                if (this.progressChart) {
+                    this.progressChart.destroy();
+                }
+
+                const lastWorkouts = workouts.slice(-10).reverse();
+                const labels = lastWorkouts.map((_, i) => `Тренировка ${i + 1}`);
+                const data = lastWorkouts.map(workout => {
+                    const completedSets = workout.sets.filter(set => set.completed);
+                    return completedSets.reduce((sum, set) => sum + (parseInt(set.weight) || 0), 0);
+                });
+
+                this.progressChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Суммарный вес (кг)',
+                            data: data,
+                            borderColor: '#007AFF',
+                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Прогресс по тренировкам'
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            },
+
+            getWorkoutHistory() {
+                const history = localStorage.getItem('workoutHistory');
+                if (!history) return {};
+                
+                const parsedHistory = JSON.parse(history);
+                const convertedHistory = {};
+
+                Object.keys(parsedHistory).forEach(oldDateString => {
+                    let newDateString;
+
+                    if (oldDateString.includes('-')) {
+                        const [year, month, day] = oldDateString.split('-');
+                        newDateString = `${day.padStart(2, '0')}.${month.padStart(2, '0')}.${year}`;
+                    } else {
+                        newDateString = oldDateString;
+                    }
+
+                    convertedHistory[newDateString] = parsedHistory[oldDateString];
+                });
+
+                return convertedHistory;
+            },
+
+            getAllWorkouts() {
+                const history = this.getWorkoutHistory();
+                const allWorkouts = [];
+
+                Object.values(history).forEach(workouts => {
+                    allWorkouts.push(...workouts);
+                });
+
+                return allWorkouts.sort((a, b) => {
+                    const [dayA, monthA, yearA] = a.date.split('.');
+                    const [dayB, monthB, yearB] = b.date.split('.');
+                    return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+                });
+            },
+
+            saveWorkoutToHistory(workout) {
+                const history = this.getWorkoutHistory();
+                const dateString = workout.date;
+
+                if (!history[dateString]) {
+                    history[dateString] = [];
+                }
+
+                history[dateString].push(workout);
                 localStorage.setItem('workoutHistory', JSON.stringify(history));
+            },
+
+            updateWorkoutInHistory(dateString, workoutIndex, updatedWorkout) {
+                const history = this.getWorkoutHistory();
+                
+                if (history[dateString] && history[dateString][workoutIndex]) {
+                    history[dateString][workoutIndex] = updatedWorkout;
+                    localStorage.setItem('workoutHistory', JSON.stringify(history));
+                }
+            },
+
+            formatDate(date) {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}.${month}.${year}`;
             }
-        }
+        };
 
-        function formatDate(date) {
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-        }
-
-        function setupEventListeners() {
-            document.getElementById('addSetButton').onclick = addSet;
-            document.getElementById('saveButton').onclick = saveWorkout;
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
 </body>
 </html>
