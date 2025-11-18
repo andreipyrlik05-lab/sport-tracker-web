@@ -787,7 +787,12 @@
                 <h3>Последние тренировки</h3>
                 <div id="workoutsList"></div>
             </div>
-
+            
+            <div class="workout-history">
+                <div id="workoutHistory">
+                    <!-- История тренировок будет здесь -->
+                </div>
+            </div>
             <div class="quick-start" onclick="showTab('workout')">
                 + Начать новую тренировку
             </div>
@@ -1645,7 +1650,7 @@
 
             const allWorkouts = getAllWorkouts();
             const recentWorkouts = allWorkouts
-                .sort((a, b) => new Date(b.date) - new Date(a.date))    
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .slice(0, 5);
 
             if (recentWorkouts.length === 0) {
