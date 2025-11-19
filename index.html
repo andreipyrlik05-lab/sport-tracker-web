@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,21 +92,121 @@
             justify-content: center;
         }
 
-        .animation-chest { animation: chest-press 2s infinite ease-in-out; }
-        .animation-back { animation: pull-up 2s infinite ease-in-out; }
-        .animation-arms { animation: bicep-curl 2s infinite ease-in-out; }
-        .animation-shoulders { animation: shoulder-press 2s infinite ease-in-out; }
-        .animation-legs { animation: squat 2s infinite ease-in-out; }
-        .animation-cardio { animation: running 1s infinite linear; }
-        .animation-abs { animation: crunch 2s infinite ease-in-out; }
+        .animation-chest {
+            animation: chest-press 2s infinite ease-in-out;
+        }
 
-        @keyframes chest-press { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) translateX(-2px); } }
-        @keyframes pull-up { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
-        @keyframes bicep-curl { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-15deg); } }
-        @keyframes shoulder-press { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-2px); } }
-        @keyframes squat { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(2px) scale(0.95); } }
-        @keyframes running { 0%, 100% { transform: translateX(0px); } 25% { transform: translateX(2px) translateY(-1px); } 75% { transform: translateX(-2px) translateY(1px); } }
-        @keyframes crunch { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.9); } }
+        .animation-back {
+            animation: pull-up 2s infinite ease-in-out;
+        }
+
+        .animation-arms {
+            animation: bicep-curl 2s infinite ease-in-out;
+        }
+
+        .animation-shoulders {
+            animation: shoulder-press 2s infinite ease-in-out;
+        }
+
+        .animation-legs {
+            animation: squat 2s infinite ease-in-out;
+        }
+
+        .animation-cardio {
+            animation: running 1s infinite linear;
+        }
+
+        .animation-abs {
+            animation: crunch 2s infinite ease-in-out;
+        }
+
+        @keyframes chest-press {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1) translateX(-2px);
+            }
+        }
+
+        @keyframes pull-up {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+
+        @keyframes bicep-curl {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(-15deg);
+            }
+        }
+
+        @keyframes shoulder-press {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-2px);
+            }
+        }
+
+        @keyframes squat {
+
+            0%,
+            100% {
+                transform: translateY(0px) scale(1);
+            }
+
+            50% {
+                transform: translateY(2px) scale(0.95);
+            }
+        }
+
+        @keyframes running {
+
+            0%,
+            100% {
+                transform: translateX(0px);
+            }
+
+            25% {
+                transform: translateX(2px) translateY(-1px);
+            }
+
+            75% {
+                transform: translateX(-2px) translateY(1px);
+            }
+        }
+
+        @keyframes crunch {
+
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(0.9);
+            }
+        }
 
         .grip-options {
             display: flex;
@@ -136,7 +237,8 @@
             margin-top: 15px;
         }
 
-        .edit-button, .delete-button {
+        .edit-button,
+        .delete-button {
             flex: 1;
             padding: 10px;
             border: none;
@@ -145,8 +247,15 @@
             font-size: 14px;
         }
 
-        .edit-button { background: #FF9500; color: white; }
-        .delete-button { background: #FF3B30; color: white; }
+        .edit-button {
+            background: #FF9500;
+            color: white;
+        }
+
+        .delete-button {
+            background: #FF3B30;
+            color: white;
+        }
 
         .modal {
             display: none;
@@ -255,8 +364,14 @@
             font-weight: bold;
         }
 
-        .calendar-date.today { border: 2px solid #007AFF; }
-        .calendar-date.other-month { color: #ccc; }
+        .calendar-date.today {
+            border: 2px solid #007AFF;
+        }
+
+        .calendar-date.other-month {
+            color: #ccc;
+        }
+
         .calendar-date.selected {
             border: 2px solid #007AFF !important;
             background: #007AFF !important;
@@ -380,6 +495,7 @@
             margin-bottom: 10px;
             border: 1px solid #eee;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .set-number {
@@ -392,9 +508,11 @@
             display: flex;
             gap: 10px;
             flex: 1;
+            min-width: 200px;
         }
 
-        .weight-input, .reps-input {
+        .weight-input,
+        .reps-input {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 6px;
@@ -408,7 +526,9 @@
             margin-bottom: 4px;
         }
 
-        .input-group { flex: 1; }
+        .input-group {
+            flex: 1;
+        }
 
         .checkbox {
             width: 24px;
@@ -422,8 +542,14 @@
             flex-shrink: 0;
         }
 
-        .checkbox.completed { background: #007AFF; }
-        .checkbox-text { color: white; font-weight: bold; }
+        .checkbox.completed {
+            background: #007AFF;
+        }
+
+        .checkbox-text {
+            color: white;
+            font-weight: bold;
+        }
 
         .delete-set-button {
             background: #FF3B30;
@@ -441,7 +567,8 @@
             opacity: 0.8;
         }
 
-        .add-button, .save-button {
+        .add-button,
+        .save-button {
             padding: 15px;
             border-radius: 8px;
             border: none;
@@ -452,14 +579,23 @@
             margin-bottom: 10px;
         }
 
-        .add-button { background: #34C759; color: white; }
-        .save-button { background: #007AFF; color: white; }
+        .add-button {
+            background: #34C759;
+            color: white;
+        }
+
+        .save-button {
+            background: #007AFF;
+            color: white;
+        }
+
         .completed-set {
             background: #f8fff8;
             border-color: #34C759;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="modal" id="workoutModal">
@@ -471,9 +607,9 @@
         </div>
 
         <div class="nav">
-            <button class="nav-button active" onclick="app.showTab('home')">🔥 Главная </button>
-            <button class="nav-button" onclick="app.showTab('workout')">💪 Тренировка </button>
-            <button class="nav-button" onclick="app.showTab('analytics')">📈 Аналитика </button>
+            <button class="nav-button active" onclick="app.showTab('home')">🏠 Главная</button>
+            <button class="nav-button" onclick="app.showTab('workout')">💪 Тренировка</button>
+            <button class="nav-button" onclick="app.showTab('analytics')">📊 Аналитика</button>
         </div>
 
         <div id="home" class="content active">
@@ -545,7 +681,7 @@
             },
 
             exercisesWithGrip: ["Приседания со штангой", "Жим ногами"],
-            
+
             groupAnimations: {
                 "Грудь": "animation-chest",
                 "Спина": "animation-back",
@@ -576,7 +712,7 @@
             showTab(tabName) {
                 document.querySelectorAll('.content').forEach(tab => tab.classList.remove('active'));
                 document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-                
+
                 document.getElementById(tabName).classList.add('active');
                 event.target.classList.add('active');
 
@@ -726,8 +862,9 @@
 
             addWorkoutToDate(dateString) {
                 this.selectedWorkoutDate = dateString;
-                this.showTab('workout');
                 this.resetWorkoutState();
+                this.selectedWorkoutDate = dateString; // Устанавливаем заново после сброса
+                this.showTab('workout');
                 alert(`Добавляем тренировку на ${dateString}`);
             },
 
@@ -737,7 +874,7 @@
                     alert('Тренировка не найдена');
                     return;
                 }
-                
+
                 const workout = workoutHistory[dateString][workoutIndex];
 
                 document.getElementById('modalExerciseName').textContent =
@@ -770,7 +907,7 @@
                     alert('Тренировка не найдена');
                     return;
                 }
-                
+
                 const workout = workoutHistory[dateString][workoutIndex];
 
                 this.selectedGroup = workout.muscleGroup;
@@ -816,7 +953,7 @@
                 if (!confirm('Удалить эту тренировку?')) return;
 
                 const workoutHistory = this.getWorkoutHistory();
-                
+
                 if (workoutHistory[dateString] && workoutHistory[dateString][workoutIndex]) {
                     workoutHistory[dateString].splice(workoutIndex, 1);
 
@@ -828,7 +965,7 @@
                     this.updateWorkoutHistory();
                     this.renderCalendar();
                     this.updateAnalytics();
-                    
+
                     alert('Тренировка удалена!');
                 } else {
                     alert('Тренировка не найдена');
@@ -1185,7 +1322,7 @@
             getWorkoutHistory() {
                 const history = localStorage.getItem('workoutHistory');
                 if (!history) return {};
-                
+
                 const parsedHistory = JSON.parse(history);
                 const convertedHistory = {};
 
@@ -1234,7 +1371,7 @@
 
             updateWorkoutInHistory(dateString, workoutIndex, updatedWorkout) {
                 const history = this.getWorkoutHistory();
-                
+
                 if (history[dateString] && history[dateString][workoutIndex]) {
                     history[dateString][workoutIndex] = updatedWorkout;
                     localStorage.setItem('workoutHistory', JSON.stringify(history));
@@ -1252,4 +1389,5 @@
         document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
 </body>
+
 </html>
