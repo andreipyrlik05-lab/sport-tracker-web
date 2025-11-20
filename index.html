@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#007AFF">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Все предыдущие стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -674,6 +673,10 @@
             100% { transform: rotate(360deg); }
         }
 
+        .sets-section-anchor {
+            scroll-margin-top: 80px;
+        }
+
         @media (max-width: 480px) {
             .container {
                 max-width: 100%;
@@ -696,6 +699,10 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
+            .sets-section-anchor {
+                scroll-margin-top: 70px;
+            }
         }
     </style>
 </head>
@@ -712,8 +719,7 @@
         </div>
 
         <div class="nav">
-            <!-- Изменили иконку с дома на календарь -->
-            <button class="nav-button active" onclick="app.showTab('home')">📅 Календарь тренеровок</button>
+            <button class="nav-button active" onclick="app.showTab('home')">📅 Тренировки</button>
             <button class="nav-button" onclick="app.showTab('workout')">💪 Тренировка</button>
             <button class="nav-button" onclick="app.showTab('analytics')">📊 Аналитика</button>
         </div>
@@ -737,14 +743,15 @@
             <div class="title">Новая тренировка</div>
             <div class="section-title">1. Выберите группу мышц:</div>
             <div class="groups-container" id="groupsContainer"></div>
+            
             <div id="exercisesSection" style="display: none;">
                 <div class="section-title" id="exercisesTitle">2. Выберите упражнение:</div>
                 <div class="exercises-container" id="exercisesContainer"></div>
             </div>
-            <div id="setsSection" style="display: none;">
+            
+            <div id="setsSection" style="display: none;" class="sets-section-anchor">
                 <div class="section-title" id="setsTitle">3. Подходы для: <span id="selectedExerciseName"></span></div>
                 
-                <!-- Собственный вес для подтягиваний -->
                 <div id="bodyweightSection" style="display: none;">
                     <div class="bodyweight-section">
                         <div class="bodyweight-checkbox" onclick="app.toggleBodyweight()">
@@ -757,19 +764,16 @@
                     </div>
                 </div>
 
-                <!-- Хват для определенных упражнений -->
                 <div id="gripSection" style="display: none;">
                     <div class="section-title">Выберите хват:</div>
                     <div class="grip-options" id="gripOptions"></div>
                 </div>
 
-                <!-- Одна нога для упражнений ног -->
                 <div id="singleLegSection" style="display: none;">
                     <div class="section-title">Выполнение:</div>
                     <div class="single-leg-options" id="singleLegOptions"></div>
                 </div>
 
-                <!-- Хват для тяги к подбородку -->
                 <div id="chinUpSection" style="display: none;">
                     <div class="section-title">Выберите хват:</div>
                     <div class="chin-up-options" id="chinUpOptions"></div>
@@ -814,7 +818,6 @@
 
     <script>
         const app = {
-            // Расширенная база упражнений (уже отсортированная по алфавиту)
             exercisesDatabase: {
                 "Грудь": [
                     "Жим гантелей под углом",
@@ -892,7 +895,6 @@
                 ]
             },
 
-            // Упражнения с выбором хвата
             exercisesWithGrip: [
                 "Приседания со штангой", 
                 "Жим ногами",
@@ -900,18 +902,15 @@
                 "Тяга штанги к подбородку"
             ],
 
-            // Упражнения для одной ноги
             singleLegExercises: [
                 "Сгибание ног (по одной ноге)",
                 "Разгибание ног (по одной ноге)"
             ],
 
-            // Упражнения с собственным весом
             bodyweightExercises: [
                 "Подтягивания"
             ],
 
-            // Анимации для групп
             groupAnimations: {
                 "Грудь": "animation-chest",
                 "Спина": "animation-back", 
@@ -922,7 +921,6 @@
                 "Пресс": "animation-abs"
             },
 
-            // Состояние приложения
             state: {
                 selectedWorkoutDate: null,
                 currentMonth: new Date().getMonth(),
@@ -937,12 +935,10 @@
                 editingWorkout: null
             },
 
-            // Кэш и графики
             cachedHistory: {},
             muscleGroupChart: null,
             progressChart: null,
 
-            // Инициализация приложения
             async init() {
                 try {
                     this.showNotification('Загрузка данных...', 'info');
@@ -957,7 +953,6 @@
                 }
             },
 
-            // Уведомления
             showNotification(message, type = 'info') {
                 const notification = document.getElementById('notification');
                 notification.textContent = message;
@@ -974,7 +969,6 @@
                 notification.classList.remove('show');
             },
 
-            // Навигация по вкладкам
             async showTab(tabName) {
                 document.querySelectorAll('.content').forEach(tab => tab.classList.remove('active'));
                 document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
@@ -996,17 +990,15 @@
                 }
             },
 
-            // Инициализация тренировки
             initWorkout() {
                 this.renderGroups();
+                this.resetWorkoutState();
             },
 
-            // Рендер групп мышц
             renderGroups() {
                 const groupsContainer = document.getElementById('groupsContainer');
                 groupsContainer.innerHTML = '';
 
-                // Сортируем группы мышц по алфавиту
                 const sortedGroups = Object.keys(this.exercisesDatabase).sort();
 
                 sortedGroups.forEach(group => {
@@ -1020,7 +1012,6 @@
                 });
             },
 
-            // Выбор группы мышц
             selectGroup(group) {
                 this.state.selectedGroup = group;
                 this.state.selectedExercise = null;
@@ -1045,9 +1036,12 @@
                 document.getElementById('bodyweightSection').style.display = 'none';
                 
                 document.querySelector('.save-button').textContent = 'Сохранить тренировку';
+
+                setTimeout(() => {
+                    this.scrollToElement(document.getElementById('exercisesSection'));
+                }, 300);
             },
 
-            // Рендер упражнений (уже отсортированных в базе данных)
             renderExercises() {
                 const exercisesContainer = document.getElementById('exercisesContainer');
                 const exercisesTitle = document.getElementById('exercisesTitle');
@@ -1057,7 +1051,6 @@
 
                 const animationClass = this.groupAnimations[this.state.selectedGroup];
 
-                // Упражнения уже отсортированы в базе данных
                 this.exercisesDatabase[this.state.selectedGroup].forEach(exercise => {
                     const button = document.createElement('button');
                     button.className = 'exercise-button';
@@ -1074,7 +1067,6 @@
                 });
             },
 
-            // Emoji для упражнений
             getExerciseEmoji(group) {
                 const emojis = {
                     "Грудь": "🏋️",
@@ -1088,7 +1080,6 @@
                 return emojis[group] || "💪";
             },
 
-            // Выбор упражнения
             selectExercise(exercise) {
                 this.state.selectedExercise = exercise;
 
@@ -1097,7 +1088,6 @@
                 });
                 event.target.classList.add('selected');
 
-                // Показываем соответствующие опции
                 if (this.exercisesWithGrip.includes(exercise)) {
                     if (exercise === "Тяга блока к груди") {
                         document.getElementById('gripSection').style.display = 'block';
@@ -1132,9 +1122,24 @@
 
                 this.renderSets();
                 document.getElementById('setsSection').style.display = 'block';
+
+                setTimeout(() => {
+                    this.scrollToElement(document.getElementById('setsSection'));
+                }, 300);
             },
 
-            // Опции хвата
+            scrollToElement(element) {
+                if (element) {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - 80;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            },
+
             renderGripOptions() {
                 const gripOptions = document.getElementById('gripOptions');
                 gripOptions.innerHTML = `
@@ -1144,7 +1149,6 @@
                 `;
             },
 
-            // Опции для одной ноги
             renderSingleLegOptions() {
                 const singleLegOptions = document.getElementById('singleLegOptions');
                 singleLegOptions.innerHTML = `
@@ -1154,7 +1158,6 @@
                 `;
             },
 
-            // Опции для тяги к подбородку
             renderChinUpOptions() {
                 const chinUpOptions = document.getElementById('chinUpOptions');
                 chinUpOptions.innerHTML = `
@@ -1163,7 +1166,6 @@
                 `;
             },
 
-            // Опция собственного веса
             renderBodyweightOption() {
                 const checkbox = document.getElementById('bodyweightCheckbox');
                 if (checkbox) {
@@ -1171,7 +1173,6 @@
                 }
             },
 
-            // Переключение собственного веса
             toggleBodyweight() {
                 this.state.bodyweight = !this.state.bodyweight;
                 const checkbox = document.getElementById('bodyweightCheckbox');
@@ -1181,25 +1182,21 @@
                 this.renderSets();
             },
 
-            // Выбор хвата
             selectGrip(grip) {
                 this.state.selectedGrip = grip;
                 this.renderGripOptions();
             },
 
-            // Выбор для одной ноги
             selectSingleLeg(option) {
                 this.state.singleLeg = option;
                 this.renderSingleLegOptions();
             },
 
-            // Выбор хвата для тяги к подбородку
             selectChinUpGrip(grip) {
                 this.state.chinUpGrip = grip;
                 this.renderChinUpOptions();
             },
 
-            // Текст для хвата
             getGripText(grip) {
                 const gripTexts = {
                     'narrow': 'Узкая',
@@ -1209,7 +1206,6 @@
                 return gripTexts[grip] || '';
             },
 
-            // Текст для одной ноги
             getSingleLegText(option) {
                 const legTexts = {
                     'both': 'Обе ноги',
@@ -1219,7 +1215,6 @@
                 return legTexts[option] || '';
             },
 
-            // Текст для хвата подбородка
             getChinUpGripText(grip) {
                 const gripTexts = {
                     'narrow': 'Узкий хват',
@@ -1228,7 +1223,6 @@
                 return gripTexts[grip] || '';
             },
 
-            // Рендер подходов
             renderSets() {
                 const setsContainer = document.getElementById('setsContainer');
                 const selectedExerciseName = document.getElementById('selectedExerciseName');
@@ -1240,7 +1234,6 @@
                     const setElement = document.createElement('div');
                     setElement.className = `set-container ${set.completed ? 'completed-set' : ''}`;
                     
-                    // Если выбран собственный вес, скрываем поле веса
                     const weightInput = this.state.bodyweight ? 
                         `<div class="input-group">
                             <div class="input-label">Вес (кг)</div>
@@ -1295,28 +1288,30 @@
                 });
             },
 
-            // Обновление подхода
             updateSet(index, field, value) {
-                // Если выбран собственный вес, не обновляем поле веса
                 if (field === 'weight' && this.state.bodyweight) {
                     return;
                 }
                 this.state.sets[index][field] = value;
             },
 
-            // Переключение выполнения подхода
             toggleSet(index) {
                 this.state.sets[index].completed = !this.state.sets[index].completed;
                 this.renderSets();
             },
 
-            // Добавление подхода
             addSet() {
                 this.state.sets.push({ weight: '', reps: '', completed: false });
                 this.renderSets();
+                
+                setTimeout(() => {
+                    const setsContainer = document.getElementById('setsContainer');
+                    if (setsContainer && setsContainer.lastElementChild) {
+                        this.scrollToElement(setsContainer.lastElementChild);
+                    }
+                }, 100);
             },
 
-            // Удаление подхода
             deleteSet(index) {
                 if (this.state.sets.length > 1) {
                     this.state.sets.splice(index, 1);
@@ -1324,7 +1319,6 @@
                 }
             },
 
-            // Сохранение тренировки
             async saveWorkout() {
                 try {
                     const completedSets = this.state.sets.filter(set => set.completed);
@@ -1347,7 +1341,6 @@
                         date: dateString
                     };
 
-                    // Добавляем дополнительные параметры
                     if (this.state.selectedGrip) {
                         workout.grip = this.state.selectedGrip;
                     }
@@ -1359,7 +1352,6 @@
                     }
                     if (this.state.bodyweight) {
                         workout.bodyweight = true;
-                        // Для упражнений с собственным весом устанавливаем вес = 0
                         workout.sets.forEach(set => {
                             if (set.completed) {
                                 set.weight = '0';
@@ -1390,7 +1382,6 @@
                 }
             },
 
-            // Сброс состояния тренировки
             resetWorkoutState() {
                 this.state.selectedWorkoutDate = null;
                 this.state.selectedGroup = null;
@@ -1405,6 +1396,7 @@
                 document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
                     btn.classList.remove('selected');
                 });
+                
                 document.getElementById('exercisesSection').style.display = 'none';
                 document.getElementById('setsSection').style.display = 'none';
                 document.getElementById('gripSection').style.display = 'none';
@@ -1413,10 +1405,16 @@
                 document.getElementById('bodyweightSection').style.display = 'none';
                 
                 document.querySelector('.save-button').textContent = 'Сохранить тренировку';
+
+                if (document.getElementById('workout').classList.contains('active')) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             },
 
-            // Календарь
             renderCalendar() {
+                const calendarGrid = document.getElementById('calendarGrid');
+                if (!calendarGrid) return;
+
                 const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
                     'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
@@ -1427,7 +1425,6 @@
                 const firstDayOfWeek = firstDay.getDay() || 7;
                 startDate.setDate(startDate.getDate() - (firstDayOfWeek - 1));
 
-                const calendarGrid = document.getElementById('calendarGrid');
                 calendarGrid.innerHTML = '';
 
                 ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
@@ -1527,6 +1524,10 @@
                         </button>
                     `;
                 }
+
+                setTimeout(() => {
+                    this.scrollToElement(document.querySelector('.workout-history'));
+                }, 300);
             },
 
             updateWorkoutHistory() {
@@ -1624,8 +1625,8 @@
                 document.getElementById('workoutModal').style.display = 'none';
             },
 
-            editWorkout(dateString, workoutIndex) {
-                const workoutHistory = this.cachedHistory;
+            async editWorkout(dateString, workoutIndex) {
+                const workoutHistory = await this.getWorkoutHistory();
                 if (!workoutHistory[dateString]?.[workoutIndex]) {
                     this.showNotification('Тренировка не найдена', 'error');
                     return;
@@ -1633,64 +1634,75 @@
                 
                 const workout = workoutHistory[dateString][workoutIndex];
 
+                // Сначала переходим на вкладку тренировки
+                this.showTab('workout');
+                
+                // Устанавливаем состояние для редактирования
                 this.state.selectedGroup = workout.muscleGroup;
                 this.state.selectedExercise = workout.exercise;
-                this.state.sets = workout.sets;
+                this.state.sets = workout.sets.map(set => ({
+                    weight: set.weight || '',
+                    reps: set.reps || '',
+                    completed: set.completed || false
+                }));
                 this.state.selectedGrip = workout.grip || null;
                 this.state.singleLeg = workout.singleLeg || null;
                 this.state.chinUpGrip = workout.chinUpGrip || null;
                 this.state.bodyweight = workout.bodyweight || false;
                 this.state.editingWorkout = { date: dateString, index: workoutIndex };
+                this.state.selectedWorkoutDate = dateString;
 
-                this.showTab('workout');
+                // Показываем все секции сразу с правильными данными
+                document.getElementById('exercisesSection').style.display = 'block';
+                document.getElementById('setsSection').style.display = 'block';
+                
+                // Выбираем группу мышц
+                document.querySelectorAll('.group-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                    if (btn.textContent.includes(this.state.selectedGroup)) {
+                        btn.classList.add('selected');
+                    }
+                });
 
+                // Рендерим упражнения и выбираем нужное
+                this.renderExercises();
+                
                 setTimeout(() => {
-                    document.querySelectorAll('.group-button').forEach(btn => {
+                    document.querySelectorAll('.exercise-button').forEach(btn => {
                         btn.classList.remove('selected');
-                        if (btn.textContent.includes(this.state.selectedGroup)) {
+                        if (btn.textContent.includes(this.state.selectedExercise)) {
                             btn.classList.add('selected');
                         }
                     });
 
-                    this.renderExercises();
-                    document.getElementById('exercisesSection').style.display = 'block';
+                    // Настраиваем дополнительные опции
+                    if (this.exercisesWithGrip.includes(this.state.selectedExercise)) {
+                        document.getElementById('gripSection').style.display = 'block';
+                        this.renderGripOptions();
+                    }
+                    
+                    if (this.singleLegExercises.includes(this.state.selectedExercise)) {
+                        document.getElementById('singleLegSection').style.display = 'block';
+                        this.renderSingleLegOptions();
+                    }
+                    
+                    if (this.bodyweightExercises.includes(this.state.selectedExercise)) {
+                        document.getElementById('bodyweightSection').style.display = 'block';
+                        this.renderBodyweightOption();
+                    }
 
+                    // Рендерим подходы
+                    this.renderSets();
+                    
+                    // Меняем текст кнопки сохранения
+                    document.querySelector('.save-button').innerHTML = '<span id="saveButtonText">Обновить тренировку</span>';
+
+                    this.showNotification(`Редактируем тренировку "${this.state.selectedExercise}"`);
+
+                    // Скроллим к секции подходов
                     setTimeout(() => {
-                        document.querySelectorAll('.exercise-button').forEach(btn => {
-                            btn.classList.remove('selected');
-                            if (btn.textContent.includes(this.state.selectedExercise)) {
-                                btn.classList.add('selected');
-                            }
-                        });
-
-                        // Показываем соответствующие опции
-                        if (this.exercisesWithGrip.includes(this.state.selectedExercise)) {
-                            if (this.state.selectedExercise === "Тяга блока к груди") {
-                                document.getElementById('gripSection').style.display = 'block';
-                                this.renderGripOptions();
-                            } else if (this.state.selectedExercise === "Тяга штанги к подбородку") {
-                                document.getElementById('chinUpSection').style.display = 'block';
-                                this.renderChinUpOptions();
-                            } else {
-                                document.getElementById('gripSection').style.display = 'block';
-                                this.renderGripOptions();
-                            }
-                        }
-
-                        if (this.singleLegExercises.includes(this.state.selectedExercise)) {
-                            document.getElementById('singleLegSection').style.display = 'block';
-                            this.renderSingleLegOptions();
-                        }
-
-                        if (this.bodyweightExercises.includes(this.state.selectedExercise)) {
-                            document.getElementById('bodyweightSection').style.display = 'block';
-                            this.renderBodyweightOption();
-                        }
-
-                        this.renderSets();
-                        document.getElementById('setsSection').style.display = 'block';
-                        document.querySelector('.save-button').textContent = 'Обновить тренировку';
-                    }, 100);
+                        this.scrollToElement(document.getElementById('setsSection'));
+                    }, 500);
                 }, 100);
             },
 
@@ -1707,7 +1719,12 @@
                             delete workoutHistory[dateString];
                         }
 
-                        await window.storage.set('workoutHistory', JSON.stringify(workoutHistory), false);
+                        if (window.storage) {
+                            await window.storage.set('workoutHistory', JSON.stringify(workoutHistory), false);
+                        } else {
+                            localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+                        }
+                        
                         this.cachedHistory = workoutHistory;
                         this.updateWorkoutHistory();
                         this.renderCalendar();
@@ -1723,7 +1740,6 @@
                 }
             },
 
-            // Аналитика
             async updateAnalytics() {
                 this.cachedHistory = await this.getWorkoutHistory();
                 const allWorkouts = this.getAllWorkouts();
@@ -1738,11 +1754,9 @@
                 });
                 document.getElementById('monthWorkouts').textContent = monthWorkouts.length;
 
-                // Общее количество подходов
                 const totalSets = allWorkouts.reduce((sum, workout) => sum + workout.sets.filter(set => set.completed).length, 0);
                 document.getElementById('totalSets').textContent = totalSets;
 
-                // Средний вес (исключая упражнения с собственным весом)
                 const allWeights = [];
                 allWorkouts.forEach(workout => {
                     if (!workout.bodyweight) {
@@ -1847,10 +1861,8 @@
                 });
             },
 
-            // Работа с хранилищем
             async getWorkoutHistory() {
                 try {
-                    // Для гибридного приложения
                     if (window.storage) {
                         const result = await window.storage.get('workoutHistory', false);
                         if (!result || !result.value) return {};
@@ -1873,7 +1885,6 @@
 
                         return convertedHistory;
                     } else {
-                        // Для браузера
                         const history = localStorage.getItem('workoutHistory');
                         return history ? JSON.parse(history) : {};
                     }
@@ -1951,7 +1962,6 @@
             }
         };
 
-        // Инициализация при загрузке
         if (window.cordova || window.Capacitor) {
             document.addEventListener('deviceready', () => {
                 app.init();
