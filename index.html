@@ -1,711 +1,922 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sport Tracker Pro</title>
-    <meta name="theme-color" content="#007AFF">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <!DOCTYPE html>
+    <html lang="ru">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sport Tracker Pro</title>
+        <meta name="theme-color" content="#007AFF">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            :root {
+                --bg-primary: #0a0a0a;
+                --bg-secondary: #111111;
+                --bg-card: #1a1a1a;
+                --text-primary: #ffffff;
+                --text-secondary: #b0b0b0;
+                --accent-primary: #00d9ff;
+                --accent-secondary: #b400ff;
+                --success: #00ff88;
+                --warning: #ffaa00;
+                --error: #ff0066;
+                --border: #333333;
+            }
+
+            body {
+                font-family: 'Segoe UI', system-ui, sans-serif;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+                line-height: 1.6;
+            }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-            position: relative;
-        }
-
-        .nav {
-            display: flex;
-            background: #007AFF;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .nav-button {
-            flex: 1;
-            padding: 15px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-button.active {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .nav-button:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 3px;
-            background: white;
-            transition: all 0.3s;
-            transform: translateX(-50%);
-        }
-
-        .nav-button.active:after {
-            width: 80%;
-        }
-
-        .content {
-            padding: 20px;
-            display: none;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .content.active {
-            display: block;
-        }
-
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .exercise-with-animation {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
-
-        .exercise-animation {
-            width: 40px;
-            height: 40px;
-            margin-left: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .animation-chest { animation: chest-press 2s infinite ease-in-out; }
-        .animation-back { animation: pull-up 2s infinite ease-in-out; }
-        .animation-arms { animation: bicep-curl 2s infinite ease-in-out; }
-        .animation-shoulders { animation: shoulder-press 2s infinite ease-in-out; }
-        .animation-legs { animation: squat 2s infinite ease-in-out; }
-        .animation-cardio { animation: running 1s infinite linear; }
-        .animation-abs { animation: crunch 2s infinite ease-in-out; }
-
-        @keyframes chest-press { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) translateX(-2px); } }
-        @keyframes pull-up { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-3px); } }
-        @keyframes bicep-curl { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-15deg); } }
-        @keyframes shoulder-press { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-2px); } }
-        @keyframes squat { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(2px) scale(0.95); } }
-        @keyframes running { 0%, 100% { transform: translateX(0px); } 25% { transform: translateX(2px) translateY(-1px); } 75% { transform: translateX(-2px) translateY(1px); } }
-        @keyframes crunch { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.9); } }
-
-        .grip-options, .single-leg-options, .chin-up-options {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-            flex-wrap: wrap;
-        }
-
-        .grip-option, .leg-option, .chin-up-option {
-            flex: 1;
-            min-width: 80px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: #f9f9f9;
-            cursor: pointer;
-            text-align: center;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-
-        .grip-option.selected, .leg-option.selected, .chin-up-option.selected {
-            background: #007AFF;
-            color: white;
-            border-color: #007AFF;
-            transform: scale(1.05);
-        }
-
-        .bodyweight-section {
-            margin: 15px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-        }
-
-        .bodyweight-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        .bodyweight-checkbox:hover {
-            background: #e9ecef;
-        }
-
-        .bodyweight-checkbox input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .bodyweight-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #333;
-        }
-
-        .bodyweight-info {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-            margin-left: 30px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .edit-button, .delete-button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .edit-button { background: #FF9500; color: white; }
-        .delete-button { background: #FF3B30; color: white; }
-        .edit-button:hover, .delete-button:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: modalSlideIn 0.3s ease-out;
-        }
-
-        @keyframes modalSlideIn {
-            from { opacity: 0; transform: scale(0.9) translateY(-20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .workout-set {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            transition: background 0.3s;
-        }
-
-        .workout-set:hover {
-            background: #f9f9f9;
-        }
-
-        .close-modal {
-            background: #007AFF;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .close-modal:hover {
-            background: #0056CC;
-            transform: translateY(-1px);
-        }
-
-        .calendar {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .calendar-nav {
-            background: #007AFF;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .calendar-nav:hover {
-            background: #0056CC;
-            transform: scale(1.05);
-        }
-
-        .calendar-month {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-        }
-
-        .calendar-day {
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            padding: 5px;
-            font-weight: 500;
-        }
-
-        .calendar-date {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .calendar-date.has-workout {
-            background: linear-gradient(135deg, #34C759, #30D158);
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(52,199,89,0.3);
-        }
-
-        .calendar-date.today { 
-            border: 2px solid #007AFF;
-            background: #007AFF;
-            color: white;
-        }
-        .calendar-date.other-month { color: #ccc; }
-        .calendar-date.selected {
-            border: 3px solid #007AFF !important;
-            background: #007AFF !important;
-            color: white !important;
-            font-weight: bold;
-            transform: scale(1.1);
-        }
-
-        .workout-history {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            margin-top: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .history-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            transition: all 0.3s;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .history-item:hover {
-            background: #f8f9fa;
-            transform: translateX(5px);
-        }
-
-        .history-exercise {
-            font-weight: 500;
-            margin-bottom: 5px;
-            cursor: pointer;
-            transition: color 0.3s;
-            font-size: 16px;
-        }
-
-        .history-exercise:hover {
-            color: #007AFF;
-        }
-
-        .history-details {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #007AFF;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            font-weight: 500;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .groups-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .group-button {
-            background: #e0e0e0;
-            padding: 20px;
-            border-radius: 15px;
-            border: none;
-            flex: 1 1 calc(50% - 10px);
-            min-width: 140px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .group-button.selected {
-            background: linear-gradient(135deg, #007AFF, #0056CC);
-            color: white;
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,122,255,0.3);
-        }
-
-        .group-button:hover:not(.selected) {
-            background: #d0d0d0;
-            transform: translateY(-2px);
-        }
-
-        .exercises-container {
-            margin-bottom: 20px;
-        }
-
-        .exercise-button {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            text-align: left;
-        }
-
-        .exercise-button.selected {
-            background: linear-gradient(135deg, #007AFF, #0056CC);
-            color: white;
-            border-color: #007AFF;
-            transform: scale(1.02);
-            box-shadow: 0 3px 10px rgba(0,122,255,0.2);
-        }
-
-        .exercise-button:hover:not(.selected) {
-            background: #e8e8e8;
-            transform: translateY(-2px);
-        }
-
-        .set-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border: 1px solid #eee;
-            gap: 10px;
-            flex-wrap: wrap;
-            transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .set-container:hover {
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .set-number {
-            font-size: 16px;
-            font-weight: 500;
-            min-width: 80px;
-        }
-
-        .set-inputs {
-            display: flex;
-            gap: 10px;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .weight-input, .reps-input {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            width: 100%;
-            transition: all 0.3s;
-        }
-
-        .weight-input:focus, .reps-input:focus {
-            border-color: #007AFF;
-            box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
-            outline: none;
-        }
-
-        .input-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 4px;
-            font-weight: 500;
-        }
-
-        .input-group { flex: 1; }
-
-        .checkbox {
-            width: 28px;
-            height: 28px;
-            border: 2px solid #007AFF;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: all 0.3s;
-        }
-
-        .checkbox.completed { 
-            background: #34C759; 
-            border-color: #34C759;
-        }
-        .checkbox-text { color: white; font-weight: bold; font-size: 14px; }
-
-        .delete-set-button {
-            background: #FF3B30;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-left: 10px;
-            flex-shrink: 0;
-            transition: all 0.3s;
-        }
-
-        .delete-set-button:hover {
-            background: #D70015;
-            transform: scale(1.1);
-        }
-
-        .add-button, .save-button {
-            padding: 15px;
-            border-radius: 12px;
-            border: none;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 10px;
-            transition: all 0.3s;
-        }
-
-        .add-button { 
-            background: linear-gradient(135deg, #34C759, #30D158);
-            color: white;
-        }
-        .save-button { 
-            background: linear-gradient(135deg, #007AFF, #0056CC);
-            color: white;
-        }
-        .add-button:hover, .save-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .completed-set {
-            background: #f8fff8;
-            border-color: #34C759;
-            box-shadow: 0 2px 8px rgba(52,199,89,0.2);
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #34C759;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1001;
-            transform: translateX(150%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.error {
-            background: #FF3B30;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #007AFF;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .sets-section-anchor {
-            scroll-margin-top: 80px;
-        }
-
-        @media (max-width: 480px) {
             .container {
-                max-width: 100%;
+                max-width: 600px;
+                margin: 0 auto;
+                background: var(--bg-secondary);
+                min-height: 100vh;
+                position: relative;
             }
-            
+
+            .nav {
+                display: flex;
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                box-shadow: 0 2px 25px rgba(0, 217, 255, 0.4);
+            }
+
             .nav-button {
-                padding: 12px 8px;
-                font-size: 12px;
-            }
-            
-            .content {
+                flex: 1;
                 padding: 15px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                position: relative;
+                overflow: hidden;
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             }
-            
-            .set-inputs {
-                flex-direction: column;
-                min-width: 150px;
+
+            .nav-button.active {
+                background: rgba(255, 255, 255, 0.15);
             }
-            
+
+            .nav-button:after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 0;
+                height: 3px;
+                background: white;
+                transition: all 0.3s;
+                transform: translateX(-50%);
+                box-shadow: 0 0 10px white;
+            }
+
+            .nav-button.active:after {
+                width: 80%;
+            }
+
+            .content {
+                padding: 20px;
+                display: none;
+                animation: fadeIn 0.3s ease-in;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .content.active {
+                display: block;
+            }
+
+            .title {
+                font-size: 24px;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 20px;
+                color: var(--text-primary);
+                text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            }
+
+            .section-title {
+                font-size: 18px;
+                font-weight: 600;
+                margin-top: 20px;
+                margin-bottom: 10px;
+                color: var(--text-primary);
+            }
+
+            .exercise-with-animation {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .exercise-animation {
+                width: 40px;
+                height: 40px;
+                margin-left: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .animation-chest {
+                animation: chest-press 2s infinite ease-in-out;
+            }
+
+            .animation-back {
+                animation: pull-up 2s infinite ease-in-out;
+            }
+
+            .animation-arms {
+                animation: bicep-curl 2s infinite ease-in-out;
+            }
+
+            .animation-shoulders {
+                animation: shoulder-press 2s infinite ease-in-out;
+            }
+
+            .animation-legs {
+                animation: squat 2s infinite ease-in-out;
+            }
+
+            .animation-cardio {
+                animation: running 1s infinite linear;
+            }
+
+            .animation-abs {
+                animation: crunch 2s infinite ease-in-out;
+            }
+
+            @keyframes chest-press {
+
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+
+                50% {
+                    transform: scale(1.1) translateX(-2px);
+                }
+            }
+
+            @keyframes pull-up {
+
+                0%,
+                100% {
+                    transform: translateY(0px);
+                }
+
+                50% {
+                    transform: translateY(-3px);
+                }
+            }
+
+            @keyframes bicep-curl {
+
+                0%,
+                100% {
+                    transform: rotate(0deg);
+                }
+
+                50% {
+                    transform: rotate(-15deg);
+                }
+            }
+
+            @keyframes shoulder-press {
+
+                0%,
+                100% {
+                    transform: translateY(0px);
+                }
+
+                50% {
+                    transform: translateY(-2px);
+                }
+            }
+
+            @keyframes squat {
+
+                0%,
+                100% {
+                    transform: translateY(0px) scale(1);
+                }
+
+                50% {
+                    transform: translateY(2px) scale(0.95);
+                }
+            }
+
+            @keyframes running {
+
+                0%,
+                100% {
+                    transform: translateX(0px);
+                }
+
+                25% {
+                    transform: translateX(2px) translateY(-1px);
+                }
+
+                75% {
+                    transform: translateX(-2px) translateY(1px);
+                }
+            }
+
+            @keyframes crunch {
+
+                0%,
+                100% {
+                    transform: scaleY(1);
+                }
+
+                50% {
+                    transform: scaleY(0.9);
+                }
+            }
+
+            .grip-options,
+            .single-leg-options,
+            .chin-up-options {
+                display: flex;
+                gap: 10px;
+                margin: 10px 0;
+                flex-wrap: wrap;
+            }
+
+            .grip-option,
+            .leg-option,
+            .chin-up-option {
+                flex: 1;
+                min-width: 80px;
+                padding: 8px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                background: var(--bg-card);
+                cursor: pointer;
+                text-align: center;
+                font-size: 12px;
+                transition: all 0.3s;
+                color: var(--text-secondary);
+            }
+
+            .grip-option.selected,
+            .leg-option.selected,
+            .chin-up-option.selected {
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                color: white;
+                border-color: var(--accent-primary);
+                transform: scale(1.05);
+                box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+            }
+
+            .bodyweight-section {
+                margin: 15px 0;
+                padding: 15px;
+                background: var(--bg-card);
+                border-radius: 12px;
+                border: 1px solid var(--border);
+            }
+
+            .bodyweight-checkbox {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                padding: 10px;
+                border-radius: 8px;
+                transition: all 0.3s;
+            }
+
+            .bodyweight-checkbox:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .bodyweight-checkbox input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+            }
+
+            .bodyweight-label {
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-primary);
+            }
+
+            .bodyweight-info {
+                font-size: 12px;
+                color: var(--text-secondary);
+                margin-top: 5px;
+                margin-left: 30px;
+            }
+
+            .action-buttons {
+                display: flex;
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .edit-button,
+            .delete-button {
+                flex: 1;
+                padding: 10px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s;
+            }
+
+            .edit-button {
+                background: linear-gradient(135deg, #ffaa00, #ffcc00);
+                color: #0a0a0a;
+                font-weight: 600;
+            }
+
+            .delete-button {
+                background: linear-gradient(135deg, #ff0066, #ff3385);
+                color: white;
+            }
+
+            .edit-button:hover,
+            .delete-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 1000;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+            }
+
+            .modal-content {
+                background: var(--bg-card);
+                padding: 20px;
+                border-radius: 16px;
+                width: 90%;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 0 50px rgba(0, 217, 255, 0.3);
+                animation: modalSlideIn 0.3s ease-out;
+                border: 1px solid var(--accent-primary);
+            }
+
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.9) translateY(-20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+            }
+
+            .modal-title {
+                font-size: 20px;
+                font-weight: bold;
+                margin-bottom: 15px;
+                text-align: center;
+                color: var(--text-primary);
+                text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+            }
+
+            .workout-set {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px;
+                border-bottom: 1px solid var(--border);
+                transition: background 0.3s;
+            }
+
+            .workout-set:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .close-modal {
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 10px;
+                cursor: pointer;
+                width: 100%;
+                margin-top: 15px;
+                font-size: 16px;
+                transition: all 0.3s;
+            }
+
+            .close-modal:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+            }
+
+            .calendar {
+                background: var(--bg-card);
+                border-radius: 16px;
+                padding: 15px;
+                margin-bottom: 20px;
+                border: 1px solid var(--border);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .calendar-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .calendar-nav {
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .calendar-nav:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+            }
+
+            .calendar-month {
+                font-size: 18px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .calendar-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+
+            .calendar-day {
+                text-align: center;
+                font-size: 12px;
+                color: var(--text-secondary);
+                padding: 5px;
+                font-weight: 500;
+            }
+
+            .calendar-date {
+                aspect-ratio: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s;
+                position: relative;
+                background: var(--bg-secondary);
+                color: var(--text-secondary);
+            }
+
+            .calendar-date.has-workout {
+                background: linear-gradient(135deg, var(--success), #00cc66);
+                color: #0a0a0a;
+                font-weight: bold;
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+            }
+
+            .calendar-date.today {
+                border: 2px solid var(--accent-primary);
+                background: var(--accent-primary);
+                color: #0a0a0a;
+                font-weight: bold;
+                box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+            }
+
+            .calendar-date.other-month {
+                color: #444;
+            }
+
+            .calendar-date.selected {
+                border: 3px solid var(--accent-primary) !important;
+                background: var(--accent-primary) !important;
+                color: #0a0a0a !important;
+                font-weight: bold;
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+            }
+
+            .workout-history {
+                background: var(--bg-card);
+                border-radius: 16px;
+                padding: 15px;
+                margin-top: 20px;
+                border: 1px solid var(--border);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .history-item {
+                padding: 15px;
+                border-bottom: 1px solid var(--border);
+                transition: all 0.3s;
+                border-radius: 12px;
+                margin-bottom: 8px;
+                background: var(--bg-secondary);
+            }
+
+            .history-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+                transform: translateX(5px);
+                box-shadow: 0 0 15px rgba(0, 217, 255, 0.1);
+            }
+
+            .history-exercise {
+                font-weight: 500;
+                margin-bottom: 5px;
+                cursor: pointer;
+                transition: color 0.3s;
+                font-size: 16px;
+                color: var(--text-primary);
+            }
+
+            .history-exercise:hover {
+                color: var(--accent-primary);
+                text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+            }
+
+            .history-details {
+                font-size: 12px;
+                color: var(--text-secondary);
+            }
+
             .stats-grid {
-                grid-template-columns: 1fr;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card {
+                background: var(--bg-card);
+                padding: 20px;
+                border-radius: 16px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                transition: transform 0.3s;
+                border: 1px solid var(--border);
+            }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+                border-color: var(--accent-primary);
+            }
+
+            .stat-value {
+                font-size: 28px;
+                font-weight: bold;
+                color: var(--accent-primary);
+                margin-bottom: 5px;
+                text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+            }
+
+            .stat-label {
+                font-size: 12px;
+                color: var(--text-secondary);
+                font-weight: 500;
+            }
+
+            .chart-container {
+                background: var(--bg-card);
+                padding: 20px;
+                border-radius: 16px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                border: 1px solid var(--border);
+            }
+
+            .groups-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .group-button {
+                background: var(--bg-card);
+                padding: 20px;
+                border-radius: 16px;
+                border: 1px solid var(--border);
+                flex: 1 1 calc(50% - 10px);
+                min-width: 140px;
+                cursor: pointer;
+                transition: all 0.3s;
+                font-size: 16px;
+                font-weight: 500;
+                color: var(--text-primary);
+            }
+
+            .group-button.selected {
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                color: #0a0a0a;
+                transform: scale(1.05);
+                box-shadow: 0 0 25px rgba(0, 217, 255, 0.4);
+                border-color: var(--accent-primary);
+            }
+
+            .group-button:hover:not(.selected) {
+                background: rgba(255, 255, 255, 0.05);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .exercises-container {
+                margin-bottom: 20px;
+            }
+
+            .exercise-button {
+                background: var(--bg-card);
+                padding: 15px;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+                margin-bottom: 10px;
+                cursor: pointer;
+                transition: all 0.3s;
+                width: 100%;
+                text-align: left;
+                color: var(--text-primary);
+            }
+
+            .exercise-button.selected {
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                color: #0a0a0a;
+                border-color: var(--accent-primary);
+                transform: scale(1.02);
+                box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            }
+
+            .exercise-button:hover:not(.selected) {
+                background: rgba(255, 255, 255, 0.05);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .set-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: var(--bg-card);
+                padding: 15px;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                border: 1px solid var(--border);
+                gap: 10px;
+                flex-wrap: wrap;
+                transition: all 0.3s;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .set-container:hover {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .set-number {
+                font-size: 16px;
+                font-weight: 500;
+                min-width: 80px;
+                color: var(--text-primary);
+            }
+
+            .set-inputs {
+                display: flex;
+                gap: 10px;
+                flex: 1;
+                min-width: 200px;
+            }
+
+            .weight-input,
+            .reps-input {
+                padding: 10px;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                font-size: 14px;
+                width: 100%;
+                transition: all 0.3s;
+                background: var(--bg-secondary);
+                color: var(--text-primary);
+            }
+
+            .weight-input:focus,
+            .reps-input:focus {
+                border-color: var(--accent-primary);
+                box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.2);
+                outline: none;
+            }
+
+            .input-label {
+                font-size: 12px;
+                color: var(--text-secondary);
+                margin-bottom: 4px;
+                font-weight: 500;
+            }
+
+            .input-group {
+                flex: 1;
+            }
+
+            .checkbox {
+                width: 28px;
+                height: 28px;
+                border: 2px solid var(--accent-primary);
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                flex-shrink: 0;
+                transition: all 0.3s;
+                background: var(--bg-secondary);
+            }
+
+            .checkbox.completed {
+                background: var(--success);
+                border-color: var(--success);
+                box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+            }
+
+            .checkbox-text {
+                color: #0a0a0a;
+                font-weight: bold;
+                font-size: 14px;
+            }
+
+            .delete-set-button {
+                background: linear-gradient(135deg, #ff0066, #ff3385);
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-left: 10px;
+                flex-shrink: 0;
+                transition: all 0.3s;
+            }
+
+            .delete-set-button:hover {
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(255, 0, 102, 0.4);
+            }
+
+            .add-button,
+            .save-button {
+                padding: 15px;
+                border-radius: 12px;
+                border: none;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                width: 100%;
+                margin-bottom: 10px;
+                transition: all 0.3s;
+            }
+
+            .add-button {
+                background: linear-gradient(135deg, var(--success), #00cc66);
+                color: #0a0a0a;
+            }
+
+            .save-button {
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                color: white;
+            }
+
+            .add-button:hover,
+            .save-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+            }
+
+            .completed-set {
+                background: rgba(0, 255, 136, 0.1);
+                border-color: var(--success);
+                box-shadow: 0 2px 15px rgba(0, 255, 136, 0.2);
+            }
+
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--success), #00cc66);
+                color: #0a0a0a;
+                padding: 15px 20px;
+                border-radius: 12px;
+                box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+                z-index: 1001;
+                transform: translateX(150%);
+                transition: transform 0.3s ease-out;
+                border: 1px solid var(--success);
+            }
+
+            .notification.show {
+                transform: translateX(0);
+            }
+
+            .notification.error {
+                background: linear-gradient(135deg, #ff0066, #ff3385);
+                color: white;
+            }
+
+            .loading {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 3px solid rgba(255, 255, 255, 0.1);
+                border-top: 3px solid var(--accent-primary);
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
             }
 
             .sets-section-anchor {
-                scroll-margin-top: 70px;
+                scroll-margin-top: 80px;
             }
-        }
-    </style>
-</head>
+
+            @media (max-width: 480px) {
+                .container {
+                    max-width: 100%;
+                }
+
+                .nav-button {
+                    padding: 12px 8px;
+                    font-size: 12px;
+                }
+
+                .content {
+                    padding: 15px;
+                }
+
+                .set-inputs {
+                    flex-direction: column;
+                    min-width: 150px;
+                }
+
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .sets-section-anchor {
+                    scroll-margin-top: 70px;
+                }
+            }
+        </style>
+    </head>
+
 <body>
     <div class="container">
         <div class="notification" id="notification"></div>
@@ -743,15 +954,15 @@
             <div class="title">Новая тренировка</div>
             <div class="section-title">1. Выберите группу мышц:</div>
             <div class="groups-container" id="groupsContainer"></div>
-            
+
             <div id="exercisesSection" style="display: none;">
                 <div class="section-title" id="exercisesTitle">2. Выберите упражнение:</div>
                 <div class="exercises-container" id="exercisesContainer"></div>
             </div>
-            
+
             <div id="setsSection" style="display: none;" class="sets-section-anchor">
                 <div class="section-title" id="setsTitle">3. Подходы для: <span id="selectedExerciseName"></span></div>
-                
+
                 <div id="bodyweightSection" style="display: none;">
                     <div class="bodyweight-section">
                         <div class="bodyweight-checkbox" onclick="app.toggleBodyweight()">
@@ -823,7 +1034,7 @@
                     "Жим гантелей под углом",
                     "Жим гантелей на прямой скамье",
                     "Жим от груди в тренажере сидя",
-                    "Жим штанги на прямой скамье", 
+                    "Жим штанги на прямой скамье",
                     "Жим штанги в смите",
                     "Жим штанги под углом",
                     "Разводка гантелей",
@@ -842,7 +1053,7 @@
                 ],
                 "Руки": [
                     "Концентрированные сгибания на бицепс сидя",
-                    "Подъем гантелей на бицепс", 
+                    "Подъем гантелей на бицепс",
                     "Подъем штанги на бицепс",
                     "Разгибание рук в блочном тренажере",
                     "Разгибание рук с гантелью в наклоне",
@@ -857,10 +1068,10 @@
                     "Французский жим с гантелями лежа"
                 ],
                 "Плечи": [
-                    "Жим гантелей сидя", 
+                    "Жим гантелей сидя",
                     "Жим над головой в тренажере",
                     "Жим штанги с груди",
-                    "Махи в сторону в кроссовере", 
+                    "Махи в сторону в кроссовере",
                     "Махи в сторону в тренажере",
                     "Махи гантелей в стороны",
                     "Подъем гантелей перед собой",
@@ -882,8 +1093,8 @@
                     "Сгибание ног лежа"
                 ],
                 "Кардио": [
-                    "Беговая дорожка", 
-                    "Велотренажер", 
+                    "Беговая дорожка",
+                    "Велотренажер",
                     "Шаги на платформе (Степ-ап)",
                     "Эллипс"
                 ],
@@ -896,7 +1107,7 @@
             },
 
             exercisesWithGrip: [
-                "Приседания со штангой", 
+                "Приседания со штангой",
                 "Жим ногами",
                 "Тяга блока к груди",
                 "Тяга штанги к подбородку"
@@ -913,7 +1124,7 @@
 
             groupAnimations: {
                 "Грудь": "animation-chest",
-                "Спина": "animation-back", 
+                "Спина": "animation-back",
                 "Руки": "animation-arms",
                 "Плечи": "animation-shoulders",
                 "Ноги": "animation-legs",
@@ -958,7 +1169,7 @@
                 notification.textContent = message;
                 notification.className = `notification ${type === 'error' ? 'error' : ''}`;
                 notification.classList.add('show');
-                
+
                 if (type !== 'info') {
                     setTimeout(() => this.hideNotification(), 3000);
                 }
@@ -972,11 +1183,11 @@
             async showTab(tabName) {
                 document.querySelectorAll('.content').forEach(tab => tab.classList.remove('active'));
                 document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-                
+
                 document.getElementById(tabName).classList.add('active');
                 event.target.classList.add('active');
 
-                switch(tabName) {
+                switch (tabName) {
                     case 'analytics':
                         await this.updateAnalytics();
                         break;
@@ -1034,7 +1245,7 @@
                 document.getElementById('singleLegSection').style.display = 'none';
                 document.getElementById('chinUpSection').style.display = 'none';
                 document.getElementById('bodyweightSection').style.display = 'none';
-                
+
                 document.querySelector('.save-button').textContent = 'Сохранить тренировку';
 
                 setTimeout(() => {
@@ -1070,7 +1281,7 @@
             getExerciseEmoji(group) {
                 const emojis = {
                     "Грудь": "🏋️",
-                    "Спина": "💪", 
+                    "Спина": "💪",
                     "Руки": "💪",
                     "Плечи": "⬆️",
                     "Ноги": "🦵",
@@ -1200,7 +1411,7 @@
             getGripText(grip) {
                 const gripTexts = {
                     'narrow': 'Узкая',
-                    'medium': 'Средняя', 
+                    'medium': 'Средняя',
                     'wide': 'Широкая'
                 };
                 return gripTexts[grip] || '';
@@ -1233,8 +1444,8 @@
                 this.state.sets.forEach((set, index) => {
                     const setElement = document.createElement('div');
                     setElement.className = `set-container ${set.completed ? 'completed-set' : ''}`;
-                    
-                    const weightInput = this.state.bodyweight ? 
+
+                    const weightInput = this.state.bodyweight ?
                         `<div class="input-group">
                             <div class="input-label">Вес (кг)</div>
                             <input 
@@ -1303,7 +1514,7 @@
             addSet() {
                 this.state.sets.push({ weight: '', reps: '', completed: false });
                 this.renderSets();
-                
+
                 setTimeout(() => {
                     const setsContainer = document.getElementById('setsContainer');
                     if (setsContainer && setsContainer.lastElementChild) {
@@ -1373,9 +1584,9 @@
                     this.cachedHistory = await this.getWorkoutHistory();
                     this.renderCalendar();
                     await this.updateAnalytics();
-                    
+
                     setTimeout(() => this.showTab('home'), 1000);
-                    
+
                 } catch (error) {
                     this.showNotification('Ошибка сохранения', 'error');
                     console.error('Save error:', error);
@@ -1396,14 +1607,14 @@
                 document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
                     btn.classList.remove('selected');
                 });
-                
+
                 document.getElementById('exercisesSection').style.display = 'none';
                 document.getElementById('setsSection').style.display = 'none';
                 document.getElementById('gripSection').style.display = 'none';
                 document.getElementById('singleLegSection').style.display = 'none';
                 document.getElementById('chinUpSection').style.display = 'none';
                 document.getElementById('bodyweightSection').style.display = 'none';
-                
+
                 document.querySelector('.save-button').textContent = 'Сохранить тренировку';
 
                 if (document.getElementById('workout').classList.contains('active')) {
@@ -1496,9 +1707,9 @@
                         if (workout.singleLeg) details.push(this.getSingleLegText(workout.singleLeg));
                         if (workout.chinUpGrip) details.push(this.getChinUpGripText(workout.chinUpGrip));
                         if (workout.bodyweight) details.push('Свой вес');
-                        
+
                         const detailsText = details.length > 0 ? ` (${details.join(', ')})` : '';
-                        
+
                         historyHTML += `
                             <div class="history-item">
                                 <div class="history-exercise" onclick="app.viewWorkoutDetails('${dateString}', ${index})">
@@ -1554,9 +1765,9 @@
                             if (workout.singleLeg) details.push(this.getSingleLegText(workout.singleLeg));
                             if (workout.chinUpGrip) details.push(this.getChinUpGripText(workout.chinUpGrip));
                             if (workout.bodyweight) details.push('Свой вес');
-                            
+
                             const detailsText = details.length > 0 ? ` (${details.join(', ')})` : '';
-                            
+
                             historyHTML += `
                                 <div class="history-item">
                                     <div class="history-exercise" onclick="app.viewWorkoutDetails('${date}', ${index})">
@@ -1590,7 +1801,7 @@
                     this.showNotification('Тренировка не найдена', 'error');
                     return;
                 }
-                
+
                 const workout = workoutHistory[dateString][workoutIndex];
 
                 let details = [];
@@ -1598,7 +1809,7 @@
                 if (workout.singleLeg) details.push(this.getSingleLegText(workout.singleLeg));
                 if (workout.chinUpGrip) details.push(this.getChinUpGripText(workout.chinUpGrip));
                 if (workout.bodyweight) details.push('Свой вес');
-                
+
                 const detailsText = details.length > 0 ? ` (${details.join(', ')})` : '';
 
                 document.getElementById('modalExerciseName').textContent = `${workout.exercise}${detailsText}`;
@@ -1631,12 +1842,12 @@
                     this.showNotification('Тренировка не найдена', 'error');
                     return;
                 }
-                
+
                 const workout = workoutHistory[dateString][workoutIndex];
 
                 // Сначала переходим на вкладку тренировки
                 this.showTab('workout');
-                
+
                 // Устанавливаем состояние для редактирования
                 this.state.selectedGroup = workout.muscleGroup;
                 this.state.selectedExercise = workout.exercise;
@@ -1655,7 +1866,7 @@
                 // Показываем все секции сразу с правильными данными
                 document.getElementById('exercisesSection').style.display = 'block';
                 document.getElementById('setsSection').style.display = 'block';
-                
+
                 // Выбираем группу мышц
                 document.querySelectorAll('.group-button').forEach(btn => {
                     btn.classList.remove('selected');
@@ -1666,7 +1877,7 @@
 
                 // Рендерим упражнения и выбираем нужное
                 this.renderExercises();
-                
+
                 setTimeout(() => {
                     document.querySelectorAll('.exercise-button').forEach(btn => {
                         btn.classList.remove('selected');
@@ -1680,12 +1891,12 @@
                         document.getElementById('gripSection').style.display = 'block';
                         this.renderGripOptions();
                     }
-                    
+
                     if (this.singleLegExercises.includes(this.state.selectedExercise)) {
                         document.getElementById('singleLegSection').style.display = 'block';
                         this.renderSingleLegOptions();
                     }
-                    
+
                     if (this.bodyweightExercises.includes(this.state.selectedExercise)) {
                         document.getElementById('bodyweightSection').style.display = 'block';
                         this.renderBodyweightOption();
@@ -1693,7 +1904,7 @@
 
                     // Рендерим подходы
                     this.renderSets();
-                    
+
                     // Меняем текст кнопки сохранения
                     document.querySelector('.save-button').innerHTML = '<span id="saveButtonText">Обновить тренировку</span>';
 
@@ -1711,7 +1922,7 @@
 
                 try {
                     const workoutHistory = await this.getWorkoutHistory();
-                    
+
                     if (workoutHistory[dateString] && workoutHistory[dateString][workoutIndex]) {
                         workoutHistory[dateString].splice(workoutIndex, 1);
 
@@ -1724,12 +1935,12 @@
                         } else {
                             localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
                         }
-                        
+
                         this.cachedHistory = workoutHistory;
                         this.updateWorkoutHistory();
                         this.renderCalendar();
                         await this.updateAnalytics();
-                        
+
                         this.showNotification('Тренировка удалена!');
                     } else {
                         this.showNotification('Тренировка не найдена', 'error');
@@ -1765,7 +1976,7 @@
                         });
                     }
                 });
-                const avgWeight = allWeights.length > 0 ? 
+                const avgWeight = allWeights.length > 0 ?
                     (allWeights.reduce((a, b) => a + b, 0) / allWeights.length).toFixed(1) : '0';
                 document.getElementById('avgWeight').textContent = avgWeight;
 
@@ -1849,7 +2060,7 @@
                             }
                         },
                         scales: {
-                            y: { 
+                            y: {
                                 beginAtZero: true,
                                 title: {
                                     display: true,
@@ -1866,7 +2077,7 @@
                     if (window.storage) {
                         const result = await window.storage.get('workoutHistory', false);
                         if (!result || !result.value) return {};
-                        
+
                         const parsedHistory = JSON.parse(result.value);
                         const convertedHistory = {};
 
@@ -1919,13 +2130,13 @@
                     }
 
                     history[dateString].push(workout);
-                    
+
                     if (window.storage) {
                         await window.storage.set('workoutHistory', JSON.stringify(history), false);
                     } else {
                         localStorage.setItem('workoutHistory', JSON.stringify(history));
                     }
-                    
+
                     this.cachedHistory = history;
                 } catch (error) {
                     console.error('Ошибка сохранения:', error);
@@ -1936,16 +2147,16 @@
             async updateWorkoutInHistory(dateString, workoutIndex, updatedWorkout) {
                 try {
                     const history = await this.getWorkoutHistory();
-                    
+
                     if (history[dateString] && history[dateString][workoutIndex]) {
                         history[dateString][workoutIndex] = updatedWorkout;
-                        
+
                         if (window.storage) {
                             await window.storage.set('workoutHistory', JSON.stringify(history), false);
                         } else {
                             localStorage.setItem('workoutHistory', JSON.stringify(history));
                         }
-                        
+
                         this.cachedHistory = history;
                     }
                 } catch (error) {
@@ -1971,4 +2182,6 @@
         }
     </script>
 </body>
+
+
 </html>
