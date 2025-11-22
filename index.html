@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sport Tracker Pro</title>
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#007AFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes"> <!-- исправленная строка -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Sport Tracker Pro">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="icons/icon-192.png"> <!-- обновленный путь -->
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -104,8 +106,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .content.active {
@@ -271,7 +280,8 @@
             margin-top: 15px;
         }
 
-        .edit-button, .delete-button {
+        .edit-button,
+        .delete-button {
             flex: 1;
             padding: 10px;
             border: none;
@@ -362,7 +372,8 @@
             min-width: 200px;
         }
 
-        .weight-input, .reps-input {
+        .weight-input,
+        .reps-input {
             padding: 10px;
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -372,7 +383,9 @@
             color: var(--text-primary);
         }
 
-        .add-button, .save-button, .auth-button {
+        .add-button,
+        .save-button,
+        .auth-button {
             padding: 15px;
             border-radius: 12px;
             border: none;
@@ -568,7 +581,8 @@
             flex-wrap: wrap;
         }
 
-        .export-button, .import-button {
+        .export-button,
+        .import-button {
             padding: 12px 20px;
             border: none;
             border-radius: 10px;
@@ -589,7 +603,8 @@
             color: #0a0a0a;
         }
 
-        .export-button:hover, .import-button:hover {
+        .export-button:hover,
+        .import-button:hover {
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
         }
@@ -673,16 +688,39 @@
         }
 
         @media (max-width: 480px) {
-            .container { max-width: 100%; }
-            .nav-button { padding: 12px 8px; font-size: 12px; }
-            .content { padding: 15px; }
-            .set-inputs { flex-direction: column; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .backup-buttons { flex-direction: column; }
-            .export-button, .import-button { min-width: 100%; }
+            .container {
+                max-width: 100%;
+            }
+
+            .nav-button {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .set-inputs {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .backup-buttons {
+                flex-direction: column;
+            }
+
+            .export-button,
+            .import-button {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="notification" id="notification"></div>
@@ -703,19 +741,20 @@
 
         <div id="home" class="content active">
             <div class="title">Мои тренировки</div>
-            
+
             <!-- Секция авторизации -->
             <div class="auth-section" id="authSection">
                 <div class="auth-title">🔐 Вход / Регистрация</div>
                 <div class="auth-form">
-                    <input type="email" id="authEmail" class="auth-input" placeholder="Email" required>
-                    <input type="password" id="authPassword" class="auth-input" placeholder="Пароль" required>
-                    <button class="auth-button" onclick="app.signIn()">Войти</button>
-                    <button class="auth-button" onclick="app.signUp()">Зарегистрироваться</button>
+                    <form onsubmit="return false;">
+                        <input type="email" id="authEmail" class="auth-input" placeholder="Email" required>
+                        <input type="password" id="authPassword" class="auth-input" placeholder="Пароль" required>
+                        <button class="auth-button" onclick="app.signIn()">Войти</button>
+                        <button class="auth-button" onclick="app.signUp()">Зарегистрироваться</button>
+                    </form>
                 </div>
                 <div class="sync-status" id="authStatus"></div>
             </div>
-
             <!-- Информация о пользователе -->
             <div class="user-info" id="userInfo" style="display: none;">
                 <div class="user-email" id="userEmail"></div>
@@ -731,9 +770,9 @@
                 </div>
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
-            
+
             <div class="workout-history" id="dateWorkouts" style="display: none;"></div>
-            
+
             <div class="motivation-section" id="motivationBlock">
                 <div class="motivation-title">💪 Двигайся к цели!</div>
                 <div class="motivation-text">
@@ -750,24 +789,25 @@
                             <stop offset="100%" stop-color="#FFCC00" />
                         </linearGradient>
                     </defs>
-                    
-                    <rect width="200" height="120" fill="url(#bgGradient)" rx="10"/>
-                    
-                    <rect x="70" y="50" width="60" height="8" fill="url(#dumbbellGradient)" rx="4"/>
-                    <rect x="60" y="45" width="10" height="18" fill="url(#dumbbellGradient)" rx="2"/>
-                    <rect x="130" y="45" width="10" height="18" fill="url(#dumbbellGradient)" rx="2"/>
-                    
+
+                    <rect width="200" height="120" fill="url(#bgGradient)" rx="10" />
+
+                    <rect x="70" y="50" width="60" height="8" fill="url(#dumbbellGradient)" rx="4" />
+                    <rect x="60" y="45" width="10" height="18" fill="url(#dumbbellGradient)" rx="2" />
+                    <rect x="130" y="45" width="10" height="18" fill="url(#dumbbellGradient)" rx="2" />
+
                     <circle cx="50" cy="30" r="3" fill="#00FF88" opacity="0.8">
-                        <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="150" cy="25" r="2" fill="#00FF88" opacity="0.6">
-                        <animate attributeName="r" values="2;4;2" dur="1.5s" repeatCount="indefinite"/>
+                        <animate attributeName="r" values="2;4;2" dur="1.5s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="180" cy="40" r="4" fill="#00FF88" opacity="0.7">
-                        <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
+                        <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite" />
                     </circle>
-                    
-                    <text x="100" y="90" text-anchor="middle" fill="white" font-family="Arial" font-size="12" font-weight="bold">
+
+                    <text x="100" y="90" text-anchor="middle" fill="white" font-family="Arial" font-size="12"
+                        font-weight="bold">
                         ТВОЙ ПУТЬ К СИЛЕ
                     </text>
                 </svg>
@@ -901,7 +941,7 @@
             async init() {
                 try {
                     this.showNotification('Загрузка...', 'info');
-                    
+
                     // Слушаем изменения состояния авторизации
                     auth.onAuthStateChanged((user) => {
                         this.handleAuthStateChange(user);
@@ -917,7 +957,7 @@
 
             handleAuthStateChange(user) {
                 this.state.currentUser = user;
-                
+
                 if (user) {
                     // Пользователь вошел
                     this.showUserInfo(user);
@@ -966,15 +1006,15 @@
                 try {
                     authStatus.textContent = 'Регистрация...';
                     authStatus.className = 'sync-status syncing';
-                    
+
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    
+
                     // 🔥 Сохраняем пользователя в Firestore
                     await this.saveUserToFirestore(userCredential.user);
-                    
+
                     this.showNotification('Регистрация успешна!');
                     authStatus.textContent = '';
-                    
+
                 } catch (error) {
                     console.error('Sign up error:', error);
                     authStatus.textContent = this.getAuthErrorMessage(error.code);
@@ -1011,15 +1051,15 @@
                 try {
                     authStatus.textContent = 'Вход...';
                     authStatus.className = 'sync-status syncing';
-                    
+
                     const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                    
+
                     // 🔥 Обновляем lastLogin при входе
                     await this.updateUserLastLogin(userCredential.user);
-                    
+
                     this.showNotification('Вход выполнен!');
                     authStatus.textContent = '';
-                    
+
                 } catch (error) {
                     console.error('Sign in error:', error);
                     authStatus.textContent = this.getAuthErrorMessage(error.code);
@@ -1078,11 +1118,11 @@
                         .where('userId', '==', this.state.currentUser.uid)
                         .onSnapshot((snapshot) => {
                             this.cachedHistory = {};
-                            
+
                             snapshot.forEach((doc) => {
                                 const workout = doc.data();
                                 const date = workout.date;
-                                
+
                                 if (!this.cachedHistory[date]) {
                                     this.cachedHistory[date] = [];
                                 }
@@ -1094,19 +1134,19 @@
 
                             // 🔥 СОРТИРУЕМ ВРУЧНУЮ на клиенте
                             this.sortWorkoutsByDate();
-                            
+
                             this.renderCalendar();
                             this.updateAnalytics();
-                            
+
                             syncStatus.textContent = '✅ Данные синхронизированы';
                             syncStatus.className = 'sync-status synced';
-                            
+
                             this.showNotification('Данные загружены', 'success');
                         }, (error) => {
                             console.error('Firestore error:', error);
                             syncStatus.textContent = '❌ Ошибка синхронизации';
                             syncStatus.className = 'sync-status error';
-                            
+
                             // 🔥 Показываем пользователю ссылку для создания индекса
                             if (error.code === 'failed-precondition') {
                                 this.showNotification('Нужно создать индекс в Firebase Console', 'error');
@@ -1130,11 +1170,11 @@
                     const dateB = new Date(yearB, monthB - 1, dayB);
                     return dateB - dateA; // Сортировка по убыванию
                 });
-                
+
                 dates.forEach(date => {
                     sortedHistory[date] = this.cachedHistory[date];
                 });
-                
+
                 this.cachedHistory = sortedHistory;
             },
 
@@ -1390,10 +1430,10 @@
                     this.renderSets();
                     document.querySelector('.save-button').textContent = 'Обновить тренировку';
                     this.showNotification(`Редактируем тренировку "${this.state.selectedExercise}"`);
-                    
-                    document.getElementById('setsSection').scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
+
+                    document.getElementById('setsSection').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
                     });
                 }, 100);
             },
@@ -1457,11 +1497,11 @@
 
                 const ctx = document.getElementById('muscleGroupChart');
                 if (!ctx) return;
-                
+
                 try {
                     const ctx2d = ctx.getContext('2d');
                     if (this.muscleGroupChart) this.muscleGroupChart.destroy();
-                    
+
                     this.muscleGroupChart = new Chart(ctx2d, {
                         type: 'doughnut',
                         data: {
@@ -1479,10 +1519,10 @@
 
                     const progressCtx = document.getElementById('progressChart');
                     if (!progressCtx) return;
-                    
+
                     const progressCtx2d = progressCtx.getContext('2d');
                     if (this.progressChart) this.progressChart.destroy();
-                    
+
                     const lastWorkouts = allWorkouts.slice(-10).reverse();
                     this.progressChart = new Chart(progressCtx2d, {
                         type: 'line',
@@ -1490,7 +1530,7 @@
                             labels: lastWorkouts.map((_, i) => `Тренировка ${i + 1}`),
                             datasets: [{
                                 label: 'Суммарный вес (кг)',
-                                data: lastWorkouts.map(workout => 
+                                data: lastWorkouts.map(workout =>
                                     workout.sets.reduce((sum, set) => sum + (parseFloat(set.weight) || 0), 0)
                                 ),
                                 borderColor: '#007AFF',
@@ -1532,7 +1572,7 @@
                     const prettyData = JSON.stringify(data, null, 2);
                     const blob = new Blob([prettyData], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
-                    
+
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = `sport-tracker-backup-${this.formatDate(new Date())}.json`;
@@ -1540,7 +1580,7 @@
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    
+
                     this.showNotification('Данные успешно экспортированы!');
                 } catch (error) {
                     this.showNotification('Ошибка при экспорте данных', 'error');
@@ -1556,7 +1596,7 @@
                 reader.onload = (e) => {
                     try {
                         const data = JSON.parse(e.target.result);
-                        
+
                         if (typeof data !== 'object' || data === null) {
                             throw new Error('Неверный формат файла');
                         }
@@ -1574,11 +1614,11 @@
                         console.error('Import error:', error);
                     }
                 };
-                
+
                 reader.onerror = () => {
                     this.showNotification('Ошибка чтения файла', 'error');
                 };
-                
+
                 reader.readAsText(file);
             },
 
@@ -1590,12 +1630,12 @@
 
                 try {
                     this.showNotification('Импорт данных в облако...', 'info');
-                    
+
                     // Удаляем старые данные
                     const snapshot = await db.collection('workouts')
                         .where('userId', '==', this.state.currentUser.uid)
                         .get();
-                    
+
                     const batch = db.batch();
                     snapshot.forEach(doc => {
                         batch.delete(doc.ref);
@@ -1649,11 +1689,11 @@
                 this.renderExercises();
                 document.getElementById('exercisesSection').style.display = 'block';
                 document.getElementById('setsSection').style.display = 'none';
-                
+
                 setTimeout(() => {
-                    document.getElementById('exercisesSection').scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
+                    document.getElementById('exercisesSection').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
                     });
                 }, 300);
             },
@@ -1687,11 +1727,11 @@
 
                 this.renderSets();
                 document.getElementById('setsSection').style.display = 'block';
-                
+
                 setTimeout(() => {
-                    document.getElementById('setsSection').scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
+                    document.getElementById('setsSection').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
                     });
                 }, 300);
             },
@@ -1737,14 +1777,14 @@
             addSet() {
                 this.state.sets.push({ weight: '', reps: '', completed: false });
                 this.renderSets();
-                
+
                 setTimeout(() => {
                     const setsContainer = document.getElementById('setsContainer');
                     const lastSet = setsContainer.lastElementChild;
                     if (lastSet) {
-                        lastSet.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'center' 
+                        lastSet.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
                         });
                     }
                 }, 100);
@@ -1762,7 +1802,7 @@
                 notification.textContent = message;
                 notification.className = `notification ${type === 'error' ? 'error' : ''}`;
                 notification.classList.add('show');
-                
+
                 if (type !== 'info') {
                     setTimeout(() => this.hideNotification(), 3000);
                 }
@@ -1776,13 +1816,13 @@
             async showTab(tabName) {
                 document.querySelectorAll('.content').forEach(tab => tab.classList.remove('active'));
                 document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-                
+
                 document.getElementById(tabName).classList.add('active');
-                
+
                 document.querySelectorAll('.nav-button').forEach(btn => {
                     if (btn.textContent.includes(
-                        tabName === 'home' ? 'Тренировки' : 
-                        tabName === 'workout' ? 'Тренировка' : 'Аналитика'
+                        tabName === 'home' ? 'Тренировки' :
+                            tabName === 'workout' ? 'Тренировка' : 'Аналитика'
                     )) {
                         btn.classList.add('active');
                     }
@@ -1810,4 +1850,5 @@
         document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
 </body>
+
 </html>
