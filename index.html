@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sport Tracker Pro</title>
     <meta name="theme-color" content="#007AFF">
-    <!-- Заменяем на совместимую версию Chart.js -->
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
         * {
@@ -363,7 +367,7 @@
             color: var(--text-primary);
         }
 
-        .add-button, .save-button {
+        .add-button, .save-button, .auth-button {
             padding: 15px;
             border-radius: 12px;
             border: none;
@@ -383,6 +387,11 @@
         .save-button {
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             color: white;
+        }
+
+        .auth-button {
+            background: linear-gradient(135deg, #FFAA00, #FFCC00);
+            color: #0a0a0a;
         }
 
         .stats-grid {
@@ -531,12 +540,141 @@
             font-size: 14px;
         }
 
+        .backup-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .backup-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--accent-primary);
+        }
+
+        .backup-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .export-button, .import-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 150px;
+        }
+
+        .export-button {
+            background: linear-gradient(135deg, #007AFF, #00d9ff);
+            color: white;
+        }
+
+        .import-button {
+            background: linear-gradient(135deg, var(--success), #00cc66);
+            color: #0a0a0a;
+        }
+
+        .export-button:hover, .import-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .auth-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .auth-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--accent-primary);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .auth-input {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .user-info {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .user-email {
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .logout-button {
+            background: linear-gradient(135deg, #ff0066, #ff3385);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .sync-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .sync-status.syncing {
+            color: var(--accent-primary);
+        }
+
+        .sync-status.synced {
+            color: var(--success);
+        }
+
+        .sync-status.error {
+            color: var(--error);
+        }
+
         @media (max-width: 480px) {
             .container { max-width: 100%; }
             .nav-button { padding: 12px 8px; font-size: 12px; }
             .content { padding: 15px; }
             .set-inputs { flex-direction: column; }
             .stats-grid { grid-template-columns: 1fr; }
+            .backup-buttons { flex-direction: column; }
+            .export-button, .import-button { min-width: 100%; }
         }
     </style>
 </head>
@@ -560,6 +698,26 @@
 
         <div id="home" class="content active">
             <div class="title">Мои тренировки</div>
+            
+            <!-- Секция авторизации -->
+            <div class="auth-section" id="authSection">
+                <div class="auth-title">🔐 Вход / Регистрация</div>
+                <div class="auth-form">
+                    <input type="email" id="authEmail" class="auth-input" placeholder="Email" required>
+                    <input type="password" id="authPassword" class="auth-input" placeholder="Пароль" required>
+                    <button class="auth-button" onclick="app.signIn()">Войти</button>
+                    <button class="auth-button" onclick="app.signUp()">Зарегистрироваться</button>
+                </div>
+                <div class="sync-status" id="authStatus"></div>
+            </div>
+
+            <!-- Информация о пользователе -->
+            <div class="user-info" id="userInfo" style="display: none;">
+                <div class="user-email" id="userEmail"></div>
+                <div class="sync-status" id="syncStatus">⚡ Данные синхронизируются с облаком</div>
+                <button class="logout-button" onclick="app.signOut()">Выйти</button>
+            </div>
+
             <div class="calendar">
                 <div class="calendar-header">
                     <button class="calendar-nav" onclick="app.changeMonth(-1)">←</button>
@@ -612,6 +770,23 @@
                     "Победа начинается с решения попробовать"
                 </div>
             </div>
+
+            <!-- Секция для экспорта/импорта -->
+            <div class="backup-section" id="backupSection" style="display: none;">
+                <div class="backup-title">📦 Резервное копирование</div>
+                <div class="backup-buttons">
+                    <button class="export-button" onclick="app.exportData()">
+                        📤 Экспорт данных
+                    </button>
+                    <label class="import-button">
+                        📥 Импорт данных
+                        <input type="file" class="file-input" accept=".json" onchange="app.importData(event)">
+                    </label>
+                </div>
+                <div style="margin-top: 15px; font-size: 12px; color: var(--text-secondary);">
+                    Экспортируйте данные для сохранения или переноса на другое устройство
+                </div>
+            </div>
         </div>
 
         <div id="workout" class="content">
@@ -658,82 +833,48 @@
             <div class="chart-container">
                 <canvas id="progressChart"></canvas>
             </div>
+
+            <!-- Секция резервного копирования в аналитике тоже -->
+            <div class="backup-section" id="analyticsBackupSection" style="display: none;">
+                <div class="backup-title">📦 Управление данными</div>
+                <div class="backup-buttons">
+                    <button class="export-button" onclick="app.exportData()">
+                        📤 Экспорт данных
+                    </button>
+                    <label class="import-button">
+                        📥 Импорт данных
+                        <input type="file" class="file-input" accept=".json" onchange="app.importData(event)">
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        // 🔥 Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTE7ZKjxmTSxxvnrGB4hzE_3If1nAN1Vc",
+            authDomain: "sport-tracker-pro.firebaseapp.com",
+            projectId: "sport-tracker-pro",
+            storageBucket: "sport-tracker-pro.firebasestorage.app",
+            messagingSenderId: "617530545146",
+            appId: "1:617530545146:web:0374f5ab27c374ef5c4a43"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         const app = {
             exercisesDatabase: {
-                "Грудь": [
-                    "Жим гантелей под углом", 
-                    "Жим гантелей на прямой скамье", 
-                    "Жим штанги на прямой скамье", 
-                    "Жим штанги под углом", 
-                    "Жим от груди в тренажере сидя", 
-                    "Разведение гантелей лёжа", 
-                    "Сведение рук в кроссовере", 
-                    "Сведение рук в тренажёре «Бабочка»"
-                ],
-                "Спина": [
-                    "Подтягивания", 
-                    "Тяга вертикального блока к груди", 
-                    "Тяга штанги в наклоне", 
-                    "Тяга горизонтального блока к поясу", 
-                    "Тяга верхнего блока в тренажёре «Хаммер»", 
-                    "Тяга блока в тренажёре с упором груди",
-                    "Тяга т-грифа с упором"
-                ],
-                "Руки": [
-                    "Концентрированные сгибания на бицепс сидя", 
-                    "Подъем гантелей на бицепс", 
-                    "Подъем штанги на бицепс", 
-                    "Разгибание рук в блочном тренажере", 
-                    "Разгибание рук с гантелью в наклоне", 
-                    "Разгибание рук с гантелью из-за головы", 
-                    "Разгибание с канатом на трицепс", 
-                    "Сгибание «Молот» («Молотки»)", 
-                    "Сгибание рук в кроссовере", 
-                    "Сгибание рук на скамье Скотта", 
-                    "Сгибание рук с нижнего блока с канатом/рукоятью", 
-                    "Французский жим"
-                ],
-                "Плечи": [
-                    "Жим гантелей сидя", 
-                    "Жим над головой в тренажере", 
-                    "Жим штанги с груди", 
-                    "Махи гантелей в стороны", 
-                    "Махи в сторону в кроссовере", 
-                    "Махи в сторону в тренажере", 
-                    "Подъем гантелей перед собой", 
-                    "Подъем руки перед собой в кроссовере", 
-                    "Разведение рук в кроссовере на задние дельты", 
-                    "Разведение рук в тренажере на задние дельты", 
-                    "Тяга канатов на задние дельты", 
-                    "Тяга к подбородку в кроссовере", 
-                    "Тяга штанги к подбородку"
-                ],
-                "Ноги": [
-                    "Жим ногами", 
-                    "Жим ноги под углом", 
-                    "Икроножные мышцы", 
-                    "Приседания со штангой", 
-                    "Разгибание ног (по одной ноге)", 
-                    "Разгибание ног сидя", 
-                    "Сгибание ног стоя (по одной ноге)", 
-                    "Сгибание ног лежа"
-                ],
-                "Кардио": [
-                    "Беговая дорожка", 
-                    "Велотренажер", 
-                    "Шаги на платформе (Степ-ап)", 
-                    "Эллипс"
-                ],
-                "Пресс": [
-                    "Планка", 
-                    "Подъем ног в висе", 
-                    "Шаги на платформе (Степ-ап)", 
-                    "Скручивания"
-                ]
+                "Грудь": ["Жим гантелей под углом", "Жим гантелей на прямой скамье", "Жим штанги на прямой скамье", "Жим штанги под углом", "Жим от груди в тренажере сидя", "Разведение гантелей лёжа", "Сведение рук в кроссовере", "Сведение рук в тренажёре «Бабочка»"],
+                "Спина": ["Подтягивания", "Тяга вертикального блока к груди", "Тяга штанги в наклоне", "Тяга горизонтального блока к поясу", "Тяга верхнего блока в тренажёре «Хаммер»", "Тяга блока в тренажёре с упором груди", "Тяга т-грифа с упором"],
+                "Руки": ["Концентрированные сгибания на бицепс сидя", "Подъем гантелей на бицепс", "Подъем штанги на бицепс", "Разгибание рук в блочном тренажере", "Разгибание рук с гантелью в наклоне", "Разгибание рук с гантелью из-за головы", "Разгибание с канатом на трицепс", "Сгибание «Молот» («Молотки»)", "Сгибание рук в кроссовере", "Сгибание рук на скамье Скотта", "Сгибание рук с нижнего блока с канатом/рукоятью", "Французский жим"],
+                "Плечи": ["Жим гантелей сидя", "Жим над головой в тренажере", "Жим штанги с груди", "Махи гантелей в стороны", "Махи в сторону в кроссовере", "Махи в сторону в тренажере", "Подъем гантелей перед собой", "Подъем руки перед собой в кроссовере", "Разведение рук в кроссовере на задние дельты", "Разведение рук в тренажере на задние дельты", "Тяга канатов на задние дельты", "Тяга к подбородку в кроссовере", "Тяга штанги к подбородку"],
+                "Ноги": ["Жим ногами", "Жим ноги под углом", "Икроножные мышцы", "Приседания со штангой", "Разгибание ног (по одной ноге)", "Разгибание ног сидя", "Сгибание ног стоя (по одной ноге)", "Сгибание ног лежа"],
+                "Кардио": ["Беговая дорожка", "Велотренажер", "Шаги на платформе (Степ-ап)", "Эллипс"],
+                "Пресс": ["Планка", "Подъем ног в висе", "Шаги на платформе (Степ-ап)", "Скручивания"]
             },
 
             state: {
@@ -743,20 +884,25 @@
                 selectedGroup: null,
                 selectedExercise: null,
                 sets: [{ weight: '', reps: '', completed: false }],
-                editingWorkout: null
+                editingWorkout: null,
+                currentUser: null
             },
 
             cachedHistory: {},
             muscleGroupChart: null,
             progressChart: null,
+            unsubscribeWorkouts: null,
 
             async init() {
                 try {
-                    this.showNotification('Загрузка данных...', 'info');
-                    this.cachedHistory = await this.getWorkoutHistory();
-                    this.renderCalendar();
+                    this.showNotification('Загрузка...', 'info');
+                    
+                    // Слушаем изменения состояния авторизации
+                    auth.onAuthStateChanged((user) => {
+                        this.handleAuthStateChange(user);
+                    });
+
                     this.renderGroups();
-                    await this.updateAnalytics();
                     setTimeout(() => this.hideNotification(), 2000);
                 } catch (error) {
                     this.showNotification('Ошибка загрузки', 'error');
@@ -764,185 +910,235 @@
                 }
             },
 
-            showNotification(message, type = 'info') {
-                const notification = document.getElementById('notification');
-                notification.textContent = message;
-                notification.className = `notification ${type === 'error' ? 'error' : ''}`;
-                notification.classList.add('show');
+            handleAuthStateChange(user) {
+                this.state.currentUser = user;
                 
-                if (type !== 'info') {
-                    setTimeout(() => this.hideNotification(), 3000);
-                }
-            },
-
-            hideNotification() {
-                const notification = document.getElementById('notification');
-                notification.classList.remove('show');
-            },
-
-            async showTab(tabName) {
-                document.querySelectorAll('.content').forEach(tab => tab.classList.remove('active'));
-                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-                
-                document.getElementById(tabName).classList.add('active');
-                
-                document.querySelectorAll('.nav-button').forEach(btn => {
-                    if (btn.textContent.includes(
-                        tabName === 'home' ? 'Тренировки' : 
-                        tabName === 'workout' ? 'Тренировка' : 'Аналитика'
-                    )) {
-                        btn.classList.add('active');
-                    }
-                });
-
-                if (tabName === 'analytics') {
-                    await this.updateAnalytics();
-                } else if (tabName === 'home') {
-                    this.cachedHistory = await this.getWorkoutHistory();
+                if (user) {
+                    // Пользователь вошел
+                    this.showUserInfo(user);
+                    this.loadWorkoutsFromFirebase();
+                    this.showNotification(`Добро пожаловать, ${user.email}!`);
+                } else {
+                    // Пользователь вышел
+                    this.showAuthForm();
+                    this.cachedHistory = {};
                     this.renderCalendar();
-                    document.getElementById('dateWorkouts').style.display = 'none';
-                    document.getElementById('motivationBlock').style.display = 'block';
-                } else if (tabName === 'workout') {
-                    this.resetWorkoutState();
+                    this.hideUserData();
                 }
             },
 
-            renderGroups() {
-                const groupsContainer = document.getElementById('groupsContainer');
-                groupsContainer.innerHTML = '';
-
-                Object.keys(this.exercisesDatabase).sort().forEach(group => {
-                    const button = document.createElement('button');
-                    button.className = 'group-button';
-                    button.textContent = group;
-                    button.onclick = () => this.selectGroup(group);
-                    groupsContainer.appendChild(button);
-                });
+            showAuthForm() {
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'none';
+                document.getElementById('backupSection').style.display = 'none';
+                document.getElementById('analyticsBackupSection').style.display = 'none';
             },
 
-            selectGroup(group) {
-                this.state.selectedGroup = group;
-                this.state.selectedExercise = null;
-                this.state.sets = [{ weight: '', reps: '', completed: false }];
+            showUserInfo(user) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'block';
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('backupSection').style.display = 'block';
+                document.getElementById('analyticsBackupSection').style.display = 'block';
+            },
 
-                document.querySelectorAll('.group-button').forEach(btn => btn.classList.remove('selected'));
-                document.querySelectorAll('.group-button').forEach(btn => {
-                    if (btn.textContent === group) {
-                        btn.classList.add('selected');
-                    }
-                });
+            hideUserData() {
+                document.getElementById('dateWorkouts').style.display = 'none';
+                document.getElementById('motivationBlock').style.display = 'block';
+            },
 
-                this.renderExercises();
-                document.getElementById('exercisesSection').style.display = 'block';
-                document.getElementById('setsSection').style.display = 'none';
-                
-                setTimeout(() => {
-                    document.getElementById('exercisesSection').scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
+            async signUp() {
+                const email = document.getElementById('authEmail').value;
+                const password = document.getElementById('authPassword').value;
+                const authStatus = document.getElementById('authStatus');
+
+                if (!email || !password) {
+                    authStatus.textContent = 'Заполните все поля';
+                    authStatus.className = 'sync-status error';
+                    return;
+                }
+
+                try {
+                    authStatus.textContent = 'Регистрация...';
+                    authStatus.className = 'sync-status syncing';
+                    
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    
+                    // 🔥 Сохраняем пользователя в Firestore
+                    await this.saveUserToFirestore(userCredential.user);
+                    
+                    this.showNotification('Регистрация успешна!');
+                    authStatus.textContent = '';
+                    
+                } catch (error) {
+                    console.error('Sign up error:', error);
+                    authStatus.textContent = this.getAuthErrorMessage(error.code);
+                    authStatus.className = 'sync-status error';
+                }
+            },
+
+            // 🔥 НОВАЯ ФУНКЦИЯ: Сохранение пользователя в Firestore
+            async saveUserToFirestore(user) {
+                try {
+                    await db.collection('users').doc(user.uid).set({
+                        email: user.email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                }, 300);
+                    console.log('Пользователь сохранен в Firestore');
+                } catch (error) {
+                    console.error('Ошибка сохранения пользователя в Firestore:', error);
+                }
             },
 
-            renderExercises() {
-                const exercisesContainer = document.getElementById('exercisesContainer');
-                const exercisesTitle = document.getElementById('exercisesTitle');
+            // 🔥 ОБНОВЛЕНА ФУНКЦИЯ: Обновляем lastLogin при входе
+            async signIn() {
+                const email = document.getElementById('authEmail').value;
+                const password = document.getElementById('authPassword').value;
+                const authStatus = document.getElementById('authStatus');
 
-                exercisesTitle.textContent = `2. Выберите упражнение для ${this.state.selectedGroup}:`;
-                exercisesContainer.innerHTML = '';
+                if (!email || !password) {
+                    authStatus.textContent = 'Заполните все поля';
+                    authStatus.className = 'sync-status error';
+                    return;
+                }
 
-                this.exercisesDatabase[this.state.selectedGroup].forEach(exercise => {
-                    const button = document.createElement('button');
-                    button.className = 'exercise-button';
-                    button.textContent = exercise;
-                    button.onclick = () => this.selectExercise(exercise);
-                    exercisesContainer.appendChild(button);
-                });
+                try {
+                    authStatus.textContent = 'Вход...';
+                    authStatus.className = 'sync-status syncing';
+                    
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    
+                    // 🔥 Обновляем lastLogin при входе
+                    await this.updateUserLastLogin(userCredential.user);
+                    
+                    this.showNotification('Вход выполнен!');
+                    authStatus.textContent = '';
+                    
+                } catch (error) {
+                    console.error('Sign in error:', error);
+                    authStatus.textContent = this.getAuthErrorMessage(error.code);
+                    authStatus.className = 'sync-status error';
+                }
             },
 
-            selectExercise(exercise) {
-                this.state.selectedExercise = exercise;
-
-                document.querySelectorAll('.exercise-button').forEach(btn => btn.classList.remove('selected'));
-                document.querySelectorAll('.exercise-button').forEach(btn => {
-                    if (btn.textContent === exercise) {
-                        btn.classList.add('selected');
-                    }
-                });
-
-                this.renderSets();
-                document.getElementById('setsSection').style.display = 'block';
-                
-                setTimeout(() => {
-                    document.getElementById('setsSection').scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
+            // 🔥 НОВАЯ ФУНКЦИЯ: Обновление времени последнего входа
+            async updateUserLastLogin(user) {
+                try {
+                    await db.collection('users').doc(user.uid).update({
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                }, 300);
+                    console.log('Время входа обновлено');
+                } catch (error) {
+                    console.error('Ошибка обновления времени входа:', error);
+                }
             },
 
-            renderSets() {
-                const setsContainer = document.getElementById('setsContainer');
-                const selectedExerciseName = document.getElementById('selectedExerciseName');
-
-                selectedExerciseName.textContent = this.state.selectedExercise;
-                setsContainer.innerHTML = '';
-
-                this.state.sets.forEach((set, index) => {
-                    const setElement = document.createElement('div');
-                    setElement.className = 'set-container';
-                    setElement.innerHTML = `
-                        <div style="min-width: 80px;">Подход ${index + 1}</div>
-                        <div class="set-inputs">
-                            <div style="flex: 1;">
-                                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Вес (кг)</div>
-                                <input type="number" class="weight-input" placeholder="0" value="${set.weight}"
-                                    onchange="app.updateSet(${index}, 'weight', this.value)" min="0" step="0.5">
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Повторения</div>
-                                <input type="number" class="reps-input" placeholder="0" value="${set.reps}"
-                                    onchange="app.updateSet(${index}, 'reps', this.value)" min="0">
-                            </div>
-                        </div>
-                        ${this.state.sets.length > 1 ? `
-                            <button onclick="app.deleteSet(${index})" style="background: #ff0066; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
-                                🗑️
-                            </button>
-                        ` : ''}
-                    `;
-                    setsContainer.appendChild(setElement);
-                });
+            async signOut() {
+                try {
+                    if (this.unsubscribeWorkouts) {
+                        this.unsubscribeWorkouts();
+                    }
+                    await auth.signOut();
+                    this.showNotification('Вы вышли из системы');
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    this.showNotification('Ошибка при выходе', 'error');
+                }
             },
 
-            updateSet(index, field, value) {
-                this.state.sets[index][field] = value;
+            getAuthErrorMessage(errorCode) {
+                const messages = {
+                    'auth/email-already-in-use': 'Email уже используется',
+                    'auth/invalid-email': 'Неверный формат email',
+                    'auth/weak-password': 'Пароль слишком простой',
+                    'auth/user-not-found': 'Пользователь не найден',
+                    'auth/wrong-password': 'Неверный пароль',
+                    'auth/too-many-requests': 'Слишком много попыток. Попробуйте позже'
+                };
+                return messages[errorCode] || 'Произошла ошибка';
             },
 
-            addSet() {
-                this.state.sets.push({ weight: '', reps: '', completed: false });
-                this.renderSets();
-                
-                setTimeout(() => {
-                    const setsContainer = document.getElementById('setsContainer');
-                    const lastSet = setsContainer.lastElementChild;
-                    if (lastSet) {
-                        lastSet.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'center' 
+            // 🔥 ИСПРАВЛЕННАЯ ФУНКЦИЯ: Загрузка тренировок без сложной сортировки
+            async loadWorkoutsFromFirebase() {
+                if (!this.state.currentUser) return;
+
+                try {
+                    const syncStatus = document.getElementById('syncStatus');
+                    syncStatus.textContent = '🔄 Загрузка данных...';
+                    syncStatus.className = 'sync-status syncing';
+
+                    // 🔥 УПРОЩЕННЫЙ ЗАПРОС - без сортировки на сервере
+                    this.unsubscribeWorkouts = db.collection('workouts')
+                        .where('userId', '==', this.state.currentUser.uid)
+                        .onSnapshot((snapshot) => {
+                            this.cachedHistory = {};
+                            
+                            snapshot.forEach((doc) => {
+                                const workout = doc.data();
+                                const date = workout.date;
+                                
+                                if (!this.cachedHistory[date]) {
+                                    this.cachedHistory[date] = [];
+                                }
+                                this.cachedHistory[date].push({
+                                    ...workout,
+                                    id: doc.id
+                                });
+                            });
+
+                            // 🔥 СОРТИРУЕМ ВРУЧНУЮ на клиенте
+                            this.sortWorkoutsByDate();
+                            
+                            this.renderCalendar();
+                            this.updateAnalytics();
+                            
+                            syncStatus.textContent = '✅ Данные синхронизированы';
+                            syncStatus.className = 'sync-status synced';
+                            
+                            this.showNotification('Данные загружены', 'success');
+                        }, (error) => {
+                            console.error('Firestore error:', error);
+                            syncStatus.textContent = '❌ Ошибка синхронизации';
+                            syncStatus.className = 'sync-status error';
+                            
+                            // 🔥 Показываем пользователю ссылку для создания индекса
+                            if (error.code === 'failed-precondition') {
+                                this.showNotification('Нужно создать индекс в Firebase Console', 'error');
+                            }
                         });
-                    }
-                }, 100);
+
+                } catch (error) {
+                    console.error('Load workouts error:', error);
+                    this.showNotification('Ошибка загрузки данных', 'error');
+                }
             },
 
-            deleteSet(index) {
-                if (this.state.sets.length > 1) {
-                    this.state.sets.splice(index, 1);
-                    this.renderSets();
-                }
+            // 🔥 НОВАЯ ФУНКЦИЯ: Сортировка тренировок по дате
+            sortWorkoutsByDate() {
+                // Сортируем даты в порядке убывания (новые сверху)
+                const sortedHistory = {};
+                const dates = Object.keys(this.cachedHistory).sort((a, b) => {
+                    const [dayA, monthA, yearA] = a.split('.').map(Number);
+                    const [dayB, monthB, yearB] = b.split('.').map(Number);
+                    const dateA = new Date(yearA, monthA - 1, dayA);
+                    const dateB = new Date(yearB, monthB - 1, dayB);
+                    return dateB - dateA; // Сортировка по убыванию
+                });
+                
+                dates.forEach(date => {
+                    sortedHistory[date] = this.cachedHistory[date];
+                });
+                
+                this.cachedHistory = sortedHistory;
             },
 
             async saveWorkout() {
+                if (!this.state.currentUser) {
+                    this.showNotification('Сначала войдите в систему', 'error');
+                    return;
+                }
+
                 try {
                     const completedSets = this.state.sets.filter(set => set.weight && set.reps);
                     if (completedSets.length === 0) {
@@ -960,22 +1156,24 @@
                         exercise: this.state.selectedExercise,
                         muscleGroup: this.state.selectedGroup,
                         sets: this.state.sets,
-                        date: dateString
+                        date: dateString,
+                        userId: this.state.currentUser.uid,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     };
 
-                    this.showNotification('Сохранение...', 'info');
-                    
+                    this.showNotification('Сохранение в облако...', 'info');
+
                     if (this.state.editingWorkout) {
-                        await this.updateWorkoutInHistory(this.state.editingWorkout.date, this.state.editingWorkout.index, workout);
+                        // Обновляем существующую тренировку
+                        await db.collection('workouts').doc(this.state.editingWorkout.id).update(workout);
                         this.showNotification(`Тренировка "${this.state.selectedExercise}" обновлена!`);
                     } else {
-                        await this.saveWorkoutToHistory(workout);
-                        this.showNotification(`Тренировка "${this.state.selectedExercise}" сохранена!`);
+                        // Создаем новую тренировку
+                        await db.collection('workouts').add(workout);
+                        this.showNotification(`Тренировка "${this.state.selectedExercise}" сохранена в облако!`);
                     }
 
                     this.resetWorkoutState();
-                    this.cachedHistory = await this.getWorkoutHistory();
-                    this.renderCalendar();
                     await this.updateAnalytics();
 
                     setTimeout(() => {
@@ -984,8 +1182,8 @@
                     }, 1000);
 
                 } catch (error) {
-                    this.showNotification('Ошибка сохранения', 'error');
-                    console.error('Save error:', error);
+                    console.error('Save workout error:', error);
+                    this.showNotification('Ошибка сохранения в облако', 'error');
                 }
             },
 
@@ -1033,7 +1231,7 @@
 
                     const dateElement = document.createElement('div');
                     dateElement.className = 'calendar-date';
-                    dateElement.dataset.date = this.formatDate(date); // Добавляем data-атрибут
+                    dateElement.dataset.date = this.formatDate(date);
 
                     const dateString = this.formatDate(date);
                     const hasWorkout = workoutHistory[dateString]?.length > 0;
@@ -1065,7 +1263,6 @@
             showWorkoutHistory(dateString) {
                 this.state.selectedWorkoutDate = dateString;
 
-                // Исправляем выбор даты - ищем по data-атрибуту
                 document.querySelectorAll('.calendar-date').forEach(date => {
                     date.classList.remove('selected');
                     if (date.dataset.date === dateString) {
@@ -1152,13 +1349,7 @@
             },
 
             async editWorkout(dateString, workoutIndex) {
-                const workoutHistory = await this.getWorkoutHistory();
-                if (!workoutHistory[dateString]?.[workoutIndex]) {
-                    this.showNotification('Тренировка не найдена', 'error');
-                    return;
-                }
-
-                const workout = workoutHistory[dateString][workoutIndex];
+                const workout = this.cachedHistory[dateString][workoutIndex];
                 this.showTab('workout');
 
                 this.state.selectedGroup = workout.muscleGroup;
@@ -1168,7 +1359,7 @@
                     reps: set.reps || '',
                     completed: set.completed || false
                 }));
-                this.state.editingWorkout = { date: dateString, index: workoutIndex };
+                this.state.editingWorkout = { date: dateString, index: workoutIndex, id: workout.id };
                 this.state.selectedWorkoutDate = dateString;
 
                 document.getElementById('exercisesSection').style.display = 'block';
@@ -1203,28 +1394,23 @@
             },
 
             async deleteWorkout(dateString, workoutIndex) {
+                if (!this.state.currentUser) return;
+
                 if (!confirm('Удалить эту тренировку?')) return;
 
                 try {
-                    const workoutHistory = await this.getWorkoutHistory();
-                    if (workoutHistory[dateString] && workoutHistory[dateString][workoutIndex]) {
-                        workoutHistory[dateString].splice(workoutIndex, 1);
-                        if (workoutHistory[dateString].length === 0) {
-                            delete workoutHistory[dateString];
-                        }
-                        localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-                        this.cachedHistory = workoutHistory;
-                        this.renderCalendar();
-                        await this.updateAnalytics();
-                        this.showNotification('Тренировка удалена!');
+                    const workout = this.cachedHistory[dateString][workoutIndex];
+                    if (workout.id) {
+                        await db.collection('workouts').doc(workout.id).delete();
+                        this.showNotification('Тренировка удалена из облака!');
                     }
                 } catch (error) {
+                    console.error('Delete workout error:', error);
                     this.showNotification('Не удалось удалить тренировку', 'error');
                 }
             },
 
             async updateAnalytics() {
-                this.cachedHistory = await this.getWorkoutHistory();
                 const allWorkouts = this.getAllWorkouts();
 
                 document.getElementById('totalWorkouts').textContent = allWorkouts.length;
@@ -1253,15 +1439,14 @@
                 this.updateCharts(allWorkouts);
             },
 
-            updateCharts(workouts) {
-                // Проверяем доступность Chart.js
+            updateCharts(allWorkouts) {
                 if (typeof Chart === 'undefined') {
                     console.warn('Chart.js не доступен, графики не будут отображены');
                     return;
                 }
 
                 const muscleGroups = {};
-                workouts.forEach(workout => {
+                allWorkouts.forEach(workout => {
                     muscleGroups[workout.muscleGroup] = (muscleGroups[workout.muscleGroup] || 0) + 1;
                 });
 
@@ -1293,7 +1478,7 @@
                     const progressCtx2d = progressCtx.getContext('2d');
                     if (this.progressChart) this.progressChart.destroy();
                     
-                    const lastWorkouts = workouts.slice(-10).reverse();
+                    const lastWorkouts = allWorkouts.slice(-10).reverse();
                     this.progressChart = new Chart(progressCtx2d, {
                         type: 'line',
                         data: {
@@ -1318,15 +1503,6 @@
                 }
             },
 
-            async getWorkoutHistory() {
-                try {
-                    const history = localStorage.getItem('workoutHistory');
-                    return history ? JSON.parse(history) : {};
-                } catch (error) {
-                    return {};
-                }
-            },
-
             getAllWorkouts() {
                 const history = this.cachedHistory || {};
                 const allWorkouts = [];
@@ -1340,24 +1516,281 @@
                 });
             },
 
-            async saveWorkoutToHistory(workout) {
-                const history = await this.getWorkoutHistory();
-                const dateString = workout.date;
+            exportData() {
+                try {
+                    const data = this.cachedHistory;
+                    if (!data || Object.keys(data).length === 0) {
+                        this.showNotification('Нет данных для экспорта', 'error');
+                        return;
+                    }
 
-                if (!history[dateString]) {
-                    history[dateString] = [];
+                    const prettyData = JSON.stringify(data, null, 2);
+                    const blob = new Blob([prettyData], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `sport-tracker-backup-${this.formatDate(new Date())}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    this.showNotification('Данные успешно экспортированы!');
+                } catch (error) {
+                    this.showNotification('Ошибка при экспорте данных', 'error');
+                    console.error('Export error:', error);
                 }
-                history[dateString].push(workout);
-                localStorage.setItem('workoutHistory', JSON.stringify(history));
-                this.cachedHistory = history;
             },
 
-            async updateWorkoutInHistory(dateString, workoutIndex, updatedWorkout) {
-                const history = await this.getWorkoutHistory();
-                if (history[dateString] && history[dateString][workoutIndex]) {
-                    history[dateString][workoutIndex] = updatedWorkout;
-                    localStorage.setItem('workoutHistory', JSON.stringify(history));
-                    this.cachedHistory = history;
+            importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (typeof data !== 'object' || data === null) {
+                            throw new Error('Неверный формат файла');
+                        }
+
+                        if (!confirm('Внимание! Это перезапишет все текущие данные. Продолжить?')) {
+                            event.target.value = '';
+                            return;
+                        }
+
+                        // Для импорта нужно загрузить данные в Firebase
+                        this.importDataToFirebase(data);
+                        event.target.value = '';
+                    } catch (error) {
+                        this.showNotification('Ошибка: неверный формат файла', 'error');
+                        console.error('Import error:', error);
+                    }
+                };
+                
+                reader.onerror = () => {
+                    this.showNotification('Ошибка чтения файла', 'error');
+                };
+                
+                reader.readAsText(file);
+            },
+
+            async importDataToFirebase(data) {
+                if (!this.state.currentUser) {
+                    this.showNotification('Сначала войдите в систему', 'error');
+                    return;
+                }
+
+                try {
+                    this.showNotification('Импорт данных в облако...', 'info');
+                    
+                    // Удаляем старые данные
+                    const snapshot = await db.collection('workouts')
+                        .where('userId', '==', this.state.currentUser.uid)
+                        .get();
+                    
+                    const batch = db.batch();
+                    snapshot.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+
+                    // Добавляем новые данные
+                    for (const [date, workouts] of Object.entries(data)) {
+                        for (const workout of workouts) {
+                            await db.collection('workouts').add({
+                                ...workout,
+                                userId: this.state.currentUser.uid,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    }
+
+                    this.showNotification('Данные успешно импортированы в облако!');
+                } catch (error) {
+                    console.error('Import to Firebase error:', error);
+                    this.showNotification('Ошибка импорта в облако', 'error');
+                }
+            },
+
+            renderGroups() {
+                const groupsContainer = document.getElementById('groupsContainer');
+                groupsContainer.innerHTML = '';
+
+                Object.keys(this.exercisesDatabase).sort().forEach(group => {
+                    const button = document.createElement('button');
+                    button.className = 'group-button';
+                    button.textContent = group;
+                    button.onclick = () => app.selectGroup(group);
+                    groupsContainer.appendChild(button);
+                });
+            },
+
+            selectGroup(group) {
+                console.log('Выбрана группа:', group);
+                this.state.selectedGroup = group;
+                this.state.selectedExercise = null;
+                this.state.sets = [{ weight: '', reps: '', completed: false }];
+
+                document.querySelectorAll('.group-button').forEach(btn => btn.classList.remove('selected'));
+                document.querySelectorAll('.group-button').forEach(btn => {
+                    if (btn.textContent === group) {
+                        btn.classList.add('selected');
+                    }
+                });
+
+                this.renderExercises();
+                document.getElementById('exercisesSection').style.display = 'block';
+                document.getElementById('setsSection').style.display = 'none';
+                
+                setTimeout(() => {
+                    document.getElementById('exercisesSection').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }, 300);
+            },
+
+            renderExercises() {
+                const exercisesContainer = document.getElementById('exercisesContainer');
+                const exercisesTitle = document.getElementById('exercisesTitle');
+
+                exercisesTitle.textContent = `2. Выберите упражнение для ${this.state.selectedGroup}:`;
+                exercisesContainer.innerHTML = '';
+
+                this.exercisesDatabase[this.state.selectedGroup].forEach(exercise => {
+                    const button = document.createElement('button');
+                    button.className = 'exercise-button';
+                    button.textContent = exercise;
+                    button.onclick = () => app.selectExercise(exercise);
+                    exercisesContainer.appendChild(button);
+                });
+            },
+
+            selectExercise(exercise) {
+                console.log('Выбрано упражнение:', exercise);
+                this.state.selectedExercise = exercise;
+
+                document.querySelectorAll('.exercise-button').forEach(btn => btn.classList.remove('selected'));
+                document.querySelectorAll('.exercise-button').forEach(btn => {
+                    if (btn.textContent === exercise) {
+                        btn.classList.add('selected');
+                    }
+                });
+
+                this.renderSets();
+                document.getElementById('setsSection').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('setsSection').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }, 300);
+            },
+
+            renderSets() {
+                const setsContainer = document.getElementById('setsContainer');
+                const selectedExerciseName = document.getElementById('selectedExerciseName');
+
+                selectedExerciseName.textContent = this.state.selectedExercise;
+                setsContainer.innerHTML = '';
+
+                this.state.sets.forEach((set, index) => {
+                    const setElement = document.createElement('div');
+                    setElement.className = 'set-container';
+                    setElement.innerHTML = `
+                        <div style="min-width: 80px;">Подход ${index + 1}</div>
+                        <div class="set-inputs">
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Вес (кг)</div>
+                                <input type="number" class="weight-input" placeholder="0" value="${set.weight}"
+                                    onchange="app.updateSet(${index}, 'weight', this.value)" min="0" step="0.5">
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Повторения</div>
+                                <input type="number" class="reps-input" placeholder="0" value="${set.reps}"
+                                    onchange="app.updateSet(${index}, 'reps', this.value)" min="0">
+                            </div>
+                        </div>
+                        ${this.state.sets.length > 1 ? `
+                            <button onclick="app.deleteSet(${index})" style="background: #ff0066; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+                                🗑️
+                            </button>
+                        ` : ''}
+                    `;
+                    setsContainer.appendChild(setElement);
+                });
+            },
+
+            updateSet(index, field, value) {
+                this.state.sets[index][field] = value;
+            },
+
+            addSet() {
+                this.state.sets.push({ weight: '', reps: '', completed: false });
+                this.renderSets();
+                
+                setTimeout(() => {
+                    const setsContainer = document.getElementById('setsContainer');
+                    const lastSet = setsContainer.lastElementChild;
+                    if (lastSet) {
+                        lastSet.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }
+                }, 100);
+            },
+
+            deleteSet(index) {
+                if (this.state.sets.length > 1) {
+                    this.state.sets.splice(index, 1);
+                    this.renderSets();
+                }
+            },
+
+            showNotification(message, type = 'info') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+                notification.classList.add('show');
+                
+                if (type !== 'info') {
+                    setTimeout(() => this.hideNotification(), 3000);
+                }
+            },
+
+            hideNotification() {
+                const notification = document.getElementById('notification');
+                notification.classList.remove('show');
+            },
+
+            async showTab(tabName) {
+                document.querySelectorAll('.content').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+                
+                document.getElementById(tabName).classList.add('active');
+                
+                document.querySelectorAll('.nav-button').forEach(btn => {
+                    if (btn.textContent.includes(
+                        tabName === 'home' ? 'Тренировки' : 
+                        tabName === 'workout' ? 'Тренировка' : 'Аналитика'
+                    )) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                if (tabName === 'analytics') {
+                    await this.updateAnalytics();
+                } else if (tabName === 'home') {
+                    this.renderCalendar();
+                    document.getElementById('dateWorkouts').style.display = 'none';
+                    document.getElementById('motivationBlock').style.display = 'block';
+                } else if (tabName === 'workout') {
+                    this.resetWorkoutState();
                 }
             },
 
