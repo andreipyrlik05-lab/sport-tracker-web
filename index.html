@@ -98,6 +98,19 @@
             width: 80%;
         }
 
+        .logout-nav {
+            flex: 0.5;
+            background: rgba(255, 0, 102, 0.2);
+            font-size: 12px;
+            min-width: 60px;
+            transition: all 0.3s;
+        }
+
+        .logout-nav:hover {
+            background: rgba(255, 0, 102, 0.4);
+            transform: scale(1.05);
+        }
+
         .content {
             padding: 20px;
             display: none;
@@ -681,16 +694,6 @@
             margin-bottom: 10px;
         }
 
-        .logout-button {
-            background: linear-gradient(135deg, #ff0066, #ff3385);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
         .sync-status {
             font-size: 12px;
             color: var(--text-secondary);
@@ -744,6 +747,12 @@
             .nav-button {
                 padding: 12px 8px;
                 font-size: 12px;
+            }
+
+            .logout-nav {
+                font-size: 10px;
+                padding: 12px 5px;
+                min-width: 50px;
             }
 
             .content {
@@ -808,9 +817,10 @@
         </div>
 
         <div class="nav">
-            <button class="nav-button active" onclick="app.showTab('home')">📅 Календарь тренировок</button>
+            <button class="nav-button active" onclick="app.showTab('home')">📅 Календарь</button>
             <button class="nav-button" onclick="app.showTab('workout')">💪 Тренировка</button>
-            <button class="nav-button" onclick="app.showTab('analytics')">🎯 Мой прогресс</button>
+            <button class="nav-button" onclick="app.showTab('analytics')">🎯 Прогресс</button>
+            <button class="nav-button logout-nav" onclick="app.signOut()" style="display: none;">🚪 Выйти</button>
         </div>
 
         <div id="home" class="content active">
@@ -840,8 +850,7 @@
             <!-- Информация о пользователе -->
             <div class="user-info" id="userInfo" style="display: none;">
                 <div class="user-email" id="userEmail"></div>
-                <!-- Убрали блок с синхронизацией -->
-                <button class="logout-button" onclick="app.signOut()">Выйти</button>
+                <!-- Кнопка выхода убрана отсюда -->
             </div>
 
             <div class="calendar">
@@ -1069,6 +1078,9 @@
                 document.getElementById('userInfo').style.display = 'none';
                 document.getElementById('backupSection').style.display = 'none';
                 document.getElementById('analyticsBackupSection').style.display = 'none';
+                
+                // Скрываем кнопку выхода в навигации
+                document.querySelector('.logout-nav').style.display = 'none';
             },
 
             showUserInfo(user) {
@@ -1077,6 +1089,9 @@
                 document.getElementById('userEmail').textContent = user.email;
                 document.getElementById('backupSection').style.display = 'block';
                 document.getElementById('analyticsBackupSection').style.display = 'block';
+                
+                // Показываем кнопку выхода в навигации
+                document.querySelector('.logout-nav').style.display = 'block';
             },
 
             hideUserData() {
@@ -2069,7 +2084,7 @@
                 document.querySelectorAll('.nav-button').forEach(btn => {
                     if (btn.textContent.includes(
                         tabName === 'home' ? 'Календарь' :
-                            tabName === 'workout' ? 'Тренировка' : 'Мой прогресс'
+                            tabName === 'workout' ? 'Тренировка' : 'Прогресс'
                     )) {
                         btn.classList.add('active');
                     }
