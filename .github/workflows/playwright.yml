@@ -1,9 +1,9 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   test:
@@ -11,20 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          
       - name: Install dependencies
         run: npm ci
-        
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-        
       - name: Run Playwright tests
         run: npx playwright test
-        
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -32,3 +27,19 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+  # ↓↓↓ ДОБАВЬТЕ ЭТОТ JOB ↓↓↓
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'  # корень проекта
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
