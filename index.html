@@ -408,7 +408,8 @@
         .weight-input,
         .reps-input,
         .time-input,
-        .intensity-input {
+        .intensity-input,
+        .body-weight-input {
             padding: 10px;
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -739,6 +740,26 @@
             color: var(--accent-primary);
         }
 
+        .body-weight-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .body-weight-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .body-weight-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            min-width: 120px;
+        }
+
         @media (max-width: 480px) {
             .container {
                 max-width: 100%;
@@ -775,6 +796,16 @@
             .export-button,
             .import-button {
                 min-width: 100%;
+            }
+
+            .body-weight-input-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .body-weight-label {
+                min-width: auto;
+                margin-bottom: 5px;
             }
         }
     </style>
@@ -933,6 +964,20 @@
                 📅 Дата тренировки: <span id="selectedDateText">Сегодня</span>
             </div>
 
+            <!-- Секция для ввода веса тела -->
+            <div class="body-weight-section" id="bodyWeightSection" style="display: none;">
+                <div class="section-title">🏋️ Ваш вес в день тренировки:</div>
+                <div class="body-weight-input-container">
+                    <div class="body-weight-label">Вес тела (кг):</div>
+                    <input type="number" class="body-weight-input" id="bodyWeightInput" 
+                           placeholder="Введите ваш вес" min="30" max="200" step="0.1"
+                           onchange="app.updateBodyWeight(this.value)">
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
+                    💡 Укажите ваш текущий вес для отслеживания прогресса
+                </div>
+            </div>
+
             <div class="section-title">1. Выберите группу мышц:</div>
             <div class="groups-container" id="groupsContainer"></div>
 
@@ -1027,7 +1072,8 @@
                 selectedExercise: null,
                 sets: [{ weight: '', reps: '', completed: false }],
                 editingWorkout: null,
-                currentUser: null
+                currentUser: null,
+                bodyWeight: null // Новое поле для хранения веса тела
             },
 
             cachedHistory: {},
@@ -1186,6 +1232,12 @@
                 } else {
                     dateDisplay.textContent = 'Сегодня (' + this.formatDate(new Date()) + ')';
                 }
+            },
+
+            // 📊 Обновление веса тела
+            updateBodyWeight(weight) {
+                this.state.bodyWeight = weight ? parseFloat(weight) : null;
+                console.log('Вес тела обновлен:', this.state.bodyWeight);
             },
 
             async signUp() {
@@ -1399,6 +1451,7 @@
                         sets: this.state.sets,
                         date: dateString,
                         userId: this.state.currentUser.uid,
+                        bodyWeight: this.state.bodyWeight, // Добавляем вес тела в тренировку
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     };
 
@@ -1433,6 +1486,7 @@
                 this.state.selectedExercise = null;
                 this.state.sets = [{ weight: '', reps: '', completed: false }];
                 this.state.editingWorkout = null;
+                this.state.bodyWeight = null; // Сбрасываем вес тела
 
                 document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
                     btn.classList.remove('selected');
@@ -1440,6 +1494,8 @@
 
                 document.getElementById('exercisesSection').style.display = 'none';
                 document.getElementById('setsSection').style.display = 'none';
+                document.getElementById('bodyWeightSection').style.display = 'none';
+                document.getElementById('bodyWeightInput').value = '';
             },
 
             renderCalendar() {
@@ -1534,6 +1590,11 @@
                             detailsText = `Подходов: ${workout.sets.length}`;
                         }
                         
+                        // Добавляем отображение веса тела если он есть
+                        if (workout.bodyWeight) {
+                            detailsText += `, Вес тела: ${workout.bodyWeight} кг`;
+                        }
+                        
                         historyHTML += `
                             <div class="history-item">
                                 <div class="history-exercise" onclick="app.viewWorkoutDetails('${dateString}', ${index})">
@@ -1571,6 +1632,16 @@
                 document.getElementById('modalExerciseName').textContent = workout.exercise;
 
                 let detailsHTML = '<div class="workout-details">';
+                
+                // Добавляем отображение веса тела если он есть
+                if (workout.bodyWeight) {
+                    detailsHTML += `
+                        <div class="workout-set">
+                            <div>Вес тела</div>
+                            <div>${workout.bodyWeight} кг</div>
+                        </div>
+                    `;
+                }
                 
                 if (workout.muscleGroup === "Кардио") {
                     // Отображение для кардио
@@ -1631,10 +1702,17 @@
                 }));
                 this.state.editingWorkout = { date: dateString, index: workoutIndex, id: workout.id };
                 this.state.selectedWorkoutDate = dateString;
+                this.state.bodyWeight = workout.bodyWeight || null; // Восстанавливаем вес тела
                 this.updateWorkoutDateDisplay();
 
                 document.getElementById('exercisesSection').style.display = 'block';
                 document.getElementById('setsSection').style.display = 'block';
+                document.getElementById('bodyWeightSection').style.display = 'block';
+                
+                // Заполняем поле веса тела если есть значение
+                if (this.state.bodyWeight) {
+                    document.getElementById('bodyWeightInput').value = this.state.bodyWeight;
+                }
 
                 document.querySelectorAll('.group-button').forEach(btn => {
                     btn.classList.remove('selected');
@@ -1921,6 +1999,7 @@
                 this.renderExercises();
                 document.getElementById('exercisesSection').style.display = 'block';
                 document.getElementById('setsSection').style.display = 'none';
+                document.getElementById('bodyWeightSection').style.display = 'block'; // Показываем секцию веса тела
 
                 setTimeout(() => {
                     document.getElementById('exercisesSection').scrollIntoView({
