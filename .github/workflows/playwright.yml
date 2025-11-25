@@ -28,11 +28,14 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-  # ↓↓↓ ДОБАВЬТЕ ЭТОТ JOB ↓↓↓
   deploy:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
+      pages: write
+      actions: read
     steps:
       - uses: actions/checkout@v4
       - name: Setup Pages
