@@ -83,7 +83,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
     
     // Проверяем секцию веса тела
     await expect(page.locator('text=Ваш вес на момент тренировки (кг):')).toBeVisible();
-    await expect(page.locator('text=Вес тела (кг)')).toBeVisible();
+    await expect(page.locator('text=Текущий вес:')).toBeVisible();
     await expect(page.locator('#bodyWeightInput')).toBeVisible();
   });
 
