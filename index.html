@@ -25,6 +25,7 @@
         }
 
         :root {
+            /* Темная тема (по умолчанию) */
             --bg-primary: #0a0a0a;
             --bg-secondary: #111111;
             --bg-card: #1a1a1a;
@@ -36,6 +37,25 @@
             --warning: #ffaa00;
             --error: #ff0066;
             --border: #333333;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --nav-shadow: rgba(0, 217, 255, 0.4);
+        }
+
+        [data-theme="light"] {
+            /* Светлая тема */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f7;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --accent-primary: #007AFF;
+            --accent-secondary: #5856D6;
+            --success: #34C759;
+            --warning: #FF9500;
+            --error: #FF3B30;
+            --border: #e5e5e7;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --nav-shadow: rgba(0, 122, 255, 0.2);
         }
 
         body {
@@ -43,6 +63,7 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
@@ -51,6 +72,7 @@
             background: var(--bg-secondary);
             min-height: 100vh;
             position: relative;
+            transition: background-color 0.3s;
         }
 
         .nav {
@@ -59,7 +81,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 25px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 2px 25px var(--nav-shadow);
         }
 
         .nav-button {
@@ -107,8 +129,45 @@
         }
 
         .logout-nav:hover {
-            background: rgba(255, 0, 102, 0.4);
             transform: scale(1.05);
+        }
+
+        /* Стили для переключателя тем */
+        .theme-toggle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-primary);
+            border-radius: 25px;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--nav-shadow);
+        }
+
+        .theme-icon {
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle.active .theme-icon {
+            transform: rotate(180deg);
         }
 
         .content {
@@ -140,6 +199,7 @@
             margin-bottom: 20px;
             color: var(--text-primary);
             text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            transition: color 0.3s;
         }
 
         .section-title {
@@ -148,6 +208,7 @@
             margin-top: 20px;
             margin-bottom: 10px;
             color: var(--text-primary);
+            transition: color 0.3s;
         }
 
         .calendar {
@@ -156,7 +217,8 @@
             padding: 15px;
             margin-bottom: 20px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s;
         }
 
         .calendar-header {
@@ -178,13 +240,14 @@
 
         .calendar-nav:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 0 15px var(--nav-shadow);
         }
 
         .calendar-month {
             font-size: 18px;
             font-weight: 600;
             color: var(--text-primary);
+            transition: color 0.3s;
         }
 
         .calendar-grid {
@@ -199,6 +262,7 @@
             color: var(--text-secondary);
             padding: 5px;
             font-weight: 500;
+            transition: color 0.3s;
         }
 
         .calendar-date {
@@ -213,6 +277,7 @@
             position: relative;
             background: var(--bg-secondary);
             color: var(--text-secondary);
+            border: 1px solid var(--border);
         }
 
         .calendar-date.has-workout {
@@ -227,11 +292,12 @@
             background: var(--accent-primary);
             color: #0a0a0a;
             font-weight: bold;
-            box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 0 15px var(--nav-shadow);
         }
 
         .calendar-date.other-month {
-            color: #444;
+            color: var(--text-secondary);
+            opacity: 0.5;
         }
 
         .calendar-date.selected {
@@ -240,7 +306,7 @@
             color: #0a0a0a !important;
             font-weight: bold;
             transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+            box-shadow: 0 0 20px var(--nav-shadow);
         }
 
         .workout-history {
@@ -249,7 +315,8 @@
             padding: 15px;
             margin-top: 20px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s;
         }
 
         .history-item {
@@ -264,7 +331,11 @@
         .history-item:hover {
             background: rgba(255, 255, 255, 0.05);
             transform: translateX(5px);
-            box-shadow: 0 0 15px rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 15px var(--nav-shadow);
+        }
+
+        [data-theme="light"] .history-item:hover {
+            background: rgba(0, 0, 0, 0.02);
         }
 
         .history-exercise {
@@ -278,12 +349,13 @@
 
         .history-exercise:hover {
             color: var(--accent-primary);
-            text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+            text-shadow: 0 0 10px var(--nav-shadow);
         }
 
         .history-details {
             font-size: 14px;
             color: var(--text-secondary);
+            transition: color 0.3s;
         }
 
         .action-buttons {
@@ -339,7 +411,7 @@
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             color: #0a0a0a;
             transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 0 25px var(--nav-shadow);
             border-color: var(--accent-primary);
         }
 
@@ -362,7 +434,7 @@
             color: #0a0a0a;
             border-color: var(--accent-primary);
             transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            box-shadow: 0 0 20px var(--nav-shadow);
         }
 
         .set-container {
@@ -417,6 +489,7 @@
             width: 100%;
             background: var(--bg-secondary);
             color: var(--text-primary);
+            transition: all 0.3s;
         }
 
         .add-button,
@@ -461,6 +534,7 @@
             border-radius: 16px;
             text-align: center;
             border: 1px solid var(--border);
+            transition: all 0.3s;
         }
 
         .stat-value {
@@ -474,6 +548,7 @@
             font-size: 12px;
             color: var(--text-secondary);
             font-weight: 500;
+            transition: color 0.3s;
         }
 
         .chart-container {
@@ -482,6 +557,7 @@
             border-radius: 16px;
             margin-bottom: 20px;
             border: 1px solid var(--border);
+            transition: all 0.3s;
         }
 
         .notification {
@@ -522,6 +598,7 @@
             max-width: 500px;
             max-height: 80vh;
             overflow-y: auto;
+            transition: all 0.3s;
         }
 
         .modal-title {
@@ -530,6 +607,7 @@
             margin-bottom: 15px;
             text-align: center;
             color: var(--text-primary);
+            transition: color 0.3s;
         }
 
         .workout-set {
@@ -538,6 +616,7 @@
             align-items: center;
             padding: 10px;
             border-bottom: 1px solid var(--border);
+            transition: border-color 0.3s;
         }
 
         .close-modal {
@@ -558,8 +637,9 @@
             padding: 20px;
             margin-top: 20px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px var(--shadow);
             text-align: center;
+            transition: all 0.3s;
         }
 
         .motivation-title {
@@ -567,7 +647,8 @@
             font-weight: bold;
             margin-bottom: 15px;
             color: var(--accent-primary);
-            text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+            text-shadow: 0 0 10px var(--nav-shadow);
+            transition: color 0.3s;
         }
 
         .motivation-image {
@@ -577,7 +658,7 @@
             border-radius: 12px;
             margin: 10px 0;
             border: 2px solid var(--accent-primary);
-            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            box-shadow: 0 0 20px var(--nav-shadow);
         }
 
         .motivation-text {
@@ -585,6 +666,7 @@
             color: var(--text-primary);
             margin: 15px 0;
             line-height: 1.5;
+            transition: color 0.3s;
         }
 
         .motivation-quote {
@@ -592,6 +674,7 @@
             color: var(--text-secondary);
             margin-top: 10px;
             font-size: 14px;
+            transition: color 0.3s;
         }
 
         .backup-section {
@@ -601,6 +684,7 @@
             margin-top: 20px;
             border: 1px solid var(--border);
             text-align: center;
+            transition: all 0.3s;
         }
 
         .backup-title {
@@ -608,6 +692,7 @@
             font-weight: bold;
             margin-bottom: 15px;
             color: var(--accent-primary);
+            transition: color 0.3s;
         }
 
         .backup-buttons {
@@ -642,7 +727,7 @@
         .export-button:hover,
         .import-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 0 15px var(--nav-shadow);
         }
 
         .file-input {
@@ -656,6 +741,7 @@
             margin-bottom: 20px;
             border: 1px solid var(--border);
             text-align: center;
+            transition: all 0.3s;
         }
 
         .auth-title {
@@ -663,6 +749,7 @@
             font-weight: bold;
             margin-bottom: 15px;
             color: var(--accent-primary);
+            transition: color 0.3s;
         }
 
         .auth-form {
@@ -678,6 +765,7 @@
             background: var(--bg-secondary);
             color: var(--text-primary);
             font-size: 14px;
+            transition: all 0.3s;
         }
 
         .user-info {
@@ -687,18 +775,21 @@
             margin-bottom: 20px;
             border: 1px solid var(--border);
             text-align: center;
+            transition: all 0.3s;
         }
 
         .user-email {
             font-size: 16px;
             color: var(--text-primary);
             margin-bottom: 10px;
+            transition: color 0.3s;
         }
 
         .sync-status {
             font-size: 12px;
             color: var(--text-secondary);
             margin-top: 10px;
+            transition: color 0.3s;
         }
 
         .sync-status.syncing {
@@ -725,7 +816,7 @@
 
         .forgot-password-link:hover {
             color: var(--accent-secondary);
-            text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+            text-shadow: 0 0 10px var(--nav-shadow);
         }
 
         .workout-date-display {
@@ -738,6 +829,7 @@
             font-size: 16px;
             font-weight: 600;
             color: var(--accent-primary);
+            transition: all 0.3s;
         }
 
         .body-weight-section {
@@ -746,18 +838,28 @@
             padding: 15px;
             margin-bottom: 20px;
             border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .body-weight-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            transition: color 0.3s;
         }
 
         .body-weight-input-container {
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 10px;
         }
 
         .body-weight-label {
             font-size: 14px;
             color: var(--text-secondary);
             min-width: 120px;
+            transition: color 0.3s;
         }
 
         @media (max-width: 480px) {
@@ -800,12 +902,16 @@
 
             .body-weight-input-container {
                 flex-direction: column;
-                align-items: stretch;
+                align-items: flex-start;
             }
 
             .body-weight-label {
                 min-width: auto;
-                margin-bottom: 5px;
+            }
+
+            .theme-toggle {
+                font-size: 12px;
+                padding: 6px 12px;
             }
         }
     </style>
@@ -854,6 +960,14 @@
             <button class="nav-button logout-nav" onclick="app.signOut()" style="display: none;">🚪 Выйти</button>
         </div>
 
+        <!-- Переключатель тем под навигацией -->
+        <div class="theme-toggle-container">
+            <button class="theme-toggle" onclick="app.toggleTheme()">
+                <span class="theme-icon" id="themeIcon">🌙</span>
+                <span id="themeText">Темная тема</span>
+            </button>
+        </div>
+
         <div id="home" class="content active">
             <div class="title">Мои тренировки</div>
 
@@ -881,7 +995,6 @@
             <!-- Информация о пользователе -->
             <div class="user-info" id="userInfo" style="display: none;">
                 <div class="user-email" id="userEmail"></div>
-                <!-- Кнопка выхода убрана отсюда -->
             </div>
 
             <div class="calendar">
@@ -966,15 +1079,14 @@
 
             <!-- Секция для ввода веса тела -->
             <div class="body-weight-section" id="bodyWeightSection" style="display: none;">
-                <div class="section-title">🏋️ Ваш вес в день тренировки:</div>
+                <div class="body-weight-title">🏋️ Ваш вес на момент тренировки (кг):</div>
                 <div class="body-weight-input-container">
-                    <div class="body-weight-label">Вес тела (кг):</div>
-                    <input type="number" class="body-weight-input" id="bodyWeightInput" 
-                           placeholder="Введите ваш вес" min="30" max="200" step="0.1"
-                           onchange="app.updateBodyWeight(this.value)">
+                    <span class="body-weight-label">Текущий вес:</span>
+                    <input type="number" id="bodyWeightInput" class="body-weight-input" placeholder="Введите ваш вес" 
+                           min="30" max="300" step="0.1">
                 </div>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
-                    💡 Укажите ваш текущий вес для отслеживания прогресса
+                <div style="margin-top: 10px; font-size: 12px; color: var(--text-secondary);">
+                    Укажите ваш текущий вес для отслеживания прогресса
                 </div>
             </div>
 
@@ -1055,7 +1167,7 @@
 
         const app = {
             exercisesDatabase: {
-                "Грудь": ["Жим гантелей под углом", "Жим гантелей на прямой скамье", "Жим штанги на прямой скамье", "Жим штанги под углом", "Жим от груди в тренажере сидя", "Разведение гантелей лёжа", "Сведение рук в кроссовере", "Сведение рук в тренажёре «Бабочка»"],
+                "Грудь": ["Жим гантелей под углом", "Жим гантелей на прямой скамье", "Жим штанги на прямой скамье", "Жим штанги под углом", "Жим от груди в тренажере сидя", "Жим от груди в тренажере лежа", "Разведение гантелей лёжа", "Сведение рук в кроссовере", "Сведение рук в тренажёре «Бабочка»"],
                 "Спина": ["Подтягивания", "Тяга вертикального блока к груди", "Тяга штанги в наклоне", "Тяга горизонтального блока к поясу", "Тяга верхнего блока в тренажёре «Хаммер»", "Тяга блока в тренажёре с упором груди", "Тяга т-грифа с упором"],
                 "Руки": ["Концентрированные сгибания на бицепс сидя", "Подъем гантелей на бицепс", "Подъем штанги на бицепс", "Разгибание рук в блочном тренажере", "Разгибание рук с гантелью в наклоне", "Разгибание рук с гантелью из-за головы", "Разгибание с канатом на трицепс", "Сгибание «Молот» («Молотки»)", "Сгибание рук в кроссовере", "Сгибание рук на скамье Скотта", "Сгибание рук с нижнего блока с канатом/рукоятью", "Французский жим"],
                 "Плечи": ["Жим гантелей сидя", "Жим над головой в тренажере", "Жим штанги с груди", "Махи гантелей в стороны", "Махи в сторону в кроссовере", "Махи в сторону в тренажере", "Подъем гантелей перед собой", "Подъем руки перед собой в кроссовере", "Разведение рук в кроссовере на задние дельты", "Разведение рук в тренажере на задние дельты", "Тяга канатов на задние дельты", "Тяга к подбородку в кроссовере", "Тяга штанги к подбородку"],
@@ -1073,7 +1185,7 @@
                 sets: [{ weight: '', reps: '', completed: false }],
                 editingWorkout: null,
                 currentUser: null,
-                bodyWeight: null // Новое поле для хранения веса тела
+                bodyWeight: ''
             },
 
             cachedHistory: {},
@@ -1084,6 +1196,9 @@
             async init() {
                 try {
                     this.showNotification('Загрузка...', 'info');
+
+                    // Инициализация темы
+                    this.initTheme();
 
                     // Слушаем изменения состояния авторизации
                     auth.onAuthStateChanged((user) => {
@@ -1099,6 +1214,38 @@
                 } catch (error) {
                     this.showNotification('Ошибка загрузки', 'error');
                     console.error('Init error:', error);
+                }
+            },
+
+            // 🔄 УПРАВЛЕНИЕ ТЕМАМИ
+            initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                this.setTheme(savedTheme);
+            },
+
+            toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                this.setTheme(newTheme);
+                this.showNotification(newTheme === 'light' ? 'Светлая тема' : 'Темная тема');
+            },
+
+            setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                this.updateThemeButton(theme);
+            },
+
+            updateThemeButton(theme) {
+                const icon = document.getElementById('themeIcon');
+                const text = document.getElementById('themeText');
+                
+                if (theme === 'light') {
+                    icon.textContent = '☀️';
+                    text.textContent = 'Светлая тема';
+                } else {
+                    icon.textContent = '🌙';
+                    text.textContent = 'Темная тема';
                 }
             },
 
@@ -1232,12 +1379,6 @@
                 } else {
                     dateDisplay.textContent = 'Сегодня (' + this.formatDate(new Date()) + ')';
                 }
-            },
-
-            // 📊 Обновление веса тела
-            updateBodyWeight(weight) {
-                this.state.bodyWeight = weight ? parseFloat(weight) : null;
-                console.log('Вес тела обновлен:', this.state.bodyWeight);
             },
 
             async signUp() {
@@ -1451,8 +1592,8 @@
                         sets: this.state.sets,
                         date: dateString,
                         userId: this.state.currentUser.uid,
-                        bodyWeight: this.state.bodyWeight, // Добавляем вес тела в тренировку
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        bodyWeight: this.state.bodyWeight || null
                     };
 
                     this.showNotification('Сохранение в облако...', 'info');
@@ -1486,7 +1627,7 @@
                 this.state.selectedExercise = null;
                 this.state.sets = [{ weight: '', reps: '', completed: false }];
                 this.state.editingWorkout = null;
-                this.state.bodyWeight = null; // Сбрасываем вес тела
+                this.state.bodyWeight = '';
 
                 document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
                     btn.classList.remove('selected');
@@ -1495,7 +1636,6 @@
                 document.getElementById('exercisesSection').style.display = 'none';
                 document.getElementById('setsSection').style.display = 'none';
                 document.getElementById('bodyWeightSection').style.display = 'none';
-                document.getElementById('bodyWeightInput').value = '';
             },
 
             renderCalendar() {
@@ -1590,7 +1730,7 @@
                             detailsText = `Подходов: ${workout.sets.length}`;
                         }
                         
-                        // Добавляем отображение веса тела если он есть
+                        // Добавляем информацию о весе тела, если она есть
                         if (workout.bodyWeight) {
                             detailsText += `, Вес тела: ${workout.bodyWeight} кг`;
                         }
@@ -1633,7 +1773,7 @@
 
                 let detailsHTML = '<div class="workout-details">';
                 
-                // Добавляем отображение веса тела если он есть
+                // Добавляем информацию о весе тела, если она есть
                 if (workout.bodyWeight) {
                     detailsHTML += `
                         <div class="workout-set">
@@ -1702,17 +1842,15 @@
                 }));
                 this.state.editingWorkout = { date: dateString, index: workoutIndex, id: workout.id };
                 this.state.selectedWorkoutDate = dateString;
-                this.state.bodyWeight = workout.bodyWeight || null; // Восстанавливаем вес тела
+                this.state.bodyWeight = workout.bodyWeight || '';
                 this.updateWorkoutDateDisplay();
 
                 document.getElementById('exercisesSection').style.display = 'block';
                 document.getElementById('setsSection').style.display = 'block';
                 document.getElementById('bodyWeightSection').style.display = 'block';
-                
-                // Заполняем поле веса тела если есть значение
-                if (this.state.bodyWeight) {
-                    document.getElementById('bodyWeightInput').value = this.state.bodyWeight;
-                }
+
+                // Устанавливаем значение веса тела в поле ввода
+                document.getElementById('bodyWeightInput').value = this.state.bodyWeight;
 
                 document.querySelectorAll('.group-button').forEach(btn => {
                     btn.classList.remove('selected');
@@ -1999,7 +2137,7 @@
                 this.renderExercises();
                 document.getElementById('exercisesSection').style.display = 'block';
                 document.getElementById('setsSection').style.display = 'none';
-                document.getElementById('bodyWeightSection').style.display = 'block'; // Показываем секцию веса тела
+                document.getElementById('bodyWeightSection').style.display = 'block';
 
                 setTimeout(() => {
                     document.getElementById('exercisesSection').scrollIntoView({
@@ -2112,7 +2250,7 @@
 
             addSet() {
                 if (this.state.selectedGroup === "Кардио") {
-                    // Для кардио только один блок ///
+                    // Для кардио только один блок
                     this.showNotification('Для кардио доступен только один блок данных', 'info');
                     return;
                 }
@@ -2177,6 +2315,8 @@
                     document.getElementById('motivationBlock').style.display = 'block';
                 } else if (tabName === 'workout') {
                     this.updateWorkoutDateDisplay();
+                    // Обновляем значение веса тела при переключении на вкладку тренировки
+                    this.state.bodyWeight = document.getElementById('bodyWeightInput').value || '';
                 }
             },
 
@@ -2187,8 +2327,13 @@
                 return `${day}.${month}.${year}`;
             }
         };
-          // mfkmklmklm //s
+
         document.addEventListener('DOMContentLoaded', () => app.init());
+
+        // Обработчик изменения веса тела
+        document.getElementById('bodyWeightInput').addEventListener('input', function() {
+            app.state.bodyWeight = this.value;
+        });
     </script>
 </body>
 
