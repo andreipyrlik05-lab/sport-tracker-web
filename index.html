@@ -937,16 +937,16 @@
                 <div style="margin-bottom: 15px; color: var(--text-secondary); font-size: 14px;">
                     Введите ваш email, и мы отправим ссылку для сброса пароля
                 </div>
-                <input type="email" id="forgotPasswordEmail" class="auth-input" placeholder="Ваш email" 
-                       style="margin-bottom: 15px;">
+                <input type="email" id="forgotPasswordEmail" class="auth-input" placeholder="Ваш email"
+                    style="margin-bottom: 15px;">
                 <div class="sync-status" id="forgotPasswordStatus"></div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="close-modal" onclick="app.sendPasswordReset()" 
-                            style="flex: 1; background: linear-gradient(135deg, var(--success), #00cc66);">
+                    <button class="close-modal" onclick="app.sendPasswordReset()"
+                        style="flex: 1; background: linear-gradient(135deg, var(--success), #00cc66);">
                         Отправить ссылку
                     </button>
-                    <button class="close-modal" onclick="app.closeForgotPassword()" 
-                            style="flex: 1; background: linear-gradient(135deg, #ff0066, #ff3385);">
+                    <button class="close-modal" onclick="app.closeForgotPassword()"
+                        style="flex: 1; background: linear-gradient(135deg, #ff0066, #ff3385);">
                         Отмена
                     </button>
                 </div>
@@ -983,12 +983,12 @@
                         <button class="auth-button" onclick="app.signUp()">Зарегистрироваться</button>
                     </form>
                 </div>
-                
+
                 <!-- Ссылка для восстановления пароля -->
                 <a href="#" onclick="app.showForgotPassword()" class="forgot-password-link">
                     Забыли пароль?
                 </a>
-                
+
                 <div class="sync-status" id="authStatus"></div>
             </div>
 
@@ -1071,7 +1071,7 @@
 
         <div id="workout" class="content">
             <div class="title">Новая тренировка</div>
-            
+
             <!-- Отображение даты тренировки -->
             <div class="workout-date-display" id="workoutDateDisplay">
                 📅 Дата тренировки: <span id="selectedDateText">Сегодня</span>
@@ -1082,8 +1082,8 @@
                 <div class="body-weight-title">🏋️ Ваш вес на момент тренировки (кг):</div>
                 <div class="body-weight-input-container">
                     <span class="body-weight-label">Текущий вес:</span>
-                    <input type="number" id="bodyWeightInput" class="body-weight-input" placeholder="Введите ваш вес" 
-                           min="30" max="300" step="0.1">
+                    <input type="number" id="bodyWeightInput" class="body-weight-input" placeholder="Введите ваш вес"
+                        min="30" max="300" step="0.1">
                 </div>
                 <div style="margin-top: 10px; font-size: 12px; color: var(--text-secondary);">
                     Укажите ваш текущий вес для отслеживания прогресса
@@ -1171,7 +1171,7 @@
                 "Спина": ["Подтягивания", "Тяга вертикального блока к груди", "Тяга штанги в наклоне", "Тяга горизонтального блока к поясу", "Тяга верхнего блока в тренажёре «Хаммер»", "Тяга блока в тренажёре с упором груди", "Тяга т-грифа с упором"],
                 "Руки": ["Концентрированные сгибания на бицепс сидя", "Подъем гантелей на бицепс", "Подъем штанги на бицепс", "Разгибание рук в блочном тренажере", "Разгибание рук с гантелью в наклоне", "Разгибание рук с гантелью из-за головы", "Разгибание с канатом на трицепс", "Сгибание «Молот» («Молотки»)", "Сгибание рук в кроссовере", "Сгибание рук на скамье Скотта", "Сгибание рук с нижнего блока с канатом/рукоятью", "Французский жим"],
                 "Плечи": ["Жим гантелей сидя", "Жим над головой в тренажере", "Жим штанги с груди", "Махи гантелей в стороны", "Махи в сторону в кроссовере", "Махи в сторону в тренажере", "Подъем гантелей перед собой", "Подъем руки перед собой в кроссовере", "Разведение рук в кроссовере на задние дельты", "Разведение рук в тренажере на задние дельты", "Тяга канатов на задние дельты", "Тяга к подбородку в кроссовере", "Тяга штанги к подбородку"],
-                "Ноги": ["Жим ногами", "Жим ноги под углом", "Икроножные мышцы", "Приседания со штангой", "Разгибание ног (по одной ноге)", "Разгибание ног сидя", "Сгибание ног стоя (по одной ноге)", "Сгибание ног лежа", "Сгибание ног сидя"],
+                "Ноги": ["Жим ногами", "Жим ноги под углом", "Икроножные мышцы", "Приседания со штангой", "Разгибание ног (по одной ноге)", "Разгибание ног сидя", "Сгибание ног стоя (по одной ноге)", "Сгибание ног лежа"],
                 "Кардио": ["Беговая дорожка", "Велотренажер", "Шаги на платформе (Степ-ап)", "Эллипс"],
                 "Пресс": ["Планка", "Подъем ног в висе", "Шаги на платформе (Степ-ап)", "Скручивания"]
             },
@@ -1239,7 +1239,7 @@
             updateThemeButton(theme) {
                 const icon = document.getElementById('themeIcon');
                 const text = document.getElementById('themeText');
-                
+
                 if (theme === 'light') {
                     icon.textContent = '☀️';
                     text.textContent = 'Светлая тема';
@@ -1271,7 +1271,7 @@
                 document.getElementById('userInfo').style.display = 'none';
                 document.getElementById('backupSection').style.display = 'none';
                 document.getElementById('analyticsBackupSection').style.display = 'none';
-                
+
                 // Скрываем кнопку выхода в навигации
                 document.querySelector('.logout-nav').style.display = 'none';
             },
@@ -1282,7 +1282,7 @@
                 document.getElementById('userEmail').textContent = user.email;
                 document.getElementById('backupSection').style.display = 'block';
                 document.getElementById('analyticsBackupSection').style.display = 'block';
-                
+
                 // Показываем кнопку выхода в навигации
                 document.querySelector('.logout-nav').style.display = 'block';
             },
@@ -1306,13 +1306,13 @@
             async sendPasswordReset() {
                 const email = document.getElementById('forgotPasswordEmail').value;
                 const statusElement = document.getElementById('forgotPasswordStatus');
-                
+
                 if (!email) {
                     statusElement.textContent = 'Введите ваш email';
                     statusElement.className = 'sync-status error';
                     return;
                 }
-                
+
                 // Проверяем валидность email
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
@@ -1320,26 +1320,26 @@
                     statusElement.className = 'sync-status error';
                     return;
                 }
-                
+
                 try {
                     statusElement.textContent = 'Отправка ссылки...';
                     statusElement.className = 'sync-status syncing';
-                    
+
                     // Отправляем email для сброса пароля
                     await auth.sendPasswordResetEmail(email);
-                    
+
                     statusElement.textContent = '✅ Ссылка для сброса пароля отправлена на ваш email!';
                     statusElement.className = 'sync-status synced';
-                    
+
                     // Закрываем модальное окно через 3 секунды
                     setTimeout(() => {
                         this.closeForgotPassword();
                         this.showNotification('Проверьте вашу почту для сброса пароля');
                     }, 3000);
-                    
+
                 } catch (error) {
                     console.error('Password reset error:', error);
-                    
+
                     const errorMessage = this.getPasswordResetErrorMessage(error.code);
                     statusElement.textContent = errorMessage;
                     statusElement.className = 'sync-status error';
@@ -1362,10 +1362,10 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const mode = urlParams.get('mode');
                 const oobCode = urlParams.get('oobCode');
-                
+
                 if (mode === 'resetPassword' && oobCode) {
                     this.showNotification('Ссылка для сброса пароля активирована. Проверьте вашу почту.', 'success');
-                    
+
                     // Очищаем URL параметры
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
@@ -1418,8 +1418,8 @@
                         email: user.email,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    console.log('Пользователь сохранен в Firestore');
+                    }, { merge: true }); // ← ДОБАВЬТЕ ЭТУ СТРОЧКУ!
+                    console.log('Пользователь сохранен/обновлен в Firestore');
                 } catch (error) {
                     console.error('Ошибка сохранения пользователя в Firestore:', error);
                 }
@@ -1443,7 +1443,7 @@
                     const userCredential = await auth.signInWithEmailAndPassword(email, password);
 
                     // 🔥 Обновляем lastLogin при входе
-                    await this.updateUserLastLogin(userCredential.user);
+                    await this.saveUserToFirestore(userCredential.user);
 
                     this.showNotification('Вход выполнен!');
                     authStatus.textContent = '';
@@ -1455,17 +1455,6 @@
                 }
             },
 
-            // 🔥 Обновление времени последнего входа
-            async updateUserLastLogin(user) {
-                try {
-                    await db.collection('users').doc(user.uid).update({
-                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    console.log('Время входа обновлено');
-                } catch (error) {
-                    console.error('Ошибка обновления времени входа:', error);
-                }
-            },
 
             async signOut() {
                 try {
@@ -1561,7 +1550,7 @@
                 try {
                     // Проверяем заполненность в зависимости от типа упражнения
                     let isValid = false;
-                    
+
                     if (this.state.selectedGroup === "Кардио") {
                         // Для кардио проверяем время и интенсивность
                         const cardioData = this.state.sets[0];
@@ -1729,12 +1718,12 @@
                         } else {
                             detailsText = `Подходов: ${workout.sets.length}`;
                         }
-                        
+
                         // Добавляем информацию о весе тела, если она есть
                         if (workout.bodyWeight) {
                             detailsText += `, Вес тела: ${workout.bodyWeight} кг`;
                         }
-                        
+
                         historyHTML += `
                             <div class="history-item">
                                 <div class="history-exercise" onclick="app.viewWorkoutDetails('${dateString}', ${index})">
@@ -1772,7 +1761,7 @@
                 document.getElementById('modalExerciseName').textContent = workout.exercise;
 
                 let detailsHTML = '<div class="workout-details">';
-                
+
                 // Добавляем информацию о весе тела, если она есть
                 if (workout.bodyWeight) {
                     detailsHTML += `
@@ -1782,7 +1771,7 @@
                         </div>
                     `;
                 }
-                
+
                 if (workout.muscleGroup === "Кардио") {
                     // Отображение для кардио
                     const cardioData = workout.sets[0];
@@ -2119,7 +2108,7 @@
                 console.log('Выбрана группа:', group);
                 this.state.selectedGroup = group;
                 this.state.selectedExercise = null;
-                
+
                 // Инициализируем соответствующий тип данных
                 if (group === "Кардио") {
                     this.state.sets = [{ time: '', intensity: '', completed: false }];
@@ -2331,10 +2320,10 @@
         document.addEventListener('DOMContentLoaded', () => app.init());
 
         // Обработчик изменения веса тела
-        document.getElementById('bodyWeightInput').addEventListener('input', function() {
+        document.getElementById('bodyWeightInput').addEventListener('input', function () {
             app.state.bodyWeight = this.value;
         });
-        </script>
+    </script>
 </body>
 
-</html> 
+</html>
