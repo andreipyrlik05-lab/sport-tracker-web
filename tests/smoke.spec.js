@@ -82,7 +82,8 @@ test.describe('Sport Tracker Smoke Tests', () => {
   // ... существующие тесты остаются без изменений ...
 
   test('should load main page', async ({ page }) => {
-    await page.goto('https://andreipyrlik05-lab.github.io/sport-tracker-web/');
+    await page.goto('https://logfitness.ru/');
+
     
     // Проверяем заголовок
     await expect(page).toHaveTitle('Sport Tracker Pro');

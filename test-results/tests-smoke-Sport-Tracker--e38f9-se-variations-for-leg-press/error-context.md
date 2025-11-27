@@ -1,0 +1,55 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]: Загрузка...
+  - generic [ref=e4]:
+    - button "📅 Календарь" [ref=e5] [cursor=pointer]
+    - button "💪 Тренировка" [ref=e6] [cursor=pointer]
+    - button "🎯 Прогресс" [ref=e7] [cursor=pointer]
+  - button "🌙 Темная тема" [ref=e9] [cursor=pointer]:
+    - generic [ref=e10]: 🌙
+    - generic [ref=e11]: Темная тема
+  - generic [ref=e12]:
+    - generic [ref=e13]: Новая тренировка
+    - generic [ref=e14]: "📅 Дата тренировки: Сегодня (27.11.2025)"
+    - generic [ref=e15]:
+      - generic [ref=e16]: "🏋️ Ваш вес на момент тренировки (кг):"
+      - generic [ref=e17]:
+        - generic [ref=e18]: "Текущий вес:"
+        - spinbutton [ref=e19]
+      - generic [ref=e20]: Укажите ваш текущий вес для отслеживания прогресса
+    - generic [ref=e21]: "1. Выберите группу мышц:"
+    - generic [ref=e22]:
+      - button "Грудь" [ref=e23] [cursor=pointer]
+      - button "Кардио" [ref=e24] [cursor=pointer]
+      - button "Ноги" [ref=e25] [cursor=pointer]
+      - button "Плечи" [ref=e26] [cursor=pointer]
+      - button "Пресс" [ref=e27] [cursor=pointer]
+      - button "Руки" [ref=e28] [cursor=pointer]
+      - button "Спина" [ref=e29] [cursor=pointer]
+    - generic [ref=e30]:
+      - generic [ref=e31]: "2. Выберите упражнение для Ноги:"
+      - generic [ref=e32]:
+        - button "Жим ногами" [active] [ref=e33] [cursor=pointer]
+        - button "Жим ноги под углом" [ref=e34] [cursor=pointer]
+        - button "Икроножные мышцы" [ref=e35] [cursor=pointer]
+        - button "Приседания со штангой" [ref=e36] [cursor=pointer]
+        - button "Разгибание ног (по одной ноге)" [ref=e37] [cursor=pointer]
+        - button "Разгибание ног сидя" [ref=e38] [cursor=pointer]
+        - button "Сгибание ног лежа" [ref=e39] [cursor=pointer]
+        - button "Сгибание ног стоя (по одной ноге)" [ref=e40] [cursor=pointer]
+    - generic [ref=e41]:
+      - generic [ref=e42]: "3. Подходы для: Жим ногами"
+      - generic [ref=e44]:
+        - generic [ref=e45]: Подход 1
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e48]: Вес (кг)
+            - spinbutton [ref=e49]
+          - generic [ref=e50]:
+            - generic [ref=e51]: Повторения
+            - spinbutton [ref=e52]
+      - button "+ Добавить подход" [ref=e53] [cursor=pointer]
+      - button "Сохранить тренировку" [ref=e54] [cursor=pointer]
+```

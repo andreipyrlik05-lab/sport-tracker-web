@@ -124,7 +124,6 @@
 
         .logout-nav {
             flex: 0.5;
-            /*background: rgba(255, 0, 102, 0.2);*/
             font-size: 12px;
             min-width: 60px;
             transition: all 0.3s;
@@ -463,6 +462,38 @@
             border: 1px solid var(--border);
             gap: 10px;
             flex-wrap: wrap;
+        }
+
+        .variations-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .variation-checkbox {
+            margin-right: 5px;
+        }
+
+        .variation-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .variation-label:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .variation-label.selected {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #0a0a0a;
         }
 
         .set-inputs {
@@ -915,6 +946,10 @@
                 font-size: 12px;
                 padding: 6px 12px;
             }
+
+            .variations-container {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -1219,7 +1254,7 @@
                 ],
                 "Руки": [
                     "Концентрированные сгибания на бицепс сидя",
-                    "Ожимания на трицепс",
+                    "Отжимания на трицепс",
                     "Подъем гантелей на бицепс",
                     "Подъем штанги на бицепс",
                     "Разгибание рук в блочном тренажере",
@@ -1245,7 +1280,7 @@
                 ]
             },
 
-                state: {
+            state: {
                 selectedWorkoutDate: null,
                 currentMonth: new Date().getMonth(),
                 currentYear: new Date().getFullYear(),
@@ -1254,13 +1289,45 @@
                 sets: [{ weight: '', reps: '', completed: false }],
                 editingWorkout: null,
                 currentUser: null,
-                bodyWeight: ''
+                bodyWeight: '',
+                variations: []
             },
 
             cachedHistory: {},
             muscleGroupChart: null,
             progressChart: null,
             unsubscribeWorkouts: null,
+
+            // 🔧 Функция для получения вариантов выполнения упражнения
+            getExerciseVariations(exerciseName) {
+                const variations = {
+                    // Вариации для жимов ногами
+                    "Жим ногами": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
+                    "Жим ноги под углом": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
+                    
+                    // Вариации для подтягиваний и тяг
+                    "Подтягивания": ["Широкий хват", "Узкий хват", "Обратный хват", "Нейтральный хват"],
+                    "Тяга вертикального блока к груди": ["Широкий хват", "Узкий хват", "Обратный хват"],
+                    "Тяга верхнего блока в тренажёре «Хаммер»": ["Широкий хват", "Узкий хват"],
+                    "Тяга горизонтального блока к поясу": ["Широкий хват", "Узкий хват", "Обратный хват"],
+                    "Тяга штанги в наклоне": ["Широкий хват", "Узкий хват"],
+                    "Тяга т-грифа с упором": ["Широкий хват", "Узкий хват"]
+                };
+                
+                return variations[exerciseName] || [];
+            },
+
+            // 🔧 Управление вариациями упражнений
+            toggleVariation(variation) {
+                const index = this.state.variations.indexOf(variation);
+                if (index > -1) {
+                    this.state.variations.splice(index, 1);
+                } else {
+                    this.state.variations.push(variation);
+                }
+                
+                console.log('Выбранные вариации:', this.state.variations);
+            },
 
             async init() {
                 try {
@@ -1487,7 +1554,7 @@
                         email: user.email,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true }); // ← ДОБАВЬТЕ ЭТУ СТРОЧКУ!
+                    }, { merge: true });
                     console.log('Пользователь сохранен/обновлен в Firestore');
                 } catch (error) {
                     console.error('Ошибка сохранения пользователя в Firestore:', error);
@@ -1523,7 +1590,6 @@
                     authStatus.className = 'sync-status error';
                 }
             },
-
 
             async signOut() {
                 try {
@@ -1651,7 +1717,8 @@
                         date: dateString,
                         userId: this.state.currentUser.uid,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        bodyWeight: this.state.bodyWeight || null
+                        bodyWeight: this.state.bodyWeight || null,
+                        variations: this.state.variations || []
                     };
 
                     this.showNotification('Сохранение в облако...', 'info');
@@ -1686,6 +1753,7 @@
                 this.state.sets = [{ weight: '', reps: '', completed: false }];
                 this.state.editingWorkout = null;
                 this.state.bodyWeight = '';
+                this.state.variations = [];
 
                 document.querySelectorAll('.group-button, .exercise-button').forEach(btn => {
                     btn.classList.remove('selected');
@@ -1793,6 +1861,11 @@
                             detailsText += `, Вес тела: ${workout.bodyWeight} кг`;
                         }
 
+                        // Добавляем информацию о вариациях, если они есть
+                        if (workout.variations && workout.variations.length > 0) {
+                            detailsText += `, Вариации: ${workout.variations.join(', ')}`;
+                        }
+
                         historyHTML += `
                                 <div class="history-item">
                                     <div class="history-exercise" onclick="app.viewWorkoutDetails('${dateString}', ${index})">
@@ -1837,6 +1910,16 @@
                             <div class="workout-set">
                                 <div>Вес тела</div>
                                 <div>${workout.bodyWeight} кг</div>
+                            </div>
+                        `;
+                }
+
+                // Добавляем информацию о вариациях, если они есть
+                if (workout.variations && workout.variations.length > 0) {
+                    detailsHTML += `
+                            <div class="workout-set">
+                                <div>Варианты выполнения</div>
+                                <div>${workout.variations.join(', ')}</div>
                             </div>
                         `;
                 }
@@ -1901,6 +1984,7 @@
                 this.state.editingWorkout = { date: dateString, index: workoutIndex, id: workout.id };
                 this.state.selectedWorkoutDate = dateString;
                 this.state.bodyWeight = workout.bodyWeight || '';
+                this.state.variations = workout.variations || [];
                 this.updateWorkoutDateDisplay();
 
                 document.getElementById('exercisesSection').style.display = 'block';
@@ -2249,6 +2333,28 @@
 
                 selectedExerciseName.textContent = this.state.selectedExercise;
                 setsContainer.innerHTML = '';
+
+                // Добавляем секцию вариаций упражнения
+                const variations = this.getExerciseVariations(this.state.selectedExercise);
+                if (variations.length > 0) {
+                    const variationsSection = document.createElement('div');
+                    variationsSection.className = 'variations-section';
+                    variationsSection.style.marginBottom = '20px';
+                    variationsSection.innerHTML = `
+                        <div class="section-title">Варианты выполнения:</div>
+                        <div class="variations-container">
+                            ${variations.map(variation => `
+                                <label class="variation-label ${this.state.variations.includes(variation) ? 'selected' : ''}">
+                                    <input type="checkbox" class="variation-checkbox" value="${variation}" 
+                                           ${this.state.variations.includes(variation) ? 'checked' : ''}
+                                           onchange="app.toggleVariation('${variation}')">
+                                    ${variation}
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                    setsContainer.appendChild(variationsSection);
+                }
 
                 if (this.state.selectedGroup === "Кардио") {
                     // Отображение для кардио
