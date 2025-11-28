@@ -895,6 +895,107 @@
             transition: color 0.3s;
         }
 
+        /* Стили для системы управления упражнениями */
+        .exercise-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .exercise-item:hover {
+            transform: translateX(5px);
+        }
+
+        .archive-btn, .unarchive-btn {
+            transition: all 0.3s ease;
+            min-width: 44px;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .archive-btn {
+            background: #666;
+            color: white;
+        }
+
+        .archive-btn:hover {
+            background: #888 !important;
+            transform: scale(1.1);
+        }
+
+        .unarchive-btn {
+            background: var(--success);
+            color: white;
+        }
+
+        .unarchive-btn:hover {
+            background: #00cc66 !important;
+            transform: scale(1.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary) !important;
+            box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.2);
+        }
+
+        .toggle-archive-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-archive-btn:hover {
+            background: var(--bg-secondary) !important;
+            border-color: var(--accent-primary) !important;
+        }
+
+        .add-custom-exercise-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .add-custom-exercise-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px var(--nav-shadow);
+        }
+
+        .archived-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .archived-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 480px) {
             .container {
                 max-width: 100%;
@@ -950,6 +1051,15 @@
             .variations-container {
                 flex-direction: column;
             }
+
+            .exercise-item {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .archive-btn, .unarchive-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -991,9 +1101,9 @@
         </div>
 
         <div class="nav">
-            <button class="nav-button active" onclick="app.showTab('home')">📅 Календарь</button>
-            <button class="nav-button" onclick="app.showTab('workout')">💪 Тренировка</button>
-            <button class="nav-button" onclick="app.showTab('analytics')">🎯 Прогресс</button>
+            <button class="nav-button active" data-tab="home">📅 Календарь</button>
+            <button class="nav-button" data-tab="workout">💪 Тренировка</button>
+            <button class="nav-button" data-tab="analytics">🎯 Прогресс</button>
             <button class="nav-button logout-nav" onclick="app.signOut()" style="display: none;">🚪 Выйти</button>
         </div>
 
@@ -1203,81 +1313,133 @@
         const db = firebase.firestore();
 
         const app = {
+            // 🆕 ОБНОВЛЕННАЯ БАЗА УПРАЖНЕНИЙ С АРХИВОМ
             exercisesDatabase: {
-                "Грудь": [
-                    "Жим гантелей на прямой скамье",
-                    "Жим гантелей под углом",
-                    "Жим от груди в тренажере лежа",
-                    "Жим от груди в тренажере сидя",
-                    "Жим штанги на прямой скамье",
-                    "Жим штанги под углом",
-                    "Разведение гантелей лёжа",
-                    "Сведение рук в кроссовере",
-                    "Сведение рук в тренажёре «Бабочка»"
-                ],
-                "Кардио": [
-                    "Беговая дорожка",
-                    "Велотренажер",
-                    "Шаги на платформе (Степ-ап)",
-                    "Эллипс"
-                ],
-                "Ноги": [
-                    "Жим ногами",
-                    "Жим ноги под углом",
-                    "Икроножные мышцы",
-                    "Приседания со штангой",
-                    "Разгибание ног (по одной ноге)",
-                    "Разгибание ног сидя",
-                    "Сгибание ног лежа",
-                    "Сгибание ног стоя (по одной ноге)"
-                ],
-                "Плечи": [
-                    "Жим гантелей сидя",
-                    "Жим над головой в тренажере",
-                    "Жим штанги с груди",
-                    "Махи в сторону в кроссовере",
-                    "Махи в сторону в тренажере",
-                    "Махи гантелей в стороны",
-                    "Подъем гантелей перед собой",
-                    "Подъем руки перед собой в кроссовере",
-                    "Разведение рук в кроссовере на задние дельты",
-                    "Разведение рук в тренажере на задние дельты",
-                    "Тяга канатов на задние дельты",
-                    "Тяга к подбородку в кроссовере",
-                    "Тяга штанги к подбородку"
-                ],
-                "Пресс": [
-                    "Планка",
-                    "Подъем ног в висе",
-                    "Скручивания",
-                    "Шаги на платформе (Степ-ап)"
-                ],
-                "Руки": [
-                    "Концентрированные сгибания на бицепс сидя",
-                    "Отжимания на трицепс",
-                    "Подъем гантелей на бицепс",
-                    "Подъем штанги на бицепс",
-                    "Разгибание рук в блочном тренажере",
-                    "Разгибание рук с гантелью в наклоне",
-                    "Разгибание рук с гантелью из-за головы",
-                    "Разгибание с канатом на трицепс",
-                    "Сгибание «Молот» («Молотки»)",
-                    "Сгибание рук в кроссовере",
-                    "Сгибание рук на скамье Скотта",
-                    "Сгибание рук с нижнего блока с канатом/рукоятью",
-                    "Французский жим"
-                ],
-                "Спина": [
-                    "Гиперэкстензия",
-                    "Гребная тяга",
-                    "Подтягивания",
-                    "Тяга вертикального блока к груди",
-                    "Тяга верхнего блока в тренажёре «Хаммер»",
-                    "Тяга горизонтального блока к поясу",
-                    "Тяга блока в тренажёре с упором груди",
-                    "Тяга штанги в наклоне",
-                    "Тяга т-грифа с упором"
-                ]
+                "Грудь": {
+                    active: [
+                        "Жим гантелей на прямой скамье",
+                        "Жим гантелей под углом",
+                        "Жим от груди в тренажере лежа",
+                        "Жим от груди в тренажере сидя",
+                        "Жим от груди в тренажере лежа",
+                        "Жим штанги на прямой скамье",
+                        "Жим штанги под углом",
+                        "Разведение гантелей лёжа",
+                        "Сведение рук в кроссовере",
+                        "Сведение рук в тренажёре «Бабочка»"
+                    ],
+                    archived: [
+                        "Пуловер с гантелью",
+                        "Кроссовер через верхние блоки",
+                        "Жим в тренажере Смита"
+                    ]
+                },
+                "Кардио": {
+                    active: [
+                        "Беговая дорожка",
+                        "Велотренажер",
+                        "Шаги на платформе (Степ-ап)",
+                        "Эллипс"
+                    ],
+                    archived: [
+                        "Скакалка",
+                        "Берпи",
+                        "Прыжки на бокс"
+                    ]
+                },
+                "Ноги": {
+                    active: [
+                        "Жим ногами",
+                        "Жим ноги под углом",
+                        "Икроножные мышцы сидя",
+                        "Икроножные мышцы стоя",
+                        "Приседания со штангой",
+                        "Разгибание ног (по одной ноге)",
+                        "Разгибание ног сидя",
+                        "Сгибание ног лежа",
+                        "Сгибание ног сидя",
+                        "Сгибание ног стоя (по одной ноге)"
+                    ],
+                    archived: [
+                        "Выпады с гантелями",
+                        "Ягодичный мостик",
+                        "Подъем на носки стоя"
+                    ]
+                },
+                "Плечи": {
+                    active: [
+                        "Жим гантелей сидя",
+                        "Жим над головой в тренажере",
+                        "Жим штанги с груди (Армейский жим)",
+                        "Махи в сторону в кроссовере",
+                        "Махи в сторону в тренажере",
+                        "Махи гантелей в стороны",
+                        "Подъем гантелей перед собой",
+                        "Подъем руки перед собой в кроссовере",
+                        "Разведение рук в кроссовере на задние дельты",
+                        "Разведение рук в тренажере на задние дельты",
+                        "Тяга канатов на задние дельты",
+                        "Тяга к подбородку в кроссовере",
+                        "Тяга штанги к подбородку узким хватом"
+                    ],
+                    archived: [
+                        "Жим Арнольда",
+                        "Тяга штанги к подбородку широким хватом"
+                    ]
+                },
+                "Пресс": {
+                    active: [
+                        "Планка",
+                        "Подъем ног в висе",
+                        "Скручивания",
+                        "Шаги на платформе (Степ-ап)"
+                    ],
+                    archived: [
+                        "Русские скручивания",
+                        "Велосипед",
+                        "Подъем корпуса на римском стуле"
+                    ]
+                },
+                "Руки": {
+                    active: [
+                        "Концентрированные сгибания на бицепс сидя",
+                        "Отжимания на трицепс",
+                        "Подъем гантелей на бицепс",
+                        "Подъем штанги на бицепс",
+                        "Разгибание рук в блочном тренажере",
+                        "Разгибание рук с гантелью в наклоне",
+                        "Разгибание из-за  головы сидя с гантелью",
+                        "Разгибание из-за  головы лежа с гантелью",
+                        "Разгибание из-за головы лежа с EZ-грифом",
+                        "Разгибание с канатом на трицепс",
+                        "Сгибание «Молот» («Молотки»)",
+                        "Сгибание рук в кроссовере",
+                        "Сгибание рук на скамье Скотта",
+                        "Сгибание рук с нижнего блока с канатом/рукоятью"
+                    ],
+                    archived: [
+                        "Сгибание Зоттмана",
+                        "Разгибание из-за головы сидя с EZ-грифом"
+                    ]
+                },
+                "Спина": {
+                    active: [
+                        "Гиперэкстензия",
+                        "Гребная тяга",
+                        "Подтягивания",
+                        "Тяга вертикального блока к груди",
+                        "Тяга верхнего блока в тренажёре «Хаммер»",
+                        "Тяга горизонтального блока к поясу",
+                        "Тяга блока в тренажёре с упором груди",
+                        "Тяга штанги в наклоне",
+                        "Тяга т-грифа с упором"
+                    ],
+                    archived: [
+                        "Тяга гантели в наклоне",
+                        "Шраги со штангой",
+                        "Пуловер в блочном тренажере"
+                    ]
+                }
             },
 
             state: {
@@ -1290,7 +1452,10 @@
                 editingWorkout: null,
                 currentUser: null,
                 bodyWeight: '',
-                variations: []
+                variations: [],
+                // 🆕 СОСТОЯНИЕ ДЛЯ УПРАВЛЕНИЯ АРХИВОМ
+                searchQuery: '',
+                showArchived: {}
             },
 
             cachedHistory: {},
@@ -1329,12 +1494,107 @@
                 console.log('Выбранные вариации:', this.state.variations);
             },
 
+            // 🆕 СИСТЕМА УПРАВЛЕНИЯ УПРАЖНЕНИЯМИ
+
+            // Мгновенное переключение статуса упражнения
+            toggleExerciseStatus(group, exercise, isActive) {
+                if (!this.exercisesDatabase[group]) return;
+                
+                const fromArray = isActive ? this.exercisesDatabase[group].active : this.exercisesDatabase[group].archived;
+                const toArray = isActive ? this.exercisesDatabase[group].archived : this.exercisesDatabase[group].active;
+                
+                const index = fromArray.indexOf(exercise);
+                if (index > -1) {
+                    fromArray.splice(index, 1);
+                    toArray.push(exercise);
+                    
+                    // Авто-сохранение в Firebase
+                    this.saveExerciseStructure();
+                    
+                    this.showNotification(exercise + ' ' + (isActive ? 'в архиве' : 'активировано'));
+                    this.renderExercises(); // Мгновенное обновление UI
+                }
+            },
+
+            // Сохранение структуры в Firebase
+            async saveExerciseStructure() {
+                if (!this.state.currentUser) return;
+                
+                try {
+                    await db.collection('exerciseStructures').doc(this.state.currentUser.uid).set({
+                        exercises: this.exercisesDatabase,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Ошибка сохранения структуры:', error);
+                }
+            },
+
+            // Загрузка структуры из Firebase  
+            async loadExerciseStructure() {
+                if (!this.state.currentUser) return;
+                
+                try {
+                    const doc = await db.collection('exerciseStructures').doc(this.state.currentUser.uid).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        Object.assign(this.exercisesDatabase, data.exercises);
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки структуры:', error);
+                }
+            },
+
+            // 🔍 УМНЫЙ ПОИСК
+            filterExercises(group, query) {
+                if (!query) return this.exercisesDatabase[group].archived;
+                
+                return this.exercisesDatabase[group].archived.filter(exercise => 
+                    exercise.toLowerCase().includes(query.toLowerCase())
+                );
+            },
+
+            // 👁️ УПРАВЛЕНИЕ ОТОБРАЖЕНИЕМ АРХИВА
+            toggleArchivedView(group) {
+                this.state.showArchived[group] = !this.state.showArchived[group];
+                this.renderExercises();
+            },
+
+            // 🔍 ОБРАБОТЧИК ПОИСКА
+            handleArchiveSearch(group, query) {
+                this.state.searchQuery = query;
+                this.renderExercises(); // Локальная фильтрация без перезагрузки
+            },
+
+            // ➕ МОДАЛКА ДЛЯ ДОБАВЛЕНИЯ УПРАЖНЕНИЯ
+            showAddCustomExerciseModal(group) {
+                const exerciseName = prompt('Введите название нового упражнения для ' + group + ':');
+                if (exerciseName && exerciseName.trim()) {
+                    this.addCustomExercise(group, exerciseName.trim());
+                }
+            },
+
+            // ДОБАВЛЕНИЕ КАСТОМНОГО УПРАЖНЕНИЯ
+            addCustomExercise(group, exerciseName) {
+                if (!this.exercisesDatabase[group]) {
+                    this.exercisesDatabase[group] = { active: [], archived: [] };
+                }
+                
+                this.exercisesDatabase[group].active.push(exerciseName);
+                this.saveExerciseStructure();
+                this.renderExercises();
+                this.showNotification(exerciseName + " добавлено!");
+            },
+
             async init() {
                 try {
                     this.showNotification('Загрузка...', 'info');
 
                     // Инициализация темы
                     this.initTheme();
+
+                    // Инициализация обработчиков навигации
+                    this.initNavigation();
 
                     // Слушаем изменения состояния авторизации
                     auth.onAuthStateChanged((user) => {
@@ -1351,6 +1611,27 @@
                     this.showNotification('Ошибка загрузки', 'error');
                     console.error('Init error:', error);
                 }
+            },
+
+            // Инициализация обработчиков навигации
+            initNavigation() {
+                const navButtons = document.querySelectorAll('.nav-button[data-tab]');
+                navButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const tabName = button.getAttribute('data-tab');
+                        this.showTab(tabName);
+                    });
+                });
+
+                // Обработчики для кнопок групп мышц
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('group-button')) {
+                        e.preventDefault();
+                        const groupName = e.target.textContent;
+                        this.selectGroup(groupName);
+                    }
+                });
             },
 
             // 🔄 УПРАВЛЕНИЕ ТЕМАМИ
@@ -1392,7 +1673,8 @@
                     // Пользователь вошел
                     this.showUserInfo(user);
                     this.loadWorkoutsFromFirebase();
-                    this.showNotification(`Добро пожаловать, ${user.email}!`);
+                    this.loadExerciseStructure(); // 🆕 Загружаем структуру упражнений
+                    this.showNotification('Добро пожаловать, ' + user.email + '!');
                 } else {
                     // Пользователь вышел
                     this.showAuthForm();
@@ -1726,11 +2008,11 @@
                     if (this.state.editingWorkout) {
                         // Обновляем существующую тренировку
                         await db.collection('workouts').doc(this.state.editingWorkout.id).update(workout);
-                        this.showNotification(`Тренировка "${this.state.selectedExercise}" обновлена!`);
+                        this.showNotification('Тренировка "' + this.state.selectedExercise + '" обновлена!');
                     } else {
                         // Создаем новую тренировку
                         await db.collection('workouts').add(workout);
-                        this.showNotification(`Тренировка "${this.state.selectedExercise}" сохранена в облако!`);
+                        this.showNotification('Тренировка "' + this.state.selectedExercise + '" сохранена в облако!');
                     }
 
                     this.resetWorkoutState();
@@ -1769,7 +2051,7 @@
                 if (!calendarGrid) return;
 
                 const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-                document.getElementById('currentMonth').textContent = `${monthNames[this.state.currentMonth]} ${this.state.currentYear}`;
+                document.getElementById('currentMonth').textContent = monthNames[this.state.currentMonth] + ' ' + this.state.currentYear;
 
                 const firstDay = new Date(this.state.currentYear, this.state.currentMonth, 1);
                 const startDate = new Date(firstDay);
@@ -1842,54 +2124,54 @@
                 dateWorkoutsElement.style.display = 'block';
                 motivationBlock.style.display = 'none';
 
-                if (workouts?.length > 0) {
-                    let historyHTML = `<div class="section-title">Тренировки за ${dateString}:</div>
-                            <button class="add-button" onclick="app.addWorkoutToDate('${dateString}')" style="margin-bottom: 15px;">
-                                + Добавить тренировку на эту дату
-                            </button>`;
-                    workouts.forEach((workout, index) => {
-                        let detailsText = '';
-                        if (workout.muscleGroup === "Кардио") {
-                            const cardioData = workout.sets[0];
-                            detailsText = `Время: ${cardioData.time} мин, Сложность: ${cardioData.intensity}/40`;
-                        } else {
-                            detailsText = `Подходов: ${workout.sets.length}`;
-                        }
-
-                        // Добавляем информацию о весе тела, если она есть
-                        if (workout.bodyWeight) {
-                            detailsText += `, Вес тела: ${workout.bodyWeight} кг`;
-                        }
-
-                        // Добавляем информацию о вариациях, если они есть
-                        if (workout.variations && workout.variations.length > 0) {
-                            detailsText += `, Вариации: ${workout.variations.join(', ')}`;
-                        }
-
-                        historyHTML += `
-                                <div class="history-item">
-                                    <div class="history-exercise" onclick="app.viewWorkoutDetails('${dateString}', ${index})">
-                                        ${workout.exercise}
-                                    </div>
-                                    <div class="history-details">
-                                        ${detailsText}
-                                    </div>
-                                    <div class="action-buttons">
-                                        <button class="edit-button" onclick="app.editWorkout('${dateString}', ${index})">✏️ Редактировать</button>
-                                        <button class="delete-button" onclick="app.deleteWorkout('${dateString}', ${index})">🗑️ Удалить</button>
-                                    </div>
-                                </div>
-                            `;
-                    });
-                    dateWorkoutsElement.innerHTML = historyHTML;
-                } else {
-                    dateWorkoutsElement.innerHTML = `
-                            <div class="section-title">На ${dateString} тренировок нет</div>
-                            <button class="add-button" onclick="app.addWorkoutToDate('${dateString}')">
-                                + Добавить тренировку на эту дату
-                            </button>
-                        `;
+                // 🔥 ПРОВЕРКА НА ПУСТОЙ МАССИВ ПОСЛЕ УДАЛЕНИЯ
+                if (!workouts || workouts.length === 0) {
+                    dateWorkoutsElement.innerHTML = 
+                        '<div class="section-title">На ' + dateString + ' тренировок нет</div>' +
+                        '<button class="add-button" onclick="app.addWorkoutToDate(\'' + dateString + '\')">' +
+                        '+ Добавить тренировку на эту дату' +
+                        '</button>';
+                    return;
                 }
+
+                let historyHTML = '<div class="section-title">Тренировки за ' + dateString + ':</div>' +
+                    '<button class="add-button" onclick="app.addWorkoutToDate(\'' + dateString + '\')" style="margin-bottom: 15px;">' +
+                    '+ Добавить тренировку на эту дату' +
+                    '</button>';
+                workouts.forEach((workout, index) => {
+                    let detailsText = '';
+                    if (workout.muscleGroup === "Кардио") {
+                        const cardioData = workout.sets[0];
+                        detailsText = 'Время: ' + cardioData.time + ' мин, Сложность: ' + cardioData.intensity + '/40';
+                    } else {
+                        detailsText = 'Подходов: ' + workout.sets.length;
+                    }
+
+                    // Добавляем информацию о весе тела, если она есть
+                    if (workout.bodyWeight) {
+                        detailsText += ', Вес тела: ' + workout.bodyWeight + ' кг';
+                    }
+
+                    // Добавляем информацию о вариациях, если они есть
+                    if (workout.variations && workout.variations.length > 0) {
+                        detailsText += ', Вариации: ' + workout.variations.join(', ');
+                    }
+
+                    historyHTML +=
+                        '<div class="history-item">' +
+                        '<div class="history-exercise" onclick="app.viewWorkoutDetails(\'' + dateString + '\', ' + index + ')">' +
+                        workout.exercise +
+                        '</div>' +
+                        '<div class="history-details">' +
+                        detailsText +
+                        '</div>' +
+                        '<div class="action-buttons">' +
+                        '<button class="edit-button" onclick="app.editWorkout(\'' + dateString + '\', ' + index + ')">✏️ Редактировать</button>' +
+                        '<button class="delete-button" onclick="app.deleteWorkout(\'' + dateString + '\', ' + index + ')">🗑️ Удалить</button>' +
+                        '</div>' +
+                        '</div>';
+                });
+                dateWorkoutsElement.innerHTML = historyHTML;
             },
 
             viewWorkoutDetails(dateString, workoutIndex) {
@@ -1906,47 +2188,43 @@
 
                 // Добавляем информацию о весе тела, если она есть
                 if (workout.bodyWeight) {
-                    detailsHTML += `
-                            <div class="workout-set">
-                                <div>Вес тела</div>
-                                <div>${workout.bodyWeight} кг</div>
-                            </div>
-                        `;
+                    detailsHTML +=
+                        '<div class="workout-set">' +
+                        '<div>Вес тела</div>' +
+                        '<div>' + workout.bodyWeight + ' кг</div>' +
+                        '</div>';
                 }
 
                 // Добавляем информацию о вариациях, если они есть
                 if (workout.variations && workout.variations.length > 0) {
-                    detailsHTML += `
-                            <div class="workout-set">
-                                <div>Варианты выполнения</div>
-                                <div>${workout.variations.join(', ')}</div>
-                            </div>
-                        `;
+                    detailsHTML +=
+                        '<div class="workout-set">' +
+                        '<div>Варианты выполнения</div>' +
+                        '<div>' + workout.variations.join(', ') + '</div>' +
+                        '</div>';
                 }
 
                 if (workout.muscleGroup === "Кардио") {
                     // Отображение для кардио
                     const cardioData = workout.sets[0];
-                    detailsHTML += `
-                            <div class="workout-set">
-                                <div>Время</div>
-                                <div>${cardioData.time} минут</div>
-                            </div>
-                            <div class="workout-set">
-                                <div>Уровень сложности</div>
-                                <div>${cardioData.intensity}/40</div>
-                            </div>
-                        `;
+                    detailsHTML +=
+                        '<div class="workout-set">' +
+                        '<div>Время</div>' +
+                        '<div>' + cardioData.time + ' минут</div>' +
+                        '</div>' +
+                        '<div class="workout-set">' +
+                        '<div>Уровень сложности</div>' +
+                        '<div>' + cardioData.intensity + '/40</div>' +
+                        '</div>';
                 } else {
                     // Отображение для силовых
                     workout.sets.forEach((set, index) => {
                         if (set.weight || set.reps) {
-                            detailsHTML += `
-                                    <div class="workout-set">
-                                        <div>Подход ${index + 1}</div>
-                                        <div>${set.weight} кг × ${set.reps} повторений</div>
-                                    </div>
-                                `;
+                            detailsHTML +=
+                                '<div class="workout-set">' +
+                                '<div>Подход ' + (index + 1) + '</div>' +
+                                '<div>' + set.weight + ' кг × ' + set.reps + ' повторений</div>' +
+                                '</div>';
                         }
                     });
                 }
@@ -1965,7 +2243,7 @@
                 this.state.selectedWorkoutDate = dateString;
                 this.updateWorkoutDateDisplay();
                 this.showTab('workout');
-                this.showNotification(`Добавляем тренировку на ${dateString}`);
+                this.showNotification('Добавляем тренировку на ' + dateString);
             },
 
             async editWorkout(dateString, workoutIndex) {
@@ -2013,7 +2291,7 @@
 
                     this.renderSets();
                     document.querySelector('.save-button').textContent = 'Обновить тренировку';
-                    this.showNotification(`Редактируем тренировку "${this.state.selectedExercise}"`);
+                    this.showNotification('Редактируем тренировку "' + this.state.selectedExercise + '"');
 
                     document.getElementById('setsSection').scrollIntoView({
                         behavior: 'smooth',
@@ -2022,6 +2300,7 @@
                 }, 100);
             },
 
+            // 🔥 ИСПРАВЛЕННЫЙ МЕТОД УДАЛЕНИЯ ТРЕНИРОВКИ
             async deleteWorkout(dateString, workoutIndex) {
                 if (!this.state.currentUser) return;
 
@@ -2031,11 +2310,36 @@
                     const workout = this.cachedHistory[dateString][workoutIndex];
                     if (workout.id) {
                         await db.collection('workouts').doc(workout.id).delete();
-                        this.showNotification('Тренировка удалена из облака!');
+                        
+                        // 🔥 ОБНОВЛЯЕМ ЛОКАЛЬНЫЙ КЭШ
+                        this.removeWorkoutFromCache(dateString, workoutIndex);
+                        
+                        // 🔥 ОБНОВЛЯЕМ КАЛЕНДАРЬ (чтобы убрать маркер тренировки)
+                        this.renderCalendar();
+                        
+                        // 🔥 ПЕРЕРИСОВЫВАЕМ ИСТОРИЮ ТРЕНИРОВОК
+                        this.showWorkoutHistory(dateString);
+                        
+                        this.showNotification('Тренировка удалена!');
                     }
                 } catch (error) {
                     console.error('Delete workout error:', error);
                     this.showNotification('Не удалось удалить тренировку', 'error');
+                }
+            },
+
+            // 🔥 НОВЫЙ МЕТОД ДЛЯ УДАЛЕНИЯ ИЗ ЛОКАЛЬНОГО КЭША
+            removeWorkoutFromCache(dateString, workoutIndex) {
+                if (this.cachedHistory[dateString] && this.cachedHistory[dateString][workoutIndex]) {
+                    // Удаляем тренировку из массива
+                    this.cachedHistory[dateString].splice(workoutIndex, 1);
+                    
+                    // Если массив пустой, удаляем дату полностью
+                    if (this.cachedHistory[dateString].length === 0) {
+                        delete this.cachedHistory[dateString];
+                    }
+                    
+                    console.log('Локальный кэш обновлен после удаления');
                 }
             },
 
@@ -2111,7 +2415,7 @@
                     this.progressChart = new Chart(progressCtx2d, {
                         type: 'line',
                         data: {
-                            labels: lastWorkouts.map((_, i) => `Тренировка ${i + 1}`),
+                            labels: lastWorkouts.map((_, i) => 'Тренировка ' + (i + 1)),
                             datasets: [{
                                 label: 'Суммарный вес (кг)',
                                 data: lastWorkouts.map(workout =>
@@ -2159,7 +2463,7 @@
 
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `sport-tracker-backup-${this.formatDate(new Date())}.json`;
+                    a.download = 'sport-tracker-backup-' + this.formatDate(new Date()) + '.json';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -2252,7 +2556,7 @@
                     const button = document.createElement('button');
                     button.className = 'group-button';
                     button.textContent = group;
-                    button.onclick = () => app.selectGroup(group);
+                    button.onclick = () => this.selectGroup(group);
                     groupsContainer.appendChild(button);
                 });
             },
@@ -2289,20 +2593,99 @@
                 }, 300);
             },
 
+            // 🆕 ОБНОВЛЕННЫЙ RENDER_EXERCISES С ВИЗУАЛЬНЫМ WORKFLOW
             renderExercises() {
                 const exercisesContainer = document.getElementById('exercisesContainer');
                 const exercisesTitle = document.getElementById('exercisesTitle');
+                
+                if (!this.state.selectedGroup) return;
+                
+                const group = this.state.selectedGroup;
+                const activeExercises = this.exercisesDatabase[group]?.active || [];
+                const archivedExercises = this.exercisesDatabase[group]?.archived || [];
+                const showArchived = this.state.showArchived[group];
+                const searchQuery = this.state.searchQuery || '';
 
-                exercisesTitle.textContent = `2. Выберите упражнение для ${this.state.selectedGroup}:`;
-                exercisesContainer.innerHTML = '';
+                exercisesTitle.textContent = '2. Выберите упражнение для ' + group + ':';
+                
+                let html =
+                    '<div class="exercises-stats" style="margin-bottom: 15px; font-size: 14px; color: var(--text-secondary);">' +
+                    '💪 ' + group + ' (' + activeExercises.length + '/' + (activeExercises.length + archivedExercises.length) + ')' +
+                    '</div>';
 
-                this.exercisesDatabase[this.state.selectedGroup].forEach(exercise => {
-                    const button = document.createElement('button');
-                    button.className = 'exercise-button';
-                    button.textContent = exercise;
-                    button.onclick = () => app.selectExercise(exercise);
-                    exercisesContainer.appendChild(button);
+                // Активные упражнения
+                activeExercises.forEach(exercise => {
+                    html +=
+                        '<div class="exercise-item">' +
+                        '<button class="exercise-button selected" ' +
+                        'onclick="app.selectExercise(\'' + exercise + '\')" ' +
+                        'style="flex: 1; margin-right: 10px;">' +
+                        '✅ ' + exercise +
+                        '</button>' +
+                        '<button class="archive-btn" ' +
+                        'onclick="app.toggleExerciseStatus(\'' + group + '\', \'' + exercise + '\', true)">' +
+                        '📁' +
+                        '</button>' +
+                        '</div>';
                 });
+
+                // Секция архива
+                if (archivedExercises.length > 0) {
+                    const filteredArchived = searchQuery ? 
+                        this.filterExercises(group, searchQuery) : archivedExercises;
+                        
+                    html +=
+                        '<div class="archived-section">' +
+                        '<div class="archived-header">' +
+                        '<button class="toggle-archive-btn" ' +
+                        'onclick="app.toggleArchivedView(\'' + group + '\')">' +
+                        '👁️ ' + (showArchived ? 'Скрыть' : 'Показать') + ' ' + archivedExercises.length + ' скрытых' +
+                        '</button>' +
+                        '</div>';
+
+                    if (showArchived) {
+                        // Поле поиска в раскрытом архиве
+                        html +=
+                            '<div style="margin-bottom: 15px;">' +
+                            '<input type="text" ' +
+                            'class="search-input" ' +
+                            'placeholder="🔍 Поиск в архиве..." ' +
+                            'value="' + searchQuery + '"' +
+                            'oninput="app.handleArchiveSearch(\'' + group + '\', this.value)">' +
+                            '</div>';
+
+                        // Архивные упражнения
+                        if (filteredArchived.length > 0) {
+                            filteredArchived.forEach(exercise => {
+                                html +=
+                                    '<div class="exercise-item">' +
+                                    '<button class="exercise-button" ' +
+                                    'onclick="app.selectExercise(\'' + exercise + '\')" ' +
+                                    'style="flex: 1; margin-right: 10px; background: var(--bg-card); opacity: 0.7;">' +
+                                    '❌ ' + exercise +
+                                    '</button>' +
+                                    '<button class="unarchive-btn" ' +
+                                    'onclick="app.toggleExerciseStatus(\'' + group + '\', \'' + exercise + '\', false)">' +
+                                    '📂' +
+                                    '</button>' +
+                                    '</div>';
+                            });
+                        } else {
+                            html += '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">Ничего не найдено</div>';
+                        }
+                    }
+                    
+                    html += '</div>';
+                }
+
+                // Кнопка добавления своего упражнения
+                html +=
+                    '<button class="add-custom-exercise-btn" ' +
+                    'onclick="app.showAddCustomExerciseModal(\'' + group + '\')">' +
+                    '➕ Добавить свое упражнение' +
+                    '</button>';
+
+                exercisesContainer.innerHTML = html;
             },
 
             selectExercise(exercise) {
@@ -2340,19 +2723,18 @@
                     const variationsSection = document.createElement('div');
                     variationsSection.className = 'variations-section';
                     variationsSection.style.marginBottom = '20px';
-                    variationsSection.innerHTML = `
-                        <div class="section-title">Варианты выполнения:</div>
-                        <div class="variations-container">
-                            ${variations.map(variation => `
-                                <label class="variation-label ${this.state.variations.includes(variation) ? 'selected' : ''}">
-                                    <input type="checkbox" class="variation-checkbox" value="${variation}" 
-                                           ${this.state.variations.includes(variation) ? 'checked' : ''}
-                                           onchange="app.toggleVariation('${variation}')">
-                                    ${variation}
-                                </label>
-                            `).join('')}
-                        </div>
-                    `;
+                    variationsSection.innerHTML =
+                        '<div class="section-title">Варианты выполнения:</div>' +
+                        '<div class="variations-container">' +
+                        variations.map(variation =>
+                            '<label class="variation-label ' + (this.state.variations.includes(variation) ? 'selected' : '') + '">' +
+                            '<input type="checkbox" class="variation-checkbox" value="' + variation + '" ' +
+                            (this.state.variations.includes(variation) ? 'checked' : '') +
+                            ' onchange="app.toggleVariation(\'' + variation + '\')">' +
+                            variation +
+                            '</label>'
+                        ).join('') +
+                        '</div>';
                     setsContainer.appendChild(variationsSection);
                 }
 
@@ -2361,21 +2743,20 @@
                     this.state.sets.forEach((set, index) => {
                         const cardioElement = document.createElement('div');
                         cardioElement.className = 'cardio-container';
-                        cardioElement.innerHTML = `
-                                <div style="min-width: 80px;">Кардио</div>
-                                <div class="cardio-inputs">
-                                    <div style="flex: 1;">
-                                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Время (мин)</div>
-                                        <input type="number" class="time-input" placeholder="0" value="${set.time}"
-                                            onchange="app.updateSet(${index}, 'time', this.value)" min="0" step="1">
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Сложность (1-40)</div>
-                                        <input type="number" class="intensity-input" placeholder="0" value="${set.intensity}"
-                                            onchange="app.updateSet(${index}, 'intensity', this.value)" min="1" max="40">
-                                    </div>
-                                </div>
-                            `;
+                        cardioElement.innerHTML =
+                            '<div style="min-width: 80px;">Кардио</div>' +
+                            '<div class="cardio-inputs">' +
+                            '<div style="flex: 1;">' +
+                            '<div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Время (мин)</div>' +
+                            '<input type="number" class="time-input" placeholder="0" value="' + set.time + '"' +
+                            ' onchange="app.updateSet(' + index + ', \'time\', this.value)" min="0" step="1">' +
+                            '</div>' +
+                            '<div style="flex: 1;">' +
+                            '<div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Сложность (1-40)</div>' +
+                            '<input type="number" class="intensity-input" placeholder="0" value="' + set.intensity + '"' +
+                            ' onchange="app.updateSet(' + index + ', \'intensity\', this.value)" min="1" max="40">' +
+                            '</div>' +
+                            '</div>';
                         setsContainer.appendChild(cardioElement);
                     });
                 } else {
@@ -2383,26 +2764,24 @@
                     this.state.sets.forEach((set, index) => {
                         const setElement = document.createElement('div');
                         setElement.className = 'set-container';
-                        setElement.innerHTML = `
-                                <div style="min-width: 80px;">Подход ${index + 1}</div>
-                                <div class="set-inputs">
-                                    <div style="flex: 1;">
-                                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Вес (кг)</div>
-                                        <input type="number" class="weight-input" placeholder="0" value="${set.weight}"
-                                            onchange="app.updateSet(${index}, 'weight', this.value)" min="0" step="0.5">
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Повторения</div>
-                                        <input type="number" class="reps-input" placeholder="0" value="${set.reps}"
-                                            onchange="app.updateSet(${index}, 'reps', this.value)" min="0">
-                                    </div>
-                                </div>
-                                ${this.state.sets.length > 1 ? `
-                                    <button onclick="app.deleteSet(${index})" style="background: #ff0066; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
-                                        🗑️
-                                    </button>
-                                ` : ''}
-                            `;
+                        setElement.innerHTML =
+                            '<div style="min-width: 80px;">Подход ' + (index + 1) + '</div>' +
+                            '<div class="set-inputs">' +
+                            '<div style="flex: 1;">' +
+                            '<div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Вес (кг)</div>' +
+                            '<input type="number" class="weight-input" placeholder="0" value="' + set.weight + '"' +
+                            ' onchange="app.updateSet(' + index + ', \'weight\', this.value)" min="0" step="0.5">' +
+                            '</div>' +
+                            '<div style="flex: 1;">' +
+                            '<div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Повторения</div>' +
+                            '<input type="number" class="reps-input" placeholder="0" value="' + set.reps + '"' +
+                            ' onchange="app.updateSet(' + index + ', \'reps\', this.value)" min="0">' +
+                            '</div>' +
+                            '</div>' +
+                            (this.state.sets.length > 1 ?
+                                '<button onclick="app.deleteSet(' + index + ')" style="background: #ff0066; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">' +
+                                '🗑️' +
+                                '</button>' : '');
                         setsContainer.appendChild(setElement);
                     });
                 }
@@ -2443,7 +2822,7 @@
             showNotification(message, type = 'info') {
                 const notification = document.getElementById('notification');
                 notification.textContent = message;
-                notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+                notification.className = 'notification ' + (type === 'error' ? 'error' : '');
                 notification.classList.add('show');
 
                 if (type !== 'info') {
@@ -2463,10 +2842,7 @@
                 document.getElementById(tabName).classList.add('active');
 
                 document.querySelectorAll('.nav-button').forEach(btn => {
-                    if (btn.textContent.includes(
-                        tabName === 'home' ? 'Календарь' :
-                            tabName === 'workout' ? 'Тренировка' : 'Прогресс'
-                    )) {
+                    if (btn.getAttribute('data-tab') === tabName) {
                         btn.classList.add('active');
                     }
                 });
@@ -2488,11 +2864,14 @@
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = date.getFullYear();
-                return `${day}.${month}.${year}`;
+                return day + '.' + month + '.' + year;
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => app.init());
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
 
         // Обработчик изменения веса тела
         document.getElementById('bodyWeightInput').addEventListener('input', function () {
