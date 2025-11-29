@@ -22,7 +22,8 @@ const exercisesData = {
   "Ноги": [
     "Жим ногами",
     "Жим ноги под углом",
-    "Икроножные мышцы",
+    "Икроножные мышцы стоя",
+    "Икроножные мышцы стоя ",
     "Приседания со штангой",
     "Разгибание ног (по одной ноге)",
     "Разгибание ног сидя",
@@ -57,13 +58,14 @@ const exercisesData = {
     "Подъем штанги на бицепс",
     "Разгибание рук в блочном тренажере",
     "Разгибание рук с гантелью в наклоне",
-    "Разгибание рук с гантелью из-за головы",
+    "Разгибание из-за головы сидя с гантелью",
+    "Разгибание из-за головы лежа с гантелью",
+    "Разгибание из-за головы лежа с EZ-грифом",
     "Разгибание с канатом на трицепс",
     "Сгибание «Молот» («Молотки»)",
     "Сгибание рук в кроссовере",
     "Сгибание рук на скамье Скотта",
-    "Сгибание рук с нижнего блока с канатом/рукоятью",
-    "Французский жим"
+    "Сгибание рук с нижнего блока с канатом/рукоятью"
   ],
   "Спина": [
     "Гиперэкстензия",
@@ -79,12 +81,9 @@ const exercisesData = {
 };
 
 test.describe('Sport Tracker Smoke Tests', () => {
-  // ... существующие тесты остаются без изменений ...
-
   test('should load main page', async ({ page }) => {
     await page.goto('https://logfitness.ru/');
 
-    
     // Проверяем заголовок
     await expect(page).toHaveTitle('Sport Tracker Pro');
     
@@ -94,8 +93,6 @@ test.describe('Sport Tracker Smoke Tests', () => {
     await expect(page.locator('.nav-button:has-text("Тренировка")')).toBeVisible();
     await expect(page.locator('.nav-button:has-text("Прогресс")')).toBeVisible();
   });
-
-  // ... остальные существующие тесты ...
 
   // НОВЫЕ ТЕСТЫ ДЛЯ ПРОВЕРКИ ВСЕХ УПРАЖНЕНИЙ
 
@@ -109,7 +106,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
     
     // Проверяем все упражнения для груди
     for (const exercise of exercisesData["Грудь"]) {
-      await expect(page.locator(`text=${exercise}`)).toBeVisible();
+      await expect(page.getByRole('button', { name: `✅ ${exercise}` }).first()).toBeVisible();
     }
   });
 
@@ -121,7 +118,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
     await page.waitForTimeout(2000);
     
     for (const exercise of exercisesData["Спина"]) {
-      await expect(page.locator(`text=${exercise}`)).toBeVisible();
+      await expect(page.getByRole('button', { name: `✅ ${exercise}` }).first()).toBeVisible();
     }
   });
 
@@ -133,7 +130,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
     await page.waitForTimeout(2000);
     
     for (const exercise of exercisesData["Руки"]) {
-      await expect(page.locator(`text=${exercise}`)).toBeVisible();
+      await expect(page.getByRole('button', { name: `✅ ${exercise}` }).first()).toBeVisible();
     }
   });
 
@@ -145,7 +142,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
     await page.waitForTimeout(2000);
     
     for (const exercise of exercisesData["Плечи"]) {
-      await expect(page.locator(`text=${exercise}`)).toBeVisible();
+      await expect(page.getByRole('button', { name: `✅ ${exercise}` }).first()).toBeVisible();
     }
   });
 
@@ -157,7 +154,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
     await page.waitForTimeout(2000);
     
     for (const exercise of exercisesData["Ноги"]) {
-      await expect(page.locator(`text=${exercise}`)).toBeVisible();
+      await expect(page.getByRole('button', { name: `✅ ${exercise}` }).first()).toBeVisible();
     }
   });
 
@@ -169,7 +166,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
     await page.waitForTimeout(2000);
     
     for (const exercise of exercisesData["Кардио"]) {
-      await expect(page.locator(`text=${exercise}`)).toBeVisible();
+      await expect(page.getByRole('button', { name: `✅ ${exercise}` }).first()).toBeVisible();
     }
   });
 
@@ -181,7 +178,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
     await page.waitForTimeout(2000);
     
     for (const exercise of exercisesData["Пресс"]) {
-      await expect(page.locator(`text=${exercise}`)).toBeVisible();
+      await expect(page.getByRole('button', { name: `✅ ${exercise}` }).first()).toBeVisible();
     }
   });
 
@@ -202,7 +199,7 @@ test.describe('Sport Tracker Smoke Tests', () => {
       
       // Проверяем все упражнения для этой группы
       for (const exercise of exercisesData[group]) {
-        await expect(page.locator(`text=${exercise}`)).toBeVisible();
+        await expect(page.getByRole('button', { name: `✅ ${exercise}` }).first()).toBeVisible();
       }
       
       // Небольшая пауза между группами
