@@ -1643,7 +1643,6 @@
                 const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
                 const newTheme = currentTheme === 'light' ? 'dark' : 'light';
                 this.setTheme(newTheme);
-                this.showNotification(newTheme === 'light' ? 'Светлая тема' : 'Темная тема');
             },
 
             setTheme(theme) {
