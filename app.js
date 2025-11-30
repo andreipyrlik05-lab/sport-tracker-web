@@ -305,6 +305,12 @@ const app = {
 
             this.renderGroups();
             this.updateWorkoutDateDisplay();
+            
+            // 🆕 ИНИЦИАЛИЗАЦИЯ ВАЛИДАЦИИ 
+            initInputValidation();
+            validateCardioIntensity();
+            validateBodyWeight();
+            
             setTimeout(() => this.hideNotification(), 2000);
         } catch (error) {
             this.showNotification('Ошибка загрузки', 'error');
@@ -1575,104 +1581,3 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('bodyWeightInput').addEventListener('input', function () {
     app.state.bodyWeight = this.value;
 });
-
-// 🔧 ФИКС ВАЛИДАЦИИ ВВОДА ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
-function initInputValidation() {
-    // Обработчики для всех числовых полей ввода
-    const numberInputs = document.querySelectorAll('input[type="number"]');
-
-    numberInputs.forEach(input => {
-        // Обработчик ввода - фильтруем нечисловые символы
-        input.addEventListener('input', function (e) {
-            // Разрешаем только цифры, точку и запятую
-            let value = this.value.replace(/[^\d.,]/g, '');
-
-            // Заменяем запятые на точки для единообразия
-            value = value.replace(/,/g, '.');
-
-            // Если есть больше одной точки, оставляем только первую
-            const parts = value.split('.');
-            if (parts.length > 2) {
-                value = parts[0] + '.' + parts.slice(1).join('');
-            }
-
-            this.value = value;
-        });
-
-        // Обработчик вставки (paste) - тоже фильтруем
-        input.addEventListener('paste', function (e) {
-            e.preventDefault();
-            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-            const numbersOnly = pastedText.replace(/[^\d.,]/g, '').replace(/,/g, '.');
-            document.execCommand('insertText', false, numbersOnly);
-        });
-
-        // Валидация при потере фокуса
-        input.addEventListener('blur', function (e) {
-            let value = this.value.trim();
-
-            // Убираем лишние точки в начале/конце
-            value = value.replace(/^\.+|\.+$/g, '');
-
-            // Если пустое значение, оставляем как есть
-            if (value === '') return;
-
-            // Проверяем валидность числа
-            const numValue = parseFloat(value);
-            if (isNaN(numValue)) {
-                this.value = '';
-                return;
-            }
-
-            // Применяем ограничения min/max если они есть
-            const min = this.getAttribute('min');
-            const max = this.getAttribute('max');
-
-            if (min && numValue < parseFloat(min)) {
-                this.value = min;
-            } else if (max && numValue > parseFloat(max)) {
-                this.value = max;
-            } else {
-                // Округляем до 0.5 если это поле веса
-                if (this.classList.contains('weight-input')) {
-                    this.value = Math.round(numValue * 2) / 2;
-                } else {
-                    // Для повторений - целые числа
-                    this.value = Math.round(numValue);
-                }
-            }
-        });
-    });
-}
-
-// 🔧 ДОПОЛНИТЕЛЬНО: Валидация для интенсивности кардио (1-40)
-function validateCardioIntensity() {
-    const intensityInputs = document.querySelectorAll('.intensity-input');
-
-    intensityInputs.forEach(input => {
-        input.addEventListener('input', function (e) {
-            let value = parseInt(this.value) || 0;
-
-            if (value < 1) value = 1;
-            if (value > 40) value = 40;
-
-            this.value = value;
-        });
-    });
-}
-
-// 🔧 ДОПОЛНИТЕЛЬНО: Валидация для веса тела
-function validateBodyWeight() {
-    const bodyWeightInput = document.getElementById('bodyWeightInput');
-    if (bodyWeightInput) {
-        bodyWeightInput.addEventListener('input', function (e) {
-            let value = parseFloat(this.value) || 0;
-
-            if (value < 30) value = 30;
-            if (value > 300) value = 300;
-
-            // Округляем до 0.1
-            this.value = Math.round(value * 10) / 10;
-        });
-    }
-}
