@@ -1870,8 +1870,8 @@ const app = {
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
 });
-       /*ПРОВЕРКА*/
-// Обработчик изменения веса тела
+       
+// Обработчик изменения веса теллла
 document.getElementById('bodyWeightInput').addEventListener('input', function () {
     app.state.bodyWeight = this.value;
 });
