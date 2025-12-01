@@ -1875,3 +1875,4 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('bodyWeightInput').addEventListener('input', function () {
     app.state.bodyWeight = this.value;
 });
+/* */
