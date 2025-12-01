@@ -1871,7 +1871,7 @@ document.addEventListener('DOMContentLoaded', () => {
     app.init();
 });
        
-// Обработчик изменения веса теллла
+// Обработчик изменения веса теллллла
 document.getElementById('bodyWeightInput').addEventListener('input', function () {
     app.state.bodyWeight = this.value;
 });
