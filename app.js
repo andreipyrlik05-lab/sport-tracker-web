@@ -320,14 +320,14 @@ const app = {
         // Обработчики для всех числовых полей ввода
         document.addEventListener('input', (e) => {
             // Вес (допускает цифры, точку и запятую)
-            if (e.target.classList.contains('weight-input') || 
+            if (e.target.classList.contains('weight-input') ||
                 e.target.classList.contains('body-weight-input')) {
                 this.validateWeightInput(e.target);
             }
-            
+
             // Повторения, время, интенсивность (только целые числа)
-            if (e.target.classList.contains('reps-input') || 
-                e.target.classList.contains('time-input') || 
+            if (e.target.classList.contains('reps-input') ||
+                e.target.classList.contains('time-input') ||
                 e.target.classList.contains('intensity-input')) {
                 this.validateIntegerInput(e.target);
             }
@@ -335,10 +335,10 @@ const app = {
 
         // Обработчики для вставки текста
         document.addEventListener('paste', (e) => {
-            if (e.target.classList.contains('weight-input') || 
+            if (e.target.classList.contains('weight-input') ||
                 e.target.classList.contains('body-weight-input') ||
-                e.target.classList.contains('reps-input') || 
-                e.target.classList.contains('time-input') || 
+                e.target.classList.contains('reps-input') ||
+                e.target.classList.contains('time-input') ||
                 e.target.classList.contains('intensity-input')) {
                 e.preventDefault();
                 this.handlePasteIntoNumberField(e);
@@ -347,10 +347,10 @@ const app = {
 
         // Обработчики для событий клавиатуры
         document.addEventListener('keydown', (e) => {
-            if (e.target.classList.contains('weight-input') || 
+            if (e.target.classList.contains('weight-input') ||
                 e.target.classList.contains('body-weight-input') ||
-                e.target.classList.contains('reps-input') || 
-                e.target.classList.contains('time-input') || 
+                e.target.classList.contains('reps-input') ||
+                e.target.classList.contains('time-input') ||
                 e.target.classList.contains('intensity-input')) {
                 this.handleKeydownOnNumberField(e);
             }
@@ -359,54 +359,74 @@ const app = {
 
     // 🔧 ВАЛИДАЦИЯ ПОЛЯ ВВОДА ВЕСА
     validateWeightInput(input) {
-        let value = input.value;
-        
+        const cursorPosition = input.selectionStart;
+        const originalValue = input.value;
+
+        let value = originalValue;
+
         // Заменяем запятые на точки
         value = value.replace(/,/g, '.');
-        
+
         // Удаляем все символы кроме цифр и точки
         value = value.replace(/[^\d.]/g, '');
-        
+
         // Удаляем лишние точки (оставляем только первую)
         const parts = value.split('.');
         if (parts.length > 2) {
             value = parts[0] + '.' + parts.slice(1).join('');
         }
-        
+
         // Ограничиваем количество знаков после запятой (до 1 знака)
         const decimalParts = value.split('.');
         if (decimalParts.length === 2 && decimalParts[1].length > 1) {
             value = decimalParts[0] + '.' + decimalParts[1].substring(0, 1);
         }
-        
+
         // Убираем ведущие нули (кроме "0.")
         if (value.length > 1 && value[0] === '0' && value[1] !== '.') {
             value = value.substring(1);
         }
-        
-        input.value = value;
-        
-        // Обновляем состояние приложения
-        const index = Array.from(input.parentElement.parentElement.parentElement.children)
-            .indexOf(input.closest('.set-container, .cardio-container'));
-        if (index !== -1) {
-            const fieldName = input.classList.contains('weight-input') ? 'weight' : 
-                            input.classList.contains('time-input') ? 'time' :
-                            input.classList.contains('intensity-input') ? 'intensity' : 'reps';
-            this.updateSet(index, fieldName, value);
+
+        // Если значение не изменилось, не обновляем поле
+        if (value === originalValue) {
+            return;
         }
+
+        // Обновляем значение
+        input.value = value;
+
+        // Вычисляем новую позицию курсора
+        const lengthDifference = value.length - originalValue.length;
+        let newCursorPosition = cursorPosition + lengthDifference;
+
+        // Корректируем позицию курсора
+        if (newCursorPosition < 0) newCursorPosition = 0;
+        if (newCursorPosition > value.length) newCursorPosition = value.length;
+
+        // Устанавливаем курсор
+        input.setSelectionRange(newCursorPosition, newCursorPosition);
+
+        // Обновляем состояние приложения
+        this.updateSetFromInput(input);
     },
 
     // 🔧 ВАЛИДАЦИЯ ПОЛЯ ВВОДА ЦЕЛЫХ ЧИСЕЛ
     validateIntegerInput(input) {
-        let value = input.value;
-        
+        const cursorPosition = input.selectionStart;
+        const originalValue = input.value;
+
+        let value = originalValue;
+
         // Удаляем все нецифровые символы
         value = value.replace(/\D/g, '');
-        
-        // Убираем ведущие нули
-        value = value.replace(/^0+/, '') || '0';
-        
+
+        // Убираем ведущие нули (кроме когда это "0")
+        if (value === '' || value === '0') {
+            value = '0';
+        } else {
+            value = value.replace(/^0+/, '');
+        }
+
         // Для интенсивности ограничиваем максимальное значение 40
         if (input.classList.contains('intensity-input')) {
             const numValue = parseInt(value) || 0;
@@ -414,17 +434,44 @@ const app = {
                 value = '40';
             }
         }
-        
+
+        // Если значение не изменилось, не обновляем поле
+        if (value === originalValue) {
+            return;
+        }
+
+        // Обновляем значение
         input.value = value;
-        
+
+        // Вычисляем новую позицию курсора
+        const lengthDifference = value.length - originalValue.length;
+        let newCursorPosition = cursorPosition + lengthDifference;
+
+        // Корректируем позицию курсора
+        if (newCursorPosition < 0) newCursorPosition = 0;
+        if (newCursorPosition > value.length) newCursorPosition = value.length;
+
+        input.setSelectionRange(newCursorPosition, newCursorPosition);
+
         // Обновляем состояние приложения
-        const index = Array.from(input.parentElement.parentElement.parentElement.children)
-            .indexOf(input.closest('.set-container, .cardio-container'));
+        this.updateSetFromInput(input);
+    },
+
+    // 🔧 ОБНОВЛЕНИЕ СОСТОЯНИЯ ИЗ INPUT
+    updateSetFromInput(input) {
+        // Находим родительский контейнер
+        const container = input.closest('.set-container, .cardio-container');
+        if (!container) return;
+
+        // Находим индекс в родительском контейнере
+        const parent = container.parentElement;
+        const index = Array.from(parent.children).indexOf(container);
+
         if (index !== -1) {
-            const fieldName = input.classList.contains('weight-input') ? 'weight' : 
-                            input.classList.contains('time-input') ? 'time' :
-                            input.classList.contains('intensity-input') ? 'intensity' : 'reps';
-            this.updateSet(index, fieldName, value);
+            const fieldName = input.classList.contains('weight-input') ? 'weight' :
+                input.classList.contains('time-input') ? 'time' :
+                    input.classList.contains('intensity-input') ? 'intensity' : 'reps';
+            this.updateSet(index, fieldName, input.value);
         }
     },
 
@@ -432,74 +479,102 @@ const app = {
     handlePasteIntoNumberField(e) {
         const input = e.target;
         const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-        
+
         // Определяем тип поля
-        const isWeightField = input.classList.contains('weight-input') || 
-                            input.classList.contains('body-weight-input');
-        
+        const isWeightField = input.classList.contains('weight-input') ||
+            input.classList.contains('body-weight-input');
+
         let cleanedText;
-        
+
         if (isWeightField) {
             // Для веса: цифры, точка, запятая
             cleanedText = pastedText.replace(/[^\d,.]/g, '').replace(/,/g, '.');
-            
+
             // Удаляем лишние точки
             const parts = cleanedText.split('.');
             if (parts.length > 2) {
                 cleanedText = parts[0] + '.' + parts.slice(1).join('');
             }
+
+            // Ограничиваем знаки после запятой
+            const decimalParts = cleanedText.split('.');
+            if (decimalParts.length === 2 && decimalParts[1].length > 1) {
+                cleanedText = decimalParts[0] + '.' + decimalParts[1].substring(0, 1);
+            }
         } else {
             // Для целых чисел: только цифры
             cleanedText = pastedText.replace(/\D/g, '');
+
+            // Для интенсивности ограничиваем 40
+            if (input.classList.contains('intensity-input')) {
+                const numValue = parseInt(cleanedText) || 0;
+                if (numValue > 40) {
+                    cleanedText = '40';
+                }
+            }
         }
-        
+
+        // Если очищенный текст пустой, ничего не вставляем
+        if (!cleanedText) {
+            e.preventDefault();
+            return;
+        }
+
         // Вставляем очищенный текст
         const start = input.selectionStart;
         const end = input.selectionEnd;
         const currentValue = input.value;
-        
+
         input.value = currentValue.substring(0, start) + cleanedText + currentValue.substring(end);
-        input.setSelectionRange(start + cleanedText.length, start + cleanedText.length);
-        
-        // Триггерим событие input для валидации
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+
+        // Устанавливаем курсор после вставленного текста
+        const newCursorPosition = start + cleanedText.length;
+        input.setSelectionRange(newCursorPosition, newCursorPosition);
+
+        // Обновляем состояние
+        setTimeout(() => {
+            if (isWeightField) {
+                this.validateWeightInput(input);
+            } else {
+                this.validateIntegerInput(input);
+            }
+        }, 0);
     },
 
     // 🔧 ОБРАБОТКА НАЖАТИЙ КЛАВИШ
     handleKeydownOnNumberField(e) {
         const input = e.target;
-        const isWeightField = input.classList.contains('weight-input') || 
-                            input.classList.contains('body-weight-input');
-        
+        const isWeightField = input.classList.contains('weight-input') ||
+            input.classList.contains('body-weight-input');
+
         // Разрешаем стандартные клавиши управления
-        if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' || 
-            e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') {
+        if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab' ||
+            e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End' ||
+            e.key === 'Enter' || e.key === 'Escape') {
             return;
         }
-        
+
         // Разрешаем Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+X
         if (e.ctrlKey || e.metaKey) {
             return;
         }
-        
-        // Для полей веса разрешаем цифры, точку и запятую
-        if (isWeightField) {
-            if (!/[\d.,]/.test(e.key)) {
-                e.preventDefault();
-                return;
-            }
-            
-            // Если уже есть точка, не разрешаем еще одну
-            if ((e.key === '.' || e.key === ',') && input.value.includes('.')) {
-                e.preventDefault();
-                return;
-            }
-        } else {
-            // Для целых чисел разрешаем только цифры
-            if (!/\d/.test(e.key)) {
-                e.preventDefault();
-            }
+
+        // Разрешаем цифры
+        if (/\d/.test(e.key)) {
+            return;
         }
+
+        // Для полей веса разрешаем точку и запятую
+        if (isWeightField && (e.key === '.' || e.key === ',')) {
+            // Если уже есть точка, не разрешаем еще одну
+            if (input.value.includes('.')) {
+                e.preventDefault();
+            }
+            return;
+        }
+
+        // Все остальные клавиши блокируем
+        e.preventDefault();
     },
 
     // Инициализация обработчиков навигации
@@ -1677,7 +1752,7 @@ const app = {
                 setsContainer.appendChild(setElement);
             });
         }
-        
+
         // Инициализируем валидацию для новых полей
         setTimeout(() => {
             const newInputs = setsContainer.querySelectorAll('input[type="number"]');
@@ -1685,18 +1760,18 @@ const app = {
                 input.addEventListener('input', (e) => {
                     if (e.target.classList.contains('weight-input')) {
                         this.validateWeightInput(e.target);
-                    } else if (e.target.classList.contains('reps-input') || 
-                               e.target.classList.contains('time-input') || 
-                               e.target.classList.contains('intensity-input')) {
+                    } else if (e.target.classList.contains('reps-input') ||
+                        e.target.classList.contains('time-input') ||
+                        e.target.classList.contains('intensity-input')) {
                         this.validateIntegerInput(e.target);
                     }
                 });
-                
+
                 input.addEventListener('paste', (e) => {
                     e.preventDefault();
                     this.handlePasteIntoNumberField(e);
                 });
-                
+
                 input.addEventListener('keydown', (e) => {
                     this.handleKeydownOnNumberField(e);
                 });
@@ -1775,7 +1850,7 @@ const app = {
             // Обновляем значение веса тела при переключении на вкладку тренировки
             const bodyWeightInput = document.getElementById('bodyWeightInput');
             this.state.bodyWeight = bodyWeightInput.value || '';
-            
+
             // Добавляем класс для валидации веса тела, если его нет
             if (!bodyWeightInput.classList.contains('body-weight-input')) {
                 bodyWeightInput.classList.add('body-weight-input');
