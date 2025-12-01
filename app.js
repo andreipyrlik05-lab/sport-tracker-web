@@ -308,6 +308,12 @@ const app = {
 
             this.renderGroups();
             this.updateWorkoutDateDisplay();
+            
+            // 🆕 ИНИЦИАЛИЗАЦИЯ ВАЛИДАЦИИ 
+            initInputValidation();
+            validateCardioIntensity();
+            validateBodyWeight();
+            
             setTimeout(() => this.hideNotification(), 2000);
         } catch (error) {
             this.showNotification('Ошибка загрузки', 'error');
@@ -1875,3 +1881,5 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('bodyWeightInput').addEventListener('input', function () {
     app.state.bodyWeight = this.value;
 });
+
+
