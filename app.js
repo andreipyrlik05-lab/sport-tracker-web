@@ -1523,9 +1523,8 @@ const app = {
         notification.className = 'notification ' + (type === 'error' ? 'error' : '');
         notification.classList.add('show');
 
-        if (type !== 'info') {
-            setTimeout(() => this.hideNotification(), 3000);
-        }
+        // Все уведомления исчезают через 2 секунды
+        setTimeout(() => this.hideNotification(), 2000);
     },
 
     hideNotification() {
