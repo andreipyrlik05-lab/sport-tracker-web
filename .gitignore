@@ -31,3 +31,4 @@ settings.gradle
 store_icon.png
 twa-manifest.json
 yarn.lock
+assets/node_modules/
