@@ -1,2 +1,39 @@
 playwright-report/
 *.backup
+
+# Android build directories
+.gradle/
+build/
+app/build/
+
+# Android specific files
+android.keystore
+*.jks
+*.keystore
+
+# Gradle
+gradle/
+.gradle-wrapper/
+
+# Android command line tools
+commandlinetools-linux-*.zip
+
+# ===== Android/PWA Build Files =====
+
+.gradle/
+build/
+app/
+gradle/
+gradlew
+gradlew.bat
+gradle.properties
+android.keystore
+*.keystore
+*.jks
+build.gradle
+settings.gradle
+commandlinetools-linux-*.zip
+twa-manifest.json
+manifest-checksum.txt
+store_icon.png
+.gitignore.local
