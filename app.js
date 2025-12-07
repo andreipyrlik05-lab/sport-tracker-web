@@ -154,7 +154,9 @@ const app = {
         variations: [],
         // 🆕 СОСТОЯНИЕ ДЛЯ УПРАВЛЕНИЯ АРХИВОМ
         searchQuery: '',
-        showArchived: {}
+        showArchived: {},
+        // 🔧 ДЛЯ ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ
+        workoutToDelete: null
     },
 
     cachedHistory: {},
@@ -865,7 +867,7 @@ const app = {
                 '</div>' +
                 '<div class="action-buttons">' +
                 '<button class="edit-button" onclick="app.editWorkout(\'' + dateString + '\', ' + index + ')">✏️ Редактировать</button>' +
-                '<button class="delete-button" onclick="app.deleteWorkout(\'' + dateString + '\', ' + index + ')">🗑️ Удалить</button>' +
+                '<button class="delete-button" onclick="app.confirmDeleteWorkout(\'' + dateString + '\', ' + index + ')">🗑️ Удалить</button>' +
                 '</div>' +
                 '</div>';
         });
@@ -998,14 +1000,141 @@ const app = {
         }, 100);
     },
 
-    // 🔥 ИСПРАВЛЕННЫЙ МЕТОД УДАЛЕНИЯ ТРЕНИРОВКИ
-    async deleteWorkout(dateString, workoutIndex) {
-        if (!this.state.currentUser) return;
+    // 🔥 КРАСИВОЕ ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ ТРЕНИРОВКИ
+    confirmDeleteWorkout(dateString, workoutIndex) {
+        const workout = this.cachedHistory[dateString][workoutIndex];
+        if (!workout) return;
 
-        if (!confirm('Удалить эту тренировку?')) return;
+        // Сохраняем данные для удаления
+        this.state.workoutToDelete = { dateString, workoutIndex, workout };
+
+        // Показываем красивое модальное окно подтверждения
+        this.showDeleteConfirmationModal(workout);
+    },
+
+    // 🔧 ПОКАЗАТЬ МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ
+    showDeleteConfirmationModal(workout) {
+        // Создаем HTML для модального окна
+        const modalHTML = `
+            <div id="deleteConfirmationModal" class="modal" style="display: flex; animation: fadeIn 0.3s ease-in;">
+                <div class="modal-content" style="max-width: 400px; text-align: center;">
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 64px; margin-bottom: 10px;">⚠️</div>
+                        <div class="modal-title">Удалить тренировку?</div>
+                    </div>
+                    
+                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                        <div style="font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">
+                            ${workout.exercise}
+                        </div>
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 5px;">
+                            Группа: ${workout.muscleGroup}
+                        </div>
+                        <div style="font-size: 14px; color: var(--text-secondary);">
+                            Дата: ${workout.date}
+                        </div>
+                        ${workout.bodyWeight ? `<div style="font-size: 14px; color: var(--text-secondary);">
+                            Вес тела: ${workout.bodyWeight} кг
+                        </div>` : ''}
+                        ${workout.variations?.length > 0 ? `<div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">
+                            Вариации: ${workout.variations.join(', ')}
+                        </div>` : ''}
+                    </div>
+                    
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 25px; line-height: 1.5;">
+                        Эта тренировка будет удалена навсегда. Отменить это действие будет невозможно.
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="cancelDeleteBtn" 
+                                style="flex: 1; padding: 12px; background: var(--bg-secondary); 
+                                       color: var(--text-primary); border: 1px solid var(--border); 
+                                       border-radius: 10px; font-size: 16px; cursor: pointer;
+                                       transition: all 0.3s;">
+                            Отмена
+                        </button>
+                        <button id="confirmDeleteBtn" 
+                                style="flex: 1; padding: 12px; background: linear-gradient(135deg, #ff0066, #ff3385); 
+                                       color: white; border: none; border-radius: 10px; 
+                                       font-size: 16px; font-weight: 600; cursor: pointer;
+                                       transition: all 0.3s; box-shadow: 0 4px 15px rgba(255, 0, 102, 0.3);">
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Добавляем модальное окно в DOM
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHTML;
+        document.body.appendChild(modalContainer.firstElementChild);
+
+        // Добавляем стили для анимации
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            #cancelDeleteBtn:hover {
+                background: var(--bg-card) !important;
+                transform: translateY(-2px);
+            }
+            
+            #confirmDeleteBtn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(255, 0, 102, 0.4) !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Назначаем обработчики событий
+        document.getElementById('cancelDeleteBtn').onclick = () => {
+            this.closeDeleteConfirmationModal();
+        };
+
+        document.getElementById('confirmDeleteBtn').onclick = () => {
+            this.executeDeleteWorkout();
+        };
+
+        // Закрытие при клике вне модального окна
+        document.getElementById('deleteConfirmationModal').onclick = (e) => {
+            if (e.target.id === 'deleteConfirmationModal') {
+                this.closeDeleteConfirmationModal();
+            }
+        };
+    },
+
+    // 🔧 ЗАКРЫТЬ МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ
+    closeDeleteConfirmationModal() {
+        const modal = document.getElementById('deleteConfirmationModal');
+        if (modal) {
+            modal.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        }
+        this.state.workoutToDelete = null;
+    },
+
+    // 🔧 ВЫПОЛНИТЬ УДАЛЕНИЕ ТРЕНИРОВКИ
+    async executeDeleteWorkout() {
+        if (!this.state.workoutToDelete || !this.state.currentUser) {
+            this.closeDeleteConfirmationModal();
+            return;
+        }
+
+        const { dateString, workoutIndex, workout } = this.state.workoutToDelete;
 
         try {
-            const workout = this.cachedHistory[dateString][workoutIndex];
+            // Показываем индикатор загрузки в кнопке
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const originalText = confirmBtn.textContent;
+            confirmBtn.textContent = 'Удаление...';
+            confirmBtn.disabled = true;
+
             if (workout.id) {
                 await db.collection('workouts').doc(workout.id).delete();
 
@@ -1020,9 +1149,21 @@ const app = {
 
                 this.showNotification('Тренировка удалена!');
             }
+
+            // Восстанавливаем кнопку
+            confirmBtn.textContent = originalText;
+            confirmBtn.disabled = false;
+
+            this.closeDeleteConfirmationModal();
+
         } catch (error) {
             console.error('Delete workout error:', error);
             this.showNotification('Не удалось удалить тренировку', 'error');
+            
+            // Восстанавливаем кнопку в случае ошибки
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            confirmBtn.textContent = 'Попробовать снова';
+            confirmBtn.disabled = false;
         }
     },
 
