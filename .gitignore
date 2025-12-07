@@ -1,39 +1,33 @@
-playwright-report/
-*.backup
-
-# Android build directories
-.gradle/
-build/
-app/build/
-
-# Android specific files
-android.keystore
-*.jks
-*.keystore
-
-# Gradle
-gradle/
-.gradle-wrapper/
-
-# Android command line tools
-commandlinetools-linux-*.zip
 
 # ===== Android/PWA Build Files =====
-
+# Android build directories
+# Android command line tools
+# Android specific files
+# Gradle
+# Node.js dependencies
+# Remaining Android files
+*.backup
+*.jks
+*.keystore
+.gitignore.local
+.gradle-wrapper/
 .gradle/
-build/
+android.keystore
 app/
+app/build/
+build.gradle
+build/
+commandlinetools-linux-*.zip
+commandlinetools-linux-9477386_latest.zip
+gradle.properties
 gradle/
 gradlew
 gradlew.bat
-gradle.properties
-android.keystore
-*.keystore
-*.jks
-build.gradle
-settings.gradle
-commandlinetools-linux-*.zip
-twa-manifest.json
 manifest-checksum.txt
+node_modules/
+package-lock.json
+playwright-report/
+settings.gradle
 store_icon.png
-.gitignore.local
+twa-manifest.json
+yarn.lock
