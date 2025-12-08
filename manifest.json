@@ -1,6 +1,7 @@
 {
   "name": "Sport Tracker Pro",
   "short_name": "SportTracker",
+  "id": "/",
   "description": "Трекер тренировок и прогресса",
   "start_url": "/",
   "display": "standalone",
@@ -92,7 +93,8 @@
       "icons": [
         {
           "src": "icons/shortcut-workout.png",
-          "sizes": "96x96"
+          "sizes": "96x96",
+          "type": "image/png"
         }
       ]
     },
@@ -104,7 +106,8 @@
       "icons": [
         {
           "src": "icons/shortcut-calendar.png",
-          "sizes": "96x96"
+          "sizes": "96x96",
+          "type": "image/png"
         }
       ]
     }
