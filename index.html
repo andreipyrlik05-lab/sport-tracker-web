@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sport Tracker Pro</title>
-    
+
     <!-- Favicon для всех браузеров -->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="icons/icon-32.png" type="image/png" sizes="32x32">
     <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    
+
     <!-- Manifest для PWA -->
     <link rel="manifest" href="manifest.json">
-    
+
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="icons/icon-180.png">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
     <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-    
+
     <!-- Windows Metro -->
     <meta name="msapplication-TileImage" content="icons/icon-144.png">
     <meta name="msapplication-TileColor" content="#007AFF">
     <meta name="msapplication-config" content="none">
-    
+
     <!-- Основные PWA мета-теги -->
     <meta name="theme-color" content="#007AFF">
     <meta name="mobile-web-app-capable" content="yes">
@@ -33,26 +34,28 @@
     <meta name="apple-mobile-web-app-title" content="Sport Tracker Pro">
     <meta name="application-name" content="Sport Tracker Pro">
     <meta name="format-detection" content="telephone=no">
-    
+
     <!-- Для лучшей индексации в магазинах приложений -->
-    <meta name="description" content="Трекер тренировок и прогресса. Отслеживайте свои спортивные достижения и прогресс.">
+    <meta name="description"
+        content="Трекер тренировок и прогресса. Отслеживайте свои спортивные достижения и прогресс.">
     <meta name="keywords" content="спорт, тренировки, трекер, фитнес, прогресс, упражнения">
-    
+
     <!-- Open Graph для соцсетей (если нужно делиться) -->
     <meta property="og:title" content="Sport Tracker Pro">
     <meta property="og:description" content="Трекер тренировок и прогресса">
     <meta property="og:image" content="icons/icon-512.png">
     <meta property="og:type" content="website">
-    
+
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <div class="notification" id="notification"></div>
@@ -286,5 +289,33 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Регистрация Service Worker с дополнительными параметрами
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js', {
+                    scope: '/',
+                    updateViaCache: 'none'  // Важно для PWA Builder!
+                })
+                    .then(registration => {
+                        console.log('✅ Service Worker зарегистрирован:', registration.scope);
+
+                        // Проверяем фоновую синхронизацию
+                        if ('sync' in registration) {
+                            console.log('✅ Background Sync поддерживается');
+                        }
+
+                        // Проверяем push уведомления
+                        if ('pushManager' in registration) {
+                            console.log('✅ Push Notifications поддерживаются');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Ошибка регистрации:', error);
+                    });
+            });
+        }
+    </script>
 </body>
+
 </html>

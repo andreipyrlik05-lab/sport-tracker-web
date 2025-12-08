@@ -133,3 +133,5 @@ async function syncData() {
 }
 
 console.log('✅ Service Worker загружен и готов к работе');
+EOF
+
