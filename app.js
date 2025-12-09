@@ -181,7 +181,7 @@ const app = {
             "Жим ногами в тренажере (горизонтальный)": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
             "Жим ногами в тренажере (вверх, под углом 45)": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
             "Приседания со штангой": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
-            
+
 
 
             // Вариации для подтягиваний и тяг
@@ -1722,12 +1722,48 @@ function validateCardioIntensity() {
 // 🔧 Валидация для веса тела
 function validateBodyWeight() {
     const bodyWeightInput = document.getElementById('bodyWeightInput');
-    if (bodyWeightInput) {
-        bodyWeightInput.addEventListener('input', function (e) {
-            let value = parseFloat(this.value) || 0;
-            if (value < 30) value = 30;
-            if (value > 300) value = 300;
-            this.value = Math.round(value * 10) / 10;
-        });
-    }
+    if (!bodyWeightInput) return;
+    
+    // 1. Очистка ввода: цифры + точка/запятая
+    bodyWeightInput.addEventListener('input', function () {
+        let value = this.value;
+        
+        // Удаляем все кроме цифр, точки и запятой
+        value = value.replace(/[^\d.,]/g, '');
+        
+        // Заменяем запятые на точки
+        value = value.replace(/,/g, '.');
+        
+        // Убираем лишние точки (оставляем первую)
+        const parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        // Ограничение длины
+        if (value.length > 7) {
+            value = value.slice(0, 7);
+        }
+        
+        this.value = value;
+    });
+    
+    // 2. Простая валидация диапазона при потере фокуса
+    bodyWeightInput.addEventListener('blur', function () {
+        const numValue = parseFloat(this.value);
+        
+        // Проверка на число
+        if (isNaN(numValue)) {
+            this.value = '';
+            return;
+        }
+        
+        // Коррекция границ
+        if (numValue < 30) {
+            this.value = '30';
+        } else if (numValue > 300) {
+            this.value = '300';
+        }
+        // Если 30-300 - оставляем как ввели (сохраняем точность)
+    });
 }
