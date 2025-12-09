@@ -26,7 +26,7 @@ const app = {
                 "Жим штанги под углом",
                 "Разведение гантелей лёжа",
                 "Сведение рук в кроссовере",
-                "Сведение рук в тренажёре «Бабочка»"
+                "Сведения рук в тренажёре «Бабочка»"
             ],
             archived: [
                 "Пуловер с гантелью",
@@ -38,6 +38,9 @@ const app = {
             active: [
                 "Беговая дорожка",
                 "Велотренажер",
+                "Гребной тренажер",
+                "Лыжный тренажер SkiErg",
+                "Сайклинг",
                 "Шаги на платформе (Степ-ап)",
                 "Эллипс"
             ],
@@ -49,19 +52,25 @@ const app = {
         },
         "Ноги": {
             active: [
-                "Жим ногами",
-                "Жим ноги под углом",
+                "Жим ногами в тренажере (горизонтальный)",
+                "Жим ногами в тренажере (вверх, под углом 45)",
                 "Икроножные мышцы сидя",
                 "Икроножные мышцы стоя",
+                "Отведения ноги назад в тренажере",
+                "Отведения ноги назад в кроссовере",
+                "Отведения ноги в бок в кроссовере",
                 "Приседания со штангой",
+                "Разведение ног тренажере",
                 "Разгибание ног (по одной ноге)",
                 "Разгибание ног сидя",
+                "Сведение ног в тренажере",
                 "Сгибание ног лежа",
                 "Сгибание ног сидя",
                 "Сгибание ног стоя (по одной ноге)"
             ],
             archived: [
                 "Выпады с гантелями",
+                "Выпады со штангой",
                 "Ягодичный мостик",
             ]
         },
@@ -126,6 +135,8 @@ const app = {
                 "Гиперэкстензия",
                 "Гребная тяга",
                 "Подтягивания",
+                "Становая тяга классическая",
+                "Становая тяга румынская",
                 "Тяга вертикального блока к груди",
                 "Тяга верхнего блока в тренажёре «Хаммер»",
                 "Тяга горизонтального блока к поясу",
@@ -135,7 +146,8 @@ const app = {
             ],
             archived: [
                 "Тяга гантели в наклоне",
-                "Шраги со штангой",
+                "Шраги со штангой стоя",
+                "Шраги с гантелями стоя",
                 "Пуловер в блочном тренажере"
             ]
         }
@@ -154,9 +166,7 @@ const app = {
         variations: [],
         // 🆕 СОСТОЯНИЕ ДЛЯ УПРАВЛЕНИЯ АРХИВОМ
         searchQuery: '',
-        showArchived: {},
-        // 🔧 ДЛЯ ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ
-        workoutToDelete: null
+        showArchived: {}
     },
 
     cachedHistory: {},
@@ -168,8 +178,11 @@ const app = {
     getExerciseVariations(exerciseName) {
         const variations = {
             // Вариации для жимов ногами
-            "Жим ногами": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
-            "Жим ноги под углом": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
+            "Жим ногами в тренажере (горизонтальный)": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
+            "Жим ногами в тренажере (вверх, под углом 45)": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
+            "Приседания со штангой": ["Узкая постановка", "Широкая постановка", "Средняя постановка"],
+
+
 
             // Вариации для подтягиваний и тяг
             "Подтягивания": ["Широкий хват", "Узкий хват", "Обратный хват", "Нейтральный хват"],
@@ -196,8 +209,6 @@ const app = {
     },
 
     // 🆕 СИСТЕМА УПРАВЛЕНИЯ УПРАЖНЕНИЯМИ
-
-    // Мгновенное переключение статуса упражнения
     toggleExerciseStatus(group, exercise, isActive) {
         if (!this.exercisesDatabase[group]) return;
 
@@ -213,7 +224,7 @@ const app = {
             this.saveExerciseStructure();
 
             this.showNotification(exercise + ' ' + (isActive ? 'в архиве' : 'активировано'));
-            this.renderExercises(); // Мгновенное обновление UI
+            this.renderExercises();
         }
     },
 
@@ -231,7 +242,7 @@ const app = {
         }
     },
 
-    // Загрузка структуры из Firebase  
+    // Загрузка структуры из Firebase
     async loadExerciseStructure() {
         if (!this.state.currentUser) return;
 
@@ -264,7 +275,7 @@ const app = {
     // 🔍 ОБРАБОТЧИК ПОИСКА
     handleArchiveSearch(group, query) {
         this.state.searchQuery = query;
-        this.renderExercises(); // Локальная фильтрация без перезагрузки
+        this.renderExercises();
     },
 
     // ➕ МОДАЛКА ДЛЯ ДОБАВЛЕНИЯ УПРАЖНЕНИЯ
@@ -309,7 +320,7 @@ const app = {
             this.updateWorkoutDateDisplay();
             setTimeout(() => this.hideNotification(), 2000);
         } catch (error) {
-            this.showNotification('Ошибка загрузки', 'error');
+            this.showNotification('Ошибка загрузка', 'error');
             console.error('Init error:', error);
         }
     },
@@ -373,7 +384,7 @@ const app = {
             // Пользователь вошел
             this.showUserInfo(user);
             this.loadWorkoutsFromFirebase();
-            this.loadExerciseStructure(); // 🆕 Загружаем структуру упражнений
+            this.loadExerciseStructure();
             this.showNotification('Добро пожаловать, ' + user.email + '!');
         } else {
             // Пользователь вышел
@@ -824,7 +835,6 @@ const app = {
         dateWorkoutsElement.style.display = 'block';
         motivationBlock.style.display = 'none';
 
-        // 🔥 ПРОВЕРКА НА ПУСТОЙ МАССИВ ПОСЛЕ УДАЛЕНИЯ
         if (!workouts || workouts.length === 0) {
             dateWorkoutsElement.innerHTML =
                 '<div class="section-title">На ' + dateString + ' тренировок нет</div>' +
@@ -838,7 +848,8 @@ const app = {
             '<button class="add-button" onclick="app.addWorkoutToDate(\'' + dateString + '\')" style="margin-bottom: 15px;">' +
             '+ Добавить тренировку на эту дату' +
             '</button>';
-        workouts.forEach((workout, index) => {
+
+        workouts.forEach((workout) => {
             let detailsText = '';
             if (workout.muscleGroup === "Кардио") {
                 const cardioData = workout.sets[0];
@@ -847,46 +858,49 @@ const app = {
                 detailsText = 'Подходов: ' + workout.sets.length;
             }
 
-            // Добавляем информацию о весе тела, если она есть
             if (workout.bodyWeight) {
                 detailsText += ', Вес тела: ' + workout.bodyWeight + ' кг';
             }
 
-            // Добавляем информацию о вариациях, если они есть
             if (workout.variations && workout.variations.length > 0) {
                 detailsText += ', Вариации: ' + workout.variations.join(', ');
             }
 
             historyHTML +=
                 '<div class="history-item">' +
-                '<div class="history-exercise" onclick="app.viewWorkoutDetails(\'' + dateString + '\', ' + index + ')">' +
+                '<div class="history-exercise" onclick="app.viewWorkoutDetails(\'' + dateString + '\', \'' + workout.id + '\')">' +
                 workout.exercise +
                 '</div>' +
                 '<div class="history-details">' +
                 detailsText +
                 '</div>' +
                 '<div class="action-buttons">' +
-                '<button class="edit-button" onclick="app.editWorkout(\'' + dateString + '\', ' + index + ')">✏️ Редактировать</button>' +
-                '<button class="delete-button" onclick="app.confirmDeleteWorkout(\'' + dateString + '\', ' + index + ')">🗑️ Удалить</button>' +
+                '<button class="edit-button" onclick="app.editWorkoutById(\'' + dateString + '\', \'' + workout.id + '\')">✏️ Редактировать</button>' +
+                '<button class="delete-button" onclick="app.confirmDeleteWorkoutById(\'' + dateString + '\', \'' + workout.id + '\')">🗑️ Удалить</button>' +
                 '</div>' +
                 '</div>';
         });
+
         dateWorkoutsElement.innerHTML = historyHTML;
     },
 
-    viewWorkoutDetails(dateString, workoutIndex) {
+    viewWorkoutDetails(dateString, workoutId) {
         const workoutHistory = this.cachedHistory;
-        if (!workoutHistory[dateString]?.[workoutIndex]) {
+        if (!workoutHistory[dateString]) {
             this.showNotification('Тренировка не найдена', 'error');
             return;
         }
 
-        const workout = workoutHistory[dateString][workoutIndex];
+        const workout = workoutHistory[dateString].find(w => w.id === workoutId);
+        if (!workout) {
+            this.showNotification('Тренировка не найдена', 'error');
+            return;
+        }
+
         document.getElementById('modalExerciseName').textContent = workout.exercise;
 
         let detailsHTML = '<div class="workout-details">';
 
-        // Добавляем информацию о весе тела, если она есть
         if (workout.bodyWeight) {
             detailsHTML +=
                 '<div class="workout-set">' +
@@ -895,7 +909,6 @@ const app = {
                 '</div>';
         }
 
-        // Добавляем информацию о вариациях, если они есть
         if (workout.variations && workout.variations.length > 0) {
             detailsHTML +=
                 '<div class="workout-set">' +
@@ -905,7 +918,6 @@ const app = {
         }
 
         if (workout.muscleGroup === "Кардио") {
-            // Отображение для кардио
             const cardioData = workout.sets[0];
             detailsHTML +=
                 '<div class="workout-set">' +
@@ -917,7 +929,6 @@ const app = {
                 '<div>' + cardioData.intensity + '/40</div>' +
                 '</div>';
         } else {
-            // Отображение для силовых
             workout.sets.forEach((set, index) => {
                 if (set.weight || set.reps) {
                     detailsHTML +=
@@ -946,8 +957,20 @@ const app = {
         this.showNotification('Добавляем тренировку на ' + dateString);
     },
 
-    async editWorkout(dateString, workoutIndex) {
-        const workout = this.cachedHistory[dateString][workoutIndex];
+    // 🔧 НОВАЯ ФУНКЦИЯ: РЕДАКТИРОВАНИЕ ПО ID
+    async editWorkoutById(dateString, workoutId) {
+        const workoutHistory = this.cachedHistory;
+        if (!workoutHistory[dateString]) {
+            this.showNotification('Тренировка не найдена', 'error');
+            return;
+        }
+
+        const workout = workoutHistory[dateString].find(w => w.id === workoutId);
+        if (!workout) {
+            this.showNotification('Тренировка не найдена', 'error');
+            return;
+        }
+
         this.showTab('workout');
 
         this.state.selectedGroup = workout.muscleGroup;
@@ -959,7 +982,7 @@ const app = {
             intensity: set.intensity || '',
             completed: set.completed || false
         }));
-        this.state.editingWorkout = { date: dateString, index: workoutIndex, id: workout.id };
+        this.state.editingWorkout = { date: dateString, id: workoutId };
         this.state.selectedWorkoutDate = dateString;
         this.state.bodyWeight = workout.bodyWeight || '';
         this.state.variations = workout.variations || [];
@@ -969,7 +992,6 @@ const app = {
         document.getElementById('setsSection').style.display = 'block';
         document.getElementById('bodyWeightSection').style.display = 'block';
 
-        // Устанавливаем значение веса тела в поле ввода
         document.getElementById('bodyWeightInput').value = this.state.bodyWeight;
 
         document.querySelectorAll('.group-button').forEach(btn => {
@@ -1000,185 +1022,105 @@ const app = {
         }, 100);
     },
 
-    // 🔥 КРАСИВОЕ ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ ТРЕНИРОВКИ
+    // 🔧 СТАРАЯ ФУНКЦИЯ РЕДАКТИРОВАНИЯ (ОСТАВЛЕНА ДЛЯ СОВМЕСТИМОСТИ)
+    async editWorkout(dateString, workoutIndex) {
+        const workout = this.cachedHistory[dateString][workoutIndex];
+        if (!workout) {
+            this.showNotification('Тренировка не найдена', 'error');
+            return;
+        }
+
+        // Используем новую функцию с ID
+        this.editWorkoutById(dateString, workout.id);
+    },
+
+    // 🔥 УДАЛЕНИЕ ПО ID (ОСНОВНАЯ ФУНКЦИЯ)
+    confirmDeleteWorkoutById(dateString, workoutId) {
+        const workoutHistory = this.cachedHistory;
+        if (!workoutHistory[dateString]) return;
+
+        const workout = workoutHistory[dateString].find(w => w.id === workoutId);
+        if (!workout) return;
+
+        // Простое подтверждение для Android WebView
+        let message = `Удалить тренировку?\n\nУпражнение: ${workout.exercise}\nГруппа: ${workout.muscleGroup}\nДата: ${workout.date}`;
+
+        if (workout.bodyWeight) {
+            message += `\nВес тела: ${workout.bodyWeight} кг`;
+        }
+
+        if (workout.variations && workout.variations.length > 0) {
+            message += `\nВариации: ${workout.variations.join(', ')}`;
+        }
+
+        if (window.confirm(message)) {
+            this.deleteWorkoutById(dateString, workoutId, workout);
+        }
+    },
+
+    // 🔧 СТАРОЕ УДАЛЕНИЕ ПО ИНДЕКСУ (ОСТАВЛЕНО ДЛЯ СОВМЕСТИМОСТИ)
     confirmDeleteWorkout(dateString, workoutIndex) {
         const workout = this.cachedHistory[dateString][workoutIndex];
         if (!workout) return;
 
-        // Сохраняем данные для удаления
-        this.state.workoutToDelete = { dateString, workoutIndex, workout };
-
-        // Показываем красивое модальное окно подтверждения
-        this.showDeleteConfirmationModal(workout);
+        // Переходим на удаление по ID
+        this.confirmDeleteWorkoutById(dateString, workout.id);
     },
 
-    // 🔧 ПОКАЗАТЬ МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ
-    showDeleteConfirmationModal(workout) {
-        // Создаем HTML для модального окна
-        const modalHTML = `
-            <div id="deleteConfirmationModal" class="modal" style="display: flex; animation: fadeIn 0.3s ease-in;">
-                <div class="modal-content" style="max-width: 400px; text-align: center;">
-                    <div style="margin-bottom: 20px;">
-                        <div style="font-size: 64px; margin-bottom: 10px;">⚠️</div>
-                        <div class="modal-title">Удалить тренировку?</div>
-                    </div>
-                    
-                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-                        <div style="font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">
-                            ${workout.exercise}
-                        </div>
-                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 5px;">
-                            Группа: ${workout.muscleGroup}
-                        </div>
-                        <div style="font-size: 14px; color: var(--text-secondary);">
-                            Дата: ${workout.date}
-                        </div>
-                        ${workout.bodyWeight ? `<div style="font-size: 14px; color: var(--text-secondary);">
-                            Вес тела: ${workout.bodyWeight} кг
-                        </div>` : ''}
-                        ${workout.variations?.length > 0 ? `<div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">
-                            Вариации: ${workout.variations.join(', ')}
-                        </div>` : ''}
-                    </div>
-                    
-                    <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 25px; line-height: 1.5;">
-                        Эта тренировка будет удалена навсегда. Отменить это действие будет невозможно.
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button id="cancelDeleteBtn" 
-                                style="flex: 1; padding: 12px; background: var(--bg-secondary); 
-                                       color: var(--text-primary); border: 1px solid var(--border); 
-                                       border-radius: 10px; font-size: 16px; cursor: pointer;
-                                       transition: all 0.3s;">
-                            Отмена
-                        </button>
-                        <button id="confirmDeleteBtn" 
-                                style="flex: 1; padding: 12px; background: linear-gradient(135deg, #ff0066, #ff3385); 
-                                       color: white; border: none; border-radius: 10px; 
-                                       font-size: 16px; font-weight: 600; cursor: pointer;
-                                       transition: all 0.3s; box-shadow: 0 4px 15px rgba(255, 0, 102, 0.3);">
-                            Удалить
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Добавляем модальное окно в DOM
-        const modalContainer = document.createElement('div');
-        modalContainer.innerHTML = modalHTML;
-        document.body.appendChild(modalContainer.firstElementChild);
-
-        // Добавляем стили для анимации
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            
-            #cancelDeleteBtn:hover {
-                background: var(--bg-card) !important;
-                transform: translateY(-2px);
-            }
-            
-            #confirmDeleteBtn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(255, 0, 102, 0.4) !important;
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Назначаем обработчики событий
-        document.getElementById('cancelDeleteBtn').onclick = () => {
-            this.closeDeleteConfirmationModal();
-        };
-
-        document.getElementById('confirmDeleteBtn').onclick = () => {
-            this.executeDeleteWorkout();
-        };
-
-        // Закрытие при клике вне модального окна
-        document.getElementById('deleteConfirmationModal').onclick = (e) => {
-            if (e.target.id === 'deleteConfirmationModal') {
-                this.closeDeleteConfirmationModal();
-            }
-        };
-    },
-
-    // 🔧 ЗАКРЫТЬ МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ
-    closeDeleteConfirmationModal() {
-        const modal = document.getElementById('deleteConfirmationModal');
-        if (modal) {
-            modal.style.animation = 'fadeOut 0.3s ease-out';
-            setTimeout(() => {
-                modal.remove();
-            }, 300);
-        }
-        this.state.workoutToDelete = null;
-    },
-
-    // 🔧 ВЫПОЛНИТЬ УДАЛЕНИЕ ТРЕНИРОВКИ
-    async executeDeleteWorkout() {
-        if (!this.state.workoutToDelete || !this.state.currentUser) {
-            this.closeDeleteConfirmationModal();
-            return;
-        }
-
-        const { dateString, workoutIndex, workout } = this.state.workoutToDelete;
-
+    // 🔧 УДАЛЕНИЕ ПО ID (ИСПРАВЛЕННАЯ ВЕРСИЯ)
+    async deleteWorkoutById(dateString, workoutId, workout) {
         try {
-            // Показываем индикатор загрузки в кнопке
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            const originalText = confirmBtn.textContent;
-            confirmBtn.textContent = 'Удаление...';
-            confirmBtn.disabled = true;
-
-            if (workout.id) {
-                await db.collection('workouts').doc(workout.id).delete();
-
-                // 🔥 ОБНОВЛЯЕМ ЛОКАЛЬНЫЙ КЭШ
-                this.removeWorkoutFromCache(dateString, workoutIndex);
-
-                // 🔥 ОБНОВЛЯЕМ КАЛЕНДАРЬ (чтобы убрать маркер тренировки)
-                this.renderCalendar();
-
-                // 🔥 ПЕРЕРИСОВЫВАЕМ ИСТОРИЮ ТРЕНИРОВОК
-                this.showWorkoutHistory(dateString);
-
-                this.showNotification('Тренировка удалена!');
+            if (!workoutId || !this.state.currentUser) {
+                this.showNotification('Не удалось удалить тренировку', 'error');
+                return;
             }
 
-            // Восстанавливаем кнопку
-            confirmBtn.textContent = originalText;
-            confirmBtn.disabled = false;
+            // Показываем индикатор загрузки
+            this.showNotification('Удаление...', 'info');
 
-            this.closeDeleteConfirmationModal();
+            // Удаляем из Firebase
+            await db.collection('workouts').doc(workoutId).delete();
+
+            // Обновляем локальный кэш
+            this.removeWorkoutFromCacheById(dateString, workoutId);
+
+            // Обновляем календарь
+            this.renderCalendar();
+
+            // Перерисовываем историю
+            this.showWorkoutHistory(dateString);
+
+            this.showNotification('Тренировка удалена!');
 
         } catch (error) {
             console.error('Delete workout error:', error);
             this.showNotification('Не удалось удалить тренировку', 'error');
-            
-            // Восстанавливаем кнопку в случае ошибки
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            confirmBtn.textContent = 'Попробовать снова';
-            confirmBtn.disabled = false;
         }
     },
 
-    // 🔥 НОВЫЙ МЕТОД ДЛЯ УДАЛЕНИЯ ИЗ ЛОКАЛЬНОГО КЭША
+    // 🔥 УДАЛЕНИЕ ИЗ КЭША ПО ID (ИСПРАВЛЕННАЯ)
+    removeWorkoutFromCacheById(dateString, workoutId) {
+        if (this.cachedHistory[dateString]) {
+            const index = this.cachedHistory[dateString].findIndex(w => w.id === workoutId);
+            if (index > -1) {
+                // Удаляем тренировку из массива по ID
+                this.cachedHistory[dateString].splice(index, 1);
+
+                // Если массив пустой, удаляем дату полностью
+                if (this.cachedHistory[dateString].length === 0) {
+                    delete this.cachedHistory[dateString];
+                }
+
+                console.log('Тренировка удалена из кэша по ID:', workoutId);
+            }
+        }
+    },
+
+    // 🔧 СТАРОЕ УДАЛЕНИЕ ИЗ КЭША ПО ИНДЕКСУ (ОСТАВЛЕНО ДЛЯ СОВМЕСТИМОСТИ)
     removeWorkoutFromCache(dateString, workoutIndex) {
         if (this.cachedHistory[dateString] && this.cachedHistory[dateString][workoutIndex]) {
-            // Удаляем тренировку из массива
-            this.cachedHistory[dateString].splice(workoutIndex, 1);
-
-            // Если массив пустой, удаляем дату полностью
-            if (this.cachedHistory[dateString].length === 0) {
-                delete this.cachedHistory[dateString];
-            }
-
-            console.log('Локальный кэш обновлен после удаления');
+            const workoutId = this.cachedHistory[dateString][workoutIndex].id;
+            this.removeWorkoutFromCacheById(dateString, workoutId);
         }
     },
 
@@ -1517,13 +1459,6 @@ const app = {
             html += '</div>';
         }
 
-        // Кнопка добавления своего упражнения
-        /* html +=
-             '<button class="add-custom-exercise-btn" ' +
-             'onclick="app.showAddCustomExerciseModal(\'' + group + '\')">' +
-             '➕ Добавить свое упражнение' +
-             '</button>';*/
-
         exercisesContainer.innerHTML = html;
     },
 
@@ -1709,6 +1644,9 @@ const app = {
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
+    initInputValidation();
+    validateCardioIntensity();
+    validateBodyWeight();
 });
 
 // Обработчик изменения веса тела
@@ -1718,28 +1656,19 @@ document.getElementById('bodyWeightInput').addEventListener('input', function ()
 
 // 🔧 ФИКС ВАЛИДАЦИИ ВВОДА ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
 function initInputValidation() {
-    // Обработчики для всех числовых полей ввода
     const numberInputs = document.querySelectorAll('input[type="number"]');
 
     numberInputs.forEach(input => {
-        // Обработчик ввода - фильтруем нечисловые символы
         input.addEventListener('input', function (e) {
-            // Разрешаем только цифры, точку и запятую
             let value = this.value.replace(/[^\d.,]/g, '');
-
-            // Заменяем запятые на точки для единообразия
             value = value.replace(/,/g, '.');
-
-            // Если есть больше одной точки, оставляем только первую
             const parts = value.split('.');
             if (parts.length > 2) {
                 value = parts[0] + '.' + parts.slice(1).join('');
             }
-
             this.value = value;
         });
 
-        // Обработчик вставки (paste) - тоже фильтруем
         input.addEventListener('paste', function (e) {
             e.preventDefault();
             const pastedText = (e.clipboardData || window.clipboardData).getData('text');
@@ -1747,24 +1676,17 @@ function initInputValidation() {
             document.execCommand('insertText', false, numbersOnly);
         });
 
-        // Валидация при потере фокуса
         input.addEventListener('blur', function (e) {
             let value = this.value.trim();
-
-            // Убираем лишние точки в начале/конце
             value = value.replace(/^\.+|\.+$/g, '');
-
-            // Если пустое значение, оставляем как есть
             if (value === '') return;
 
-            // Проверяем валидность числа
             const numValue = parseFloat(value);
             if (isNaN(numValue)) {
                 this.value = '';
                 return;
             }
 
-            // Применяем ограничения min/max если они есть
             const min = this.getAttribute('min');
             const max = this.getAttribute('max');
 
@@ -1773,11 +1695,9 @@ function initInputValidation() {
             } else if (max && numValue > parseFloat(max)) {
                 this.value = max;
             } else {
-                // Округляем до 0.5 если это поле веса
                 if (this.classList.contains('weight-input')) {
                     this.value = Math.round(numValue * 2) / 2;
                 } else {
-                    // Для повторений - целые числа
                     this.value = Math.round(numValue);
                 }
             }
@@ -1785,34 +1705,65 @@ function initInputValidation() {
     });
 }
 
-// 🔧 ДОПОЛНИТЕЛЬНО: Валидация для интенсивности кардио (1-40)
+// 🔧 Валидация для интенсивности кардио (1-40)
 function validateCardioIntensity() {
     const intensityInputs = document.querySelectorAll('.intensity-input');
 
     intensityInputs.forEach(input => {
         input.addEventListener('input', function (e) {
             let value = parseInt(this.value) || 0;
-
             if (value < 1) value = 1;
             if (value > 40) value = 40;
-
             this.value = value;
         });
     });
 }
 
-// 🔧 ДОПОЛНИТЕЛЬНО: Валидация для веса тела
+// 🔧 Валидация для веса тела
 function validateBodyWeight() {
     const bodyWeightInput = document.getElementById('bodyWeightInput');
-    if (bodyWeightInput) {
-        bodyWeightInput.addEventListener('input', function (e) {
-            let value = parseFloat(this.value) || 0;
-
-            if (value < 30) value = 30;
-            if (value > 300) value = 300;
-
-            // Округляем до 0.1
-            this.value = Math.round(value * 10) / 10;
-        });
-    }
+    if (!bodyWeightInput) return;
+    
+    // 1. Очистка ввода: цифры + точка/запятая
+    bodyWeightInput.addEventListener('input', function () {
+        let value = this.value;
+        
+        // Удаляем все кроме цифр, точки и запятой
+        value = value.replace(/[^\d.,]/g, '');
+        
+        // Заменяем запятые на точки
+        value = value.replace(/,/g, '.');
+        
+        // Убираем лишние точки (оставляем первую)
+        const parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        // Ограничение длины
+        if (value.length > 7) {
+            value = value.slice(0, 7);
+        }
+        
+        this.value = value;
+    });
+    
+    // 2. Простая валидация диапазона при потере фокуса
+    bodyWeightInput.addEventListener('blur', function () {
+        const numValue = parseFloat(this.value);
+        
+        // Проверка на число
+        if (isNaN(numValue)) {
+            this.value = '';
+            return;
+        }
+        
+        // Коррекция границ
+        if (numValue < 30) {
+            this.value = '30';
+        } else if (numValue > 300) {
+            this.value = '300';
+        }
+        // Если 30-300 - оставляем как ввели (сохраняем точность)
+    });
 }
